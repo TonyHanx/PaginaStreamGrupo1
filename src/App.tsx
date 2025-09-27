@@ -1,17 +1,15 @@
-import React from "react";
-import Encabezado from "./componentes/Encabezado/Encabezado";
-import BarraLateral from "./componentes/BarraLateral/BarraLateral";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
-const App: React.FC = () => {
+export default function App() {
   return (
-    <div className="app-container d-flex">
-      <BarraLateral />
-      <div className="flex-grow-1 main-content">
-        <Encabezado />
-        {/* Aquí puedes agregar el resto de la plataforma */}
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </BrowserRouter>
   );
-};
-
-export default App;
+}
