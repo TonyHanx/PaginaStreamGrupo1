@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  background: #111;
+  color: #fff;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Estilos base para toda la app */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+.main-content {
+  margin-left: 300px;
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    margin-left: 70px;
+  }
+}

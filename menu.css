@@ -1,0 +1,27 @@
+.row{
+    background-color: red;
+}
+.container {
+    background-color: black;
+    color: white;
+}
+.container-fluid{
+        background-color: black;
+    color: white;
+}
+.col{
+    text-align: center;
+    background-color: red;
+}
+nav{
+    text-align:center;
+    padding-bottom: 40px;
+}
+.cabeza-nav{
+    text-align:center;  
+    align-items: center;
+    
+}
+.row{
+    
+}

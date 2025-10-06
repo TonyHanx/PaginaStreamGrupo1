@@ -6,7 +6,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Importa los scripts JavaScript de Bootstrap
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import App from "./App";
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-  </StrictMode>,
+    <App />
+  </StrictMode>
 )
