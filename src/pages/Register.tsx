@@ -8,7 +8,7 @@ import appleIcon from "../assets/icons/apple.svg";
 export default function Register() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí luego se podrá agregar la lógica de registro (por ejemplo, enviar datos a un backend)
+    // TODO: lógica de registro
   };
 
   return (
@@ -17,11 +17,10 @@ export default function Register() {
         <h1 className="auth-title">Registrarse</h1>
 
         <form onSubmit={onSubmit}>
-          {/* Nombre de usuario */}
           <label className="form-label">Nombre de usuario</label>
           <div className="input-group mb-3">
             <span className="input-group-text">
-              <i className="bi bi-person"></i>
+              <i className="bi bi-person" />
             </span>
             <input
               type="text"
@@ -31,11 +30,10 @@ export default function Register() {
             />
           </div>
 
-          {/* Correo electrónico */}
           <label className="form-label">E-mail</label>
           <div className="input-group mb-3">
             <span className="input-group-text">
-              <i className="bi bi-envelope"></i>
+              <i className="bi bi-envelope" />
             </span>
             <input
               type="email"
@@ -45,11 +43,10 @@ export default function Register() {
             />
           </div>
 
-          {/* Contraseña */}
           <label className="form-label">Contraseña</label>
           <div className="input-group mb-3">
             <span className="input-group-text">
-              <i className="bi bi-lock"></i>
+              <i className="bi bi-lock" />
             </span>
             <input
               type="password"
@@ -59,11 +56,10 @@ export default function Register() {
             />
           </div>
 
-          {/* Confirmar contraseña */}
           <label className="form-label">Confirmar contraseña</label>
           <div className="input-group">
             <span className="input-group-text">
-              <i className="bi bi-lock"></i>
+              <i className="bi bi-lock" />
             </span>
             <input
               type="password"
@@ -78,12 +74,10 @@ export default function Register() {
           </button>
         </form>
 
-        {/* Separador */}
         <div className="divider my-4">
           <span>O continúa con</span>
         </div>
 
-        {/* Botones sociales */}
         <div className="d-flex justify-content-center gap-3 mb-2">
           <button className="provider-btn" type="button" aria-label="Google">
             <img src={googleIcon} alt="Google" />
@@ -96,7 +90,6 @@ export default function Register() {
           </button>
         </div>
 
-        {/* Texto legal */}
         <p className="auth-foot">
           Al registrarte, aceptas nuestra{" "}
           <a className="auth-link" href="#">
@@ -105,10 +98,10 @@ export default function Register() {
           y nuestros{" "}
           <a className="auth-link" href="#">
             Términos y Condiciones
-          </a>.
+          </a>
+          .
         </p>
 
-        {/* Enlace a login */}
         <p className="auth-foot">
           ¿Ya tienes una cuenta?{" "}
           <Link to="/login" className="auth-link fw-semibold">
