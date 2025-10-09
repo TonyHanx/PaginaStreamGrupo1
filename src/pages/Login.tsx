@@ -1,20 +1,22 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/auth.css";
+
 
 import googleIcon from "../assets/icons/google.svg";
 import facebookIcon from "../assets/icons/facebook.svg";
 import appleIcon from "../assets/icons/apple.svg";
 
 export default function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="auth-wrap">
       <div className="auth-card">
         <h1 className="auth-title">Iniciar sesión</h1>
 
         <form>
-          <label className="form-label">
-            Correo electrónico o nombre de usuario
-          </label>
+          <label className="form-label">Correo electrónico o nombre de usuario</label>
           <div className="input-group mb-3">
             <span className="input-group-text">
               <i className="bi bi-person" />
@@ -33,17 +35,24 @@ export default function Login() {
               <i className="bi bi-lock" />
             </span>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               className="form-control auth-input"
               placeholder="••••••••"
               required
             />
+            <button
+              type="button"
+              className="input-group-text bg-transparent border-0"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              title={showPassword ? "Ocultar" : "Mostrar"}
+            >
+              <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`} />
+            </button>
           </div>
 
           <div className="text-end mt-1">
-            <a href="#" className="auth-link">
-              ¿Olvidaste tu contraseña?
-            </a>
+            <a href="#" className="auth-link">¿Olvidaste tu contraseña?</a>
           </div>
 
           <button type="submit" className="primary-btn mt-3">
@@ -69,9 +78,7 @@ export default function Login() {
 
         <p className="auth-foot">
           ¿No tienes una cuenta?{" "}
-          <Link to="/register" className="auth-link fw-semibold">
-            Registrarse
-          </Link>
+          <Link to="/register" className="auth-link fw-semibold">Registrarse</Link>
         </p>
       </div>
     </div>
