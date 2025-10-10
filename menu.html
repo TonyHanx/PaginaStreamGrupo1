@@ -1,33 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=
-    , initial-scale=1.0">
-    <title>AZEES</title>
-    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
-    
-    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap-grid.min.css">
-    <link rel="stylesheet" href="menu.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AZEES</title>
+  <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap-grid.min.css">
+  <link rel="stylesheet" href="menu.css">
 </head>
 <body>
-<div class="container-fluid">
-  <div class="seccion-menu">
-    <nav class="cabeza-nav">
-      <br>
-      <br>
-      AZEES
-    </nav>
-    <div class="row">
-      <div class="col-3">
-        opciones main
-      </div>
-      <div class="col-9">
-        steamers  
+  <div class="container-fluid">
+    <div class="seccion-menu">
+      <nav class="cabeza-nav">
+        <br><br>
+        AZEES
+      </nav>
+      <div class="row">
+        <div class="col-3">
+          opciones main
+        </div>
+       Streamers
+        </div>
       </div>
     </div>
   </div>
-</div>
-
+  <script>
+    function scrollCarousel(direction) {
+      const el = document.getElementById('carousel');
+      const cardWidth = 312;
+      el.scrollBy({ left: direction * cardWidth * 2, behavior: 'smooth' });
+    }
+  </script>
 </body>
 </html>

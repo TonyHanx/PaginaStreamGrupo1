@@ -1,27 +1,23 @@
-.row{
-    background-color: red;
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.container {
-    background-color: black;
-    color: white;
+.arrow:hover {
+  background: rgba(255,255,255,0.2);
 }
-.container-fluid{
-        background-color: black;
-    color: white;
-}
-.col{
-    text-align: center;
-    background-color: red;
-}
-nav{
-    text-align:center;
-    padding-bottom: 40px;
-}
-.cabeza-nav{
-    text-align:center;  
-    align-items: center;
-    
-}
-.row{
-    
-}
+.arrow.left { left: 0; }
+.arrow.right { right: 0; }
