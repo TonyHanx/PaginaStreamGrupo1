@@ -1,6 +1,8 @@
 import React, { useRef } from "react";
 import Encabezado, { type EncabezadoHandle } from "../../componentes/Encabezado/Encabezado";
 import BarraLateral from "../../componentes/BarraLateral/BarraLateral";
+import CarruselStreams from "../../componentes/CarruselStreams/CarruselStreams";
+import ListaCategorias from "../../componentes/ListaCategorias/ListaCategorias";
 import "./Inicio.css";
 
 const Inicio: React.FC = () => {
@@ -17,12 +19,11 @@ const Inicio: React.FC = () => {
 				<BarraLateral onShowLogin={handleShowLogin} />
 				<div className="inicio__main">
 					<Encabezado ref={encabezadoRef} />
+					<div className="inicio__carrusel-container">
+						<CarruselStreams />
+					</div>
 					<main className="inicio__contenido">
-						<div className="inicio__bienvenida">
-							<h1>Bienvenido a Nexus Stream</h1>
-							<p>Descubre los mejores streamers y contenido en vivo</p>
-						</div>
-						{/* Aquí se pueden agregar más componentes como ListaCategorias y VistaStream cuando estén listos */}
+						<ListaCategorias />
 					</main>
 				</div>
 			</div>
