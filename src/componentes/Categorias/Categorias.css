@@ -1,0 +1,103 @@
+.cat-section{
+  width:100%;
+  max-width:1200px;
+  margin:24px auto 0;
+  padding:0 24px;
+}
+
+.cat-title{
+  text-align:center;
+  font-family:'Segoe UI', Arial, sans-serif;
+  color:#600bcf;
+  font-weight:700;
+  font-size:2rem;
+  letter-spacing:.5px;
+  text-shadow:0 2px 8px rgba(0,0,0,.18);
+  margin-bottom:24px;
+}
+
+.cat-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:24px;
+}
+
+.cat-card{
+  position:relative;
+  height:140px;
+  background:#232323;
+  border-radius:28px;
+  box-shadow:0 2px 12px rgba(0,0,0,.18);
+  display:flex;
+  align-items:center;
+  padding:20px 24px;
+  text-decoration:none;
+  color:#fff;
+  overflow:hidden;
+  transition:transform .2s, box-shadow .2s, filter .2s;
+}
+
+.cat-card:hover{
+  transform:translateY(-3px) scale(1.02);
+  box-shadow:0 8px 32px rgba(0,0,0,.28);
+  filter:brightness(1.06);
+}
+
+.cat-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(120px 120px at 15% 50%, rgba(96,11,207,.35), transparent 60%),
+             radial-gradient(120px 120px at 85% 50%, rgba(14,165,233,.28), transparent 60%);
+  opacity:.9;
+}
+
+.cat-card-badge{
+  z-index:1;
+  width:64px;
+  height:64px;
+  border-radius:16px;
+  background:linear-gradient(135deg, #600bcf, #14b8a6);
+  font-weight:800;
+  font-size:1rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-right:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.24);
+  color:#fff;
+}
+
+.cat-card-name{
+  z-index:1;
+  font-size:1.25rem;
+  font-weight:700;
+  letter-spacing:.3px;
+}
+
+.cat-footer{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:16px;
+}
+
+.cat-more{
+  padding:10px 16px;
+  border:none;
+  border-radius:999px;
+  background:#0ea5e9;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  transition:transform .15s, filter .15s, background .15s;
+}
+.cat-more:hover{ transform:translateY(-1px); filter:brightness(1.05); }
+
+@media (max-width:960px){
+  .cat-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width:640px){
+  .cat-grid{ grid-template-columns:1fr; }
+  .cat-title{ font-size:1.6rem; }
+}
