@@ -1,5 +1,5 @@
 // import { Link } from "react-router-dom";
-import "../styles/auth.css";
+import "../Styles/auth.css";
 
 import googleIcon from "../assets/icons/google.svg";
 import facebookIcon from "../assets/icons/facebook.svg";

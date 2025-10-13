@@ -1,0 +1,37 @@
+.inicio {
+	min-height: 100vh;
+	background-color: #1a1a1a;
+}
+
+.inicio__layout {
+	display: flex;
+	min-height: 100vh;
+}
+
+.inicio__main {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.inicio__contenido {
+	padding: 20px;
+	color: white;
+	flex: 1;
+}
+
+.inicio__bienvenida {
+	text-align: center;
+	padding: 40px 20px;
+}
+
+.inicio__bienvenida h1 {
+	font-size: 2.5rem;
+	margin-bottom: 1rem;
+	color: #00bfff;
+}
+
+.inicio__bienvenida p {
+	font-size: 1.2rem;
+	color: #cccccc;
+}

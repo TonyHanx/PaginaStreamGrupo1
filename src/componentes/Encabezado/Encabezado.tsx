@@ -1,18 +1,30 @@
 
-import React, { useState } from "react";
+import React, { useState, useImperativeHandle, forwardRef } from "react";
 import "./Encabezado.css";
-import logoNexus from "../../assets/nexus-logo.png";
-import BarraLateral from "../BarraLateral/BarraLateral";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
 
-const Encabezado: React.FC = () => {
+export interface EncabezadoHandle {
+	showLoginModal: () => void;
+	showRegisterModal: () => void;
+}
+
+const Encabezado = forwardRef<EncabezadoHandle>((props, ref) => {
 	const [modal, setModal] = useState<null | 'login' | 'register'>(null);
 	const closeModal = () => setModal(null);
+	
+	const handleLoginClick = () => {
+		setModal('login');
+	};
+
+	useImperativeHandle(ref, () => ({
+		showLoginModal: () => setModal('login'),
+		showRegisterModal: () => setModal('register')
+	}));
+	
 	return (
-		<div style={{ display: "flex" }}>
-			   <BarraLateral onShowLogin={() => setModal('login')} />
-			<header className="encabezado" style={{ flex: 1 }}>
+		<div>
+			<header className="encabezado">
 				<div className="encabezado__menu-logo">
 					{/* Solo espacio para alineación izquierda, sin menú hamburguesa ni logo */}
 				</div>
@@ -50,7 +62,7 @@ const Encabezado: React.FC = () => {
 							</svg>
 						</span>
 					</button>
-					<button className="encabezado__login" onClick={() => setModal('login')}>Iniciar sesión</button>
+					<button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
 					<button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
 				</div>
 			</header>
@@ -87,7 +99,7 @@ const Encabezado: React.FC = () => {
 			)}
 		</div>
 	);
-};
+});
 
 export default Encabezado;
 
