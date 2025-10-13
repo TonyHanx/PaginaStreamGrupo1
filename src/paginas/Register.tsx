@@ -1,11 +1,11 @@
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import "../styles/auth.css";
 
 import googleIcon from "../assets/icons/google.svg";
 import facebookIcon from "../assets/icons/facebook.svg";
 import appleIcon from "../assets/icons/apple.svg";
 
-export default function Register() {
+export default function Register({ onShowLogin }: { onShowLogin?: () => void }) {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: lógica de registro
@@ -104,9 +104,14 @@ export default function Register() {
 
         <p className="auth-foot">
           ¿Ya tienes una cuenta?{" "}
-          <Link to="/login" className="auth-link fw-semibold">
+          <button
+            type="button"
+            className="auth-link fw-semibold"
+            style={{background:'none',border:'none',color:'var(--primary)',cursor:'pointer',padding:0}}
+            onClick={onShowLogin}
+          >
             Iniciar sesión
-          </Link>
+          </button>
         </p>
       </div>
     </div>

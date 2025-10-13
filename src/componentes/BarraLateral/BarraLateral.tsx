@@ -1,4 +1,5 @@
 import React from "react";
+// import { useNavigate } from "react-router-dom";
 import "./BarraLateral.css";
 import logoNexus from "../../assets/nexus-logo.png";
 
@@ -26,7 +27,12 @@ const recomendados = [
 	{ nombre: "Dragkero", juego: "Resident Evil 0", espectadores: "451", online: true },
 ];
 
-const BarraLateral: React.FC = () => {
+interface BarraLateralProps {
+  onShowLogin?: () => void;
+}
+
+const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
+	// const navigate = useNavigate();
 	return (
 		<aside className="barra-lateral">
 			<div className="barra-lateral__top">
@@ -39,14 +45,19 @@ const BarraLateral: React.FC = () => {
 				</span>
 				<img src={logoNexus} alt="Logo Nexus" className="barra-lateral__logo" />
 			</div>
-			<nav className="barra-lateral__menu-items">
-				{menuItems.map((item, idx) => (
-					<div key={idx} className="barra-lateral__item">
-						<span className="barra-lateral__icon">{item.icon}</span>
-						<span className="barra-lateral__label">{item.label}</span>
-					</div>
-				))}
-			</nav>
+					<nav className="barra-lateral__menu-items">
+						   {menuItems.map((item, idx) => (
+							   <div
+								   key={idx}
+								   className="barra-lateral__item"
+								   onClick={item.label === "Siguiendo" ? onShowLogin : undefined}
+								   style={item.label === "Siguiendo" ? { cursor: 'pointer' } : {}}
+							   >
+								   <span className="barra-lateral__icon">{item.icon}</span>
+								   <span className="barra-lateral__label">{item.label}</span>
+							   </div>
+						   ))}
+					</nav>
 			{/* Línea separadora antes de recomendados */}
 			<div className="barra-lateral__divider" />
 			<div className="barra-lateral__recomendados">
