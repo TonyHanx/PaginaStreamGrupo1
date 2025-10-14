@@ -165,3 +165,22 @@
 		}
 	}
 }
+
+/* Estilos específicos para el botón ¿Quiénes somos? */
+.barra-lateral__quienes-somos {
+	background: #333 !important;
+	border: 2px solid rgba(0, 191, 255, 0.3);
+	margin-top: 0.5rem;
+}
+
+.barra-lateral__quienes-somos:hover {
+	background: #00bfff !important;
+	color: #111 !important;
+	border-color: rgba(0, 191, 255, 0.6);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3);
+}
+
+.barra-lateral__quienes-somos:hover .barra-lateral__icon svg {
+	stroke: #111;
+}

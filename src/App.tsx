@@ -5,6 +5,7 @@ import Inicio from "./paginas/Inicio/Inicio";
 import CatalogoRegalosCliente from "./paginas/CatalogoRegalosCliente";
 import PanelRegalosStreamer from "./paginas/PanelRegalosStreamer";
 import Dashboard from "./componentes/Dashboard/Dashboard";
+import Nosotros from "./componentes/Nosotros/Nosotros";
 
 export default function App() {
   return (
@@ -16,6 +17,9 @@ export default function App() {
         {/* Páginas de autenticación (sin layout) */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        
+        {/* Página Nosotros */}
+        <Route path="/nosotros" element={<Nosotros />} />
         
   {/* Páginas específicas (con layout) */}
   <Route path="/regalos" element={<CatalogoRegalosCliente />} />
