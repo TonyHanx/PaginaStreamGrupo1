@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¿Quiénes somos?</title>
+  <link rel="stylesheet" href="Nosotros.css">
+</head>
+<body>
+  <h1 class="nos-title">¿Quiénes somos?</h1>
+  <div class="nos-container">
+    <div class="nos-card">
+      <div class="nos-img-container">
+        <img src="public/fotos-integrantes/leandro.jpg" alt="Foto de Leandro" class="nos-img" onerror="showPlaceholder(this)">
+        <div class="nos-img nos-placeholder">LP</div>
+      </div>
+      <div class="nos-name">Leandro Perez</div>
+    </div>
+    <div class="nos-card">
+      <div class="nos-img-container">
+        <img src="public/fotos-integrantes/andrea.jpg" alt="Foto de Andrea" class="nos-img" onerror="showPlaceholder(this)">
+        <div class="nos-img nos-placeholder">AC</div>
+      </div>
+      <div class="nos-name">Andrea Castillo</div>
+    </div>
+    <div class="nos-card">
+      <div class="nos-img-container">
+        <img src="public/fotos-integrantes/mathias.jpg" alt="Foto de Mathias" class="nos-img" onerror="showPlaceholder(this)">
+        <div class="nos-img nos-placeholder">MC</div>
+      </div>
+      <div class="nos-name">Mathias Castañeda</div>
+    </div>
+    <div class="nos-card">
+      <div class="nos-img-container">
+        <img src="public/fotos-integrantes/cristian.jpg" alt="Foto de Cristian" class="nos-img" onerror="showPlaceholder(this)">
+        <div class="nos-img nos-placeholder">CE</div>
+      </div>
+      <div class="nos-name">Cristian Erazo</div>
+    </div>
+    <div class="nos-card">
+      <div class="nos-img-container">
+        <img src="public/fotos-integrantes/anthony.jpg" alt="Foto de Anthony" class="nos-img" onerror="showPlaceholder(this)">
+        <div class="nos-img nos-placeholder">AQ</div>
+      </div>
+      <div class="nos-name">Anthony Quispe</div>
+    </div>
+    <div class="nos-card">
+      <div class="nos-img-container">
+        <img src="public/fotos-integrantes/katsuo.jpg" alt="Foto de Katsuo" class="nos-img" onerror="showPlaceholder(this)">
+        <div class="nos-img nos-placeholder">KT</div>
+      </div>
+      <div class="nos-name">Katsuo Taniguchi</div>
+    </div>
+  </div>
+  <a href="index.html" class="nos-back">Regresar a Nexus</a>
+
+  <script>
+    function showPlaceholder(imgElement) {
+      imgElement.classList.add('hidden');
+      imgElement.nextElementSibling.classList.add('show');
+    }
+  </script>
+</body>
+</html>

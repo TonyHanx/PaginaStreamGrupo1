@@ -12,6 +12,7 @@ const menuItems = [
 	), label: "Inicio" },
 	{ icon: <svg width="24" height="24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#fff" strokeWidth="2"/></svg>, label: "Explorar" },
 	{ icon: <svg width="24" height="24" fill="none"><path d="M12 21s-6-4.35-6-10A6 6 0 0112 5a6 6 0 016 6c0 5.65-6 10-6 10z" stroke="#fff" strokeWidth="2"/></svg>, label: "Siguiendo" },
+	{ icon: <svg width="24" height="24" fill="none"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" stroke="#fff" strokeWidth="2"/></svg>, label: "Sobre Nosotros" },
 ];
 
 const recomendados = [
@@ -55,8 +56,12 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 							   <div
 								   key={idx}
 								   className="barra-lateral__item"
-								   onClick={item.label === "Siguiendo" ? onShowLogin : undefined}
-								   style={item.label === "Siguiendo" ? { cursor: 'pointer' } : {}}
+								   onClick={
+									   item.label === "Siguiendo" ? onShowLogin :
+									   item.label === "Sobre Nosotros" ? () => window.location.href = "/Nosotros.html" :
+									   undefined
+								   }
+								   style={(item.label === "Siguiendo" || item.label === "Sobre Nosotros") ? { cursor: 'pointer' } : {}}
 							   >
 								   <span className="barra-lateral__icon">{item.icon}</span>
 								   <span className="barra-lateral__label">{item.label}</span>
