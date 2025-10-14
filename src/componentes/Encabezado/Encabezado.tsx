@@ -3,6 +3,7 @@ import React, { useState, useImperativeHandle, forwardRef } from "react";
 import "./Encabezado.css";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
+import { useNavigate } from "react-router-dom";
 
 export interface EncabezadoHandle {
 	showLoginModal: () => void;
@@ -12,7 +13,7 @@ export interface EncabezadoHandle {
 const Encabezado = forwardRef<EncabezadoHandle>((props, ref) => {
 	const [modal, setModal] = useState<null | 'login' | 'register'>(null);
 	const closeModal = () => setModal(null);
-	
+	const navigate = useNavigate();
 	const handleLoginClick = () => {
 		setModal('login');
 	};
@@ -38,7 +39,7 @@ const Encabezado = forwardRef<EncabezadoHandle>((props, ref) => {
 					<input className="encabezado__busqueda" type="text" placeholder="Buscar" />
 				</div>
 				<div className="encabezado__acciones">
-					<button className="encabezado__donar" title="Donar a streamers">
+					  <button className="encabezado__donar" title="Donar a streamers">
 						<span className="encabezado__donar-icon">
 							<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 								{/* Orejas largas */}
@@ -62,10 +63,12 @@ const Encabezado = forwardRef<EncabezadoHandle>((props, ref) => {
 							</svg>
 						</span>
 					</button>
-					<button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
-					<button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
-				</div>
-			</header>
+``					  <button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
+					  <button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
+					  {/* Botón a Dashboard: usa navigate para ir a /dashboard */}
+					  <button className="encabezado__dashboard" onClick={() => navigate("/dashboard")}>Dashboard Streamer</button>
+        		</div>
+      		</header>
 
 			{/* Modal */}
 			{modal && (
