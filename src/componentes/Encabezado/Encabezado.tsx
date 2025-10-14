@@ -63,10 +63,10 @@ const Encabezado = forwardRef<EncabezadoHandle>((props, ref) => {
 							</svg>
 						</span>
 					</button>
-``					  <button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
-					  <button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
-					  {/* Botón a Dashboard: usa navigate para ir a /dashboard */}
-					  <button className="encabezado__dashboard" onClick={() => navigate("/dashboard")}>Dashboard Streamer</button>
+					<button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
+					<button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
+					{/* Botón a Dashboard: usa navigate para ir a /dashboard */}
+					<button className="encabezado__dashboard" onClick={() => navigate("/dashboard")}>Dashboard Streamer</button>
         		</div>
       		</header>
 
