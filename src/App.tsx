@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./paginas/Login";
 import Register from "./paginas/Register";
@@ -11,6 +12,21 @@ import Nosotros from "./componentes/Nosotros/Nosotros";
 import StreamPage from "./paginas/StreamPage";
 
 export default function App() {
+  const [dashboardNotifications, setDashboardNotifications] = React.useState([
+    { mensaje: "Leandro te siguió!", tiempo: "5min ago" },
+    { mensaje: "Andrea te donó 10 estrellas", tiempo: "just now" },
+    { mensaje: "Carlos te envió un regalo", tiempo: "1h ago" },
+    { mensaje: "María te siguió!", tiempo: "2h ago" },
+    { mensaje: "Luis te donó 5 estrellas", tiempo: "3h ago" },
+    { mensaje: "Ana te envió un regalo", tiempo: "4h ago" },
+    { mensaje: "Pedro te siguió!", tiempo: "5h ago" },
+    { mensaje: "Sofía te donó 20 estrellas", tiempo: "6h ago" },
+    { mensaje: "Javier te envió un regalo", tiempo: "7h ago" },
+    { mensaje: "Lucía te siguió!", tiempo: "8h ago" },
+    { mensaje: "Miguel te donó 15 estrellas", tiempo: "9h ago" },
+    { mensaje: "Elena te envió un regalo", tiempo: "10h ago" }
+  ]);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -40,20 +56,8 @@ export default function App() {
           element={
             <Dashboard
               horasTransmision={120}
-              notifications={[
-                { mensaje: "Leandro te siguió!", tiempo: "5min ago" },
-                { mensaje: "Andrea te donó 10 estrellas", tiempo: "just now" },
-                { mensaje: "Carlos te envió un regalo", tiempo: "1h ago" },
-                { mensaje: "María te siguió!", tiempo: "2h ago" },
-                { mensaje: "Luis te donó 5 estrellas", tiempo: "3h ago" },
-                { mensaje: "Ana te envió un regalo", tiempo: "4h ago" },
-                { mensaje: "Pedro te siguió!", tiempo: "5h ago" },
-                { mensaje: "Sofía te donó 20 estrellas", tiempo: "6h ago" },
-                { mensaje: "Javier te envió un regalo", tiempo: "7h ago" },
-                { mensaje: "Lucía te siguió!", tiempo: "8h ago" },
-                { mensaje: "Miguel te donó 15 estrellas", tiempo: "9h ago" },
-                { mensaje: "Elena te envió un regalo", tiempo: "10h ago" }
-              ]}
+              notifications={dashboardNotifications}
+              setNotifications={setDashboardNotifications}
             />
           }
         />
