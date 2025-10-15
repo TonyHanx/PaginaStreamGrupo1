@@ -371,6 +371,12 @@
   background-clip: text;
 }
 
+.vista-stream__chat-username .nivel-usuario {
+  color: #FFD700;
+  font-weight: bold;
+  margin: 0 4px;
+}
+
 .vista-stream__chat-text {
   color: #e0e0e0;
   font-size: 0.9rem;

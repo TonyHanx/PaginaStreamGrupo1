@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './VistaStream.css';
-import { agregarPuntos, AccionesPuntos } from '../../utils/puntos';
+import { agregarPuntos, AccionesPuntos, calcularNivel } from '../../utils/puntos';
 import { obtenerMonedasUsuario, gastarMonedas } from '../../utils/monedas';
 import NotificacionPuntos from '../NotificacionPuntos/NotificacionPuntos';
 
@@ -38,6 +38,7 @@ interface ChatMessage {
   username: string;
   message: string;
   color: string;
+  puntos?: number;
   isBroadcaster?: boolean;
   isGift?: boolean;
 }
@@ -232,15 +233,15 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
 
   // Mensajes de chat de ejemplo
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { id: 1, username: "pollocdmx", message: "🔥🔥🔥", color: "#FFD700" },
-    { id: 2, username: "Domifutbolero", message: "GOLAZO!", color: "#00FF00" },
-    { id: 3, username: "rmelcrack", message: "TREMENDO", color: "#FF6B6B" },
-    { id: 4, username: "LACOBRAAA", message: "SALVAME GEMINIII", color: "#9B59B6", isBroadcaster: true },
-    { id: 5, username: "SilverAngell", message: "🎵🎶", color: "#E91E63" },
-    { id: 6, username: "adrianxtacs", message: "jajajaja", color: "#3498DB" },
-    { id: 7, username: "Lukveg", message: "ICI", color: "#2ECC71" },
-    { id: 8, username: "chalols6", message: "XDDD", color: "#F39C12" },
-    { id: 9, username: "abrah_amm", message: "TREMENDO AD", color: "#1ABC9C" }
+    { id: 1, username: "pollocdmx", message: "🔥🔥🔥", color: "#FFD700", puntos: 120 },
+    { id: 2, username: "Domifutbolero", message: "GOLAZO!", color: "#00FF00", puntos: 350 },
+    { id: 3, username: "rmelcrack", message: "TREMENDO", color: "#FF6B6B", puntos: 80 },
+    { id: 4, username: "LACOBRAAA", message: "SALVAME GEMINIII", color: "#9B59B6", isBroadcaster: true, puntos: 900 },
+    { id: 5, username: "SilverAngell", message: "🎵🎶", color: "#E91E63", puntos: 210 },
+    { id: 6, username: "adrianxtacs", message: "jajajaja", color: "#3498DB", puntos: 60 },
+    { id: 7, username: "Lukveg", message: "ICI", color: "#2ECC71", puntos: 40 },
+    { id: 8, username: "chalols6", message: "XDDD", color: "#F39C12", puntos: 500 },
+    { id: 9, username: "abrah_amm", message: "TREMENDO AD", color: "#1ABC9C", puntos: 300 }
   ]);
 
   // Auto-scroll al agregar nuevos mensajes
@@ -267,11 +268,19 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
       const colores = ['#FFD700', '#00FF00', '#FF6B6B', '#E91E63', '#3498DB', '#2ECC71', '#F39C12', '#1ABC9C', '#9B59B6', '#00bfff'];
       const colorAleatorio = colores[Math.floor(Math.random() * colores.length)];
       
+      // Obtener puntos del usuario actual
+      let puntosUsuario = 0;
+      const usuarioData = usuarioStr ? JSON.parse(usuarioStr) : null;
+      if (usuarioData && typeof usuarioData.puntos === 'number') {
+        puntosUsuario = usuarioData.puntos;
+      }
+
       const nuevoMensaje: ChatMessage = {
         id: Date.now(),
         username: username,
         message: message,
-        color: colorAleatorio
+        color: colorAleatorio,
+        puntos: puntosUsuario
       };
       
       // Agregar mensaje al chat
@@ -295,12 +304,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
         <div className={`vista-stream__video-container ${isFullscreen ? 'fullscreen' : ''}`}>
           <div 
             className="vista-stream__video-placeholder"
-            style={{
-              backgroundImage: 'url(/imagenes/qué-opinan-de-la-cobra-v0-6m7zlzhyit6d1.webp)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-            }}
+            style={{ backgroundImage: 'url(/imagenes/qué-opinan-de-la-cobra-v0-6m7zlzhyit6d1.webp)' }}
           >
             {/* Aquí iría el reproductor de video real */}
             <div className="vista-stream__live-indicator">
@@ -447,7 +451,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
                 className={`vista-stream__chat-username ${msg.isBroadcaster ? 'broadcaster' : ''}`}
                 style={{ color: msg.color }}
               >
-                {msg.username}:
+                {msg.username} <strong style={{ color: '#FFD700' }}>Nv.{msg.puntos ? calcularNivel(msg.puntos).nivel : 1}</strong>:
               </span>
               <span className="vista-stream__chat-text">{msg.message}</span>
               {msg.isGift && <span className="vista-stream__chat-gift-sparkle">✨</span>}
@@ -527,10 +531,8 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
             
             <div className="vista-stream__gift-modal-content">
               <div className="vista-stream__gift-user-coins">
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <BunnySVG width="24" height="24" />
-                  Tus monedas: {saldoActual}
-                </span>
+                <BunnySVG width="24" height="24" />
+                Tus monedas: {saldoActual}
               </div>
               
               <div className="vista-stream__gift-grid">
