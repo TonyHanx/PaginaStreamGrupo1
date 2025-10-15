@@ -1,5 +1,5 @@
 import React from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./BarraLateral.css";
 import logoNexus from "../../assets/nexus-logo.png";
 
@@ -32,8 +32,16 @@ interface BarraLateralProps {
 }
 
 const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
+
 	// Detectar si hay usuario logueado
 	const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
+
+	const navigate = useNavigate();
+	
+	const handleQuienesSomosClick = () => {
+		navigate('/nosotros');
+	};
+
 	return (
 		<aside className="barra-lateral">
 			<div className="barra-lateral__top">
@@ -46,6 +54,7 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 				</span>
 				<img src={logoNexus} alt="Logo Nexus" className="barra-lateral__logo" />
 			</div>
+
 			<nav className="barra-lateral__menu-items">
 				{menuItems.map((item, idx) => {
 					if (item.label === "Siguiendo") {
@@ -72,6 +81,23 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 					);
 				})}
 			</nav>
+
+					{/* Botón ¿Quiénes somos? */}
+					<div
+						className="barra-lateral__item barra-lateral__quienes-somos"
+						onClick={handleQuienesSomosClick}
+					>
+						<span className="barra-lateral__icon">
+							<svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+								<circle cx="9" cy="7" r="4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+								<path d="M23 21V19C23 17.1362 21.7252 15.5701 20 15.126" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+								<path d="M16 3.126C17.7252 3.5699 19 5.13616 19 7C19 8.86384 17.7252 10.4301 16 10.874" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+							</svg>
+						</span>
+						<span className="barra-lateral__label">¿Quiénes somos?</span>
+					</div>
+
 			{/* Línea separadora antes de recomendados */}
 			<div className="barra-lateral__divider" />
 			<div className="barra-lateral__recomendados">

@@ -1,3 +1,4 @@
+
 @keyframes bunny-pulse {
 	0% {
 		transform: scale(1);
@@ -28,11 +29,29 @@
 	animation: bunny-pulse 2.1s infinite cubic-bezier(.6,0,.4,1);
 	will-change: transform, filter;
 }
+
+.encabezado__dashboard {
+	background: #00bfff;
+	border: none;
+	color: #111;
+	font-weight: bold;
+	font-size: 1.1rem;
+	border-radius: 8px;
+	padding: 0.5rem 1.4rem;
+	cursor: pointer;
+	box-shadow: 0 2px 8px rgba(0,224,255,0.15);
+	transition: background 0.2s, transform 0.2s;
+}
+.encabezado__dashboard:hover {
+	background: #0099ff;
+
+}
 .encabezado__donar-icon {
 	position: relative;
 	display: flex;
 	align-items: center;
 }
+
 .encabezado__donar-rays polyline {
 	stroke: #fff200;
 	filter: drop-shadow(0 0 6px #fff200);
@@ -117,6 +136,10 @@
 }
 
 .encabezado__acciones {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
 .encabezado__donar {
 	background: none;
 	border: none;
@@ -128,10 +151,6 @@
 }
 .encabezado__donar:hover {
 	transform: scale(1.15);
-}
-	display: flex;
-	align-items: center;
-	gap: 1rem;
 }
 
 .encabezado__login {

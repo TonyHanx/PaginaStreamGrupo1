@@ -1,4 +1,4 @@
-// import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../Styles/auth.css";
 
 import googleIcon from "../assets/icons/google.svg";
@@ -128,13 +128,13 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
 
         <p className="auth-foot">
           Al registrarte, aceptas nuestra{" "}
-          <a className="auth-link" href="#">
-            Política de Privacidad
-          </a>{" "}
+          <Link to="/politicas" className="auth-link" target="_blank">
+          Politica de privacidad
+          </Link>{" "}
           y nuestros{" "}
-          <a className="auth-link" href="#">
-            Términos y Condiciones
-          </a>
+          <Link to="/terminos" className="auth-link" target="_blank">
+          Términos y Condiciones
+          </Link>
           .
         </p>
 

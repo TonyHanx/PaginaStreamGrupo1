@@ -1,8 +1,9 @@
-
 import React, { useState, useImperativeHandle, forwardRef, useRef, useEffect } from "react";
 import "./Encabezado.css";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
+import { useNavigate } from "react-router-dom";
+
 
 export interface EncabezadoHandle {
   showLoginModal: () => void;
@@ -16,6 +17,7 @@ export interface EncabezadoProps {
 function UserMenu({ username }: { username: string }) {
 	const [open, setOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -75,7 +77,7 @@ function UserMenu({ username }: { username: string }) {
 						<MenuItem icon={
 							// Barras (panel de control)
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="4" y="13" width="2.5" height="3" rx="1" stroke="#fff" strokeWidth="1.5"/><rect x="8.75" y="9" width="2.5" height="7" rx="1" stroke="#fff" strokeWidth="1.5"/><rect x="13.5" y="6" width="2.5" height="10" rx="1" stroke="#fff" strokeWidth="1.5"/></svg>
-						} label="Panel de control del creador" />
+						} label="Panel de control del creador" onClick={() => navigate("/dashboard")} />
 						<MenuItem icon={
 							// Icono de referencia (adjunto)
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="2" y="5" width="16" height="10" rx="3" stroke="#fff" strokeWidth="1.5"/><rect x="7" y="8" width="6" height="4" rx="1" fill="#fff"/><circle cx="10" cy="10" r="1.5" fill="#181b1f"/></svg>
@@ -147,6 +149,7 @@ const recargaMonedasOpciones = [
 const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthButtons = true }, ref) => {
 	const [modal, setModal] = useState<null | 'login' | 'register' | 'monedas'>(null);
 	const closeModal = () => setModal(null);
+
 	const handleLoginClick = () => setModal('login');
 
 	// Detectar usuario logueado
@@ -158,10 +161,12 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
 		usuarioObj = null;
 	}
 
+
 	useImperativeHandle(ref, () => ({
 		showLoginModal: () => setModal('login'),
 		showRegisterModal: () => setModal('register')
 	}));
+
 
 	return (
 		<div>
@@ -194,6 +199,7 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
 					)}
 				</div>
 			</header>
+
 
 			{/* Modal de login/register/monedas */}
 			{modal && (

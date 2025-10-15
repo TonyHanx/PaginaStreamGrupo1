@@ -1,0 +1,179 @@
+.dashboard-stream-placeholder {
+    width: 100%;
+    min-height: 700px;
+    background: linear-gradient(135deg, #23262f 60%, #181a20 100%);
+    border: 2px dashed #00e0ff99;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b0b3c6;
+    font-size: 1.3rem;
+    margin: 32px 0 32px 0;
+    box-shadow: 0 2px 12px rgba(0,224,255,0.07);
+}
+.row {
+    display: flex;
+    gap: 24px;
+    min-height: 100vh;
+}
+
+body{
+    background-color: #1a1a1a;
+}
+
+.dashboard-header {
+    width: 100%;
+    padding: 24px 0 0 0;
+    position: relative;
+    text-align: center;
+    min-height: 60px;
+    background: #000000;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 4px 18px rgba(0,224,255,0.08);
+    margin-bottom: 0px;
+}
+
+.dashboard-header h2 {
+    color: #00e0ff;
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin: 0;
+    padding-bottom: 8px;
+}
+.dashboard-volver-btn {
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #00bfff;
+    color: #111;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.4rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,224,255,0.15);
+    transition: background 0.2s, transform 0.2s;
+    z-index: 2;
+}
+.dashboard-volver-btn:hover {
+    background: #0099ff;
+}
+
+.dashboard-sidebar {
+    background: #000000;
+    padding: 24px 18px;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    height: 100vh;
+    min-width: 150px;
+    max-width: 450px; 
+}
+
+.dashboard-notifications {
+    list-style: none;
+    padding: 0;
+    margin: 18px 0 0 0;
+}
+
+.titulo-Sidebar{
+    text-align: center;
+}
+
+.dashboard-notification {
+  background: #23262f;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 4px rgba(0,224,255,0.07);
+  font-size: 1rem;
+  position: relative;
+}
+
+.dashboard-notification-msg {
+  color: #00e0ff;
+  font-weight: 500;
+}
+
+.dashboard-notification-time {
+  color: #b0b3c6;
+  font-size: 0.92rem;
+  margin-top: 2px;
+  align-self: flex-end;
+}
+
+.dashboard-notification-vacia {
+  color: #b0b3c6;
+  text-align: center;
+  font-style: italic;
+}
+
+.dashboard-main {
+  flex: 1;
+}
+
+.dashboard-extra {
+  min-width: 120px;
+  max-width: 450px;
+}
+.dashboard-container {
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 32px 24px;
+  background: #181a20;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  color: #fff;
+  text-align: center;
+  padding-bottom: 3rem;
+}
+
+.dashboard-card {  
+  margin-top: 10px;
+  padding: 24px 0;
+  background: #23262f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dashboard-label {
+  font-size: 1.1rem;
+  color: #b0b3c6;
+  margin-bottom: 8px;
+}
+
+.dashboard-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #00e0ff;
+  letter-spacing: 2px;
+}
+
+/* Cambios para la barra del nivel*/
+.nivel-progreso-barra {
+  width: 100%;
+  height: 10px;
+  background-color: #2d2d4d;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.nivel-progreso-relleno {
+  height: 100%;
+  background-color: #6C63FF;
+  transition: width 0.4s ease-in-out;
+}
+
+/* Opcional: hover para efecto visual */
+.dashboard-card:hover .nivel-progreso-relleno {
+  background-color: #00BFFF;
+}
