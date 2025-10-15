@@ -16,6 +16,7 @@ body{margin:0; background:var(--bg); font-family: system-ui, Arial, sans-serif}
   display:grid;
   place-items:center;
   padding:24px;
+  overflow: hidden;
 }
 
 /* Tarjeta */
@@ -26,6 +27,8 @@ body{margin:0; background:var(--bg); font-family: system-ui, Arial, sans-serif}
   border-radius:18px;
   padding:24px 20px;
   box-shadow:0 12px 28px rgba(0,0,0,.12);
+  border: none;
+  outline: none;
 }
 
 /* Título */

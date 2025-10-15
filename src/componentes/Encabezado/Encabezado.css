@@ -30,6 +30,158 @@
 	will-change: transform, filter;
 }
 
+/* Estilos del modal */
+.encabezado__modal-bg {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.7);
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.encabezado__modal {
+	position: relative;
+	background: transparent;
+	border-radius: 16px;
+	padding: 0;
+	max-width: 90vw;
+	max-height: 90vh;
+	overflow: visible;
+	box-shadow: none;
+	z-index: 1010;
+}
+
+.encabezado__modal-close {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	background: #181b1f;
+	border: 2px solid #fff;
+	color: #fff;
+	font-size: 24px;
+	cursor: pointer;
+	z-index: 1020;
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	transition: background 0.2s, transform 0.2s;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.encabezado__modal-close:hover {
+	background: #00bfff;
+	transform: scale(1.1);
+}
+
+.encabezado__modal-monedas {
+	color: #fff;
+	min-width: 480px;
+	background: #181b1f;
+	border-radius: 16px;
+	padding: 32px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.encabezado__modal-monedas h2 {
+	font-size: 24px;
+	font-weight: 700;
+	margin-bottom: 16px;
+}
+
+.encabezado__modal-saldo {
+	font-weight: 500;
+	margin-bottom: 12px;
+}
+
+.encabezado__modal-saldo-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 24px;
+}
+
+.encabezado__modal-saldo-row span:first-child {
+	width: 32px;
+	height: 32px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.encabezado__modal-saldo-row span:last-child {
+	font-weight: 700;
+	font-size: 18px;
+}
+
+.encabezado__modal-monedas-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
+	justify-content: center;
+	margin: 0 auto;
+	max-width: 500px;
+}
+
+.encabezado__modal-monedas-opcion {
+	background: #232329;
+	border-radius: 12px;
+	padding: 16px;
+	min-width: 110px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	cursor: pointer;
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.encabezado__modal-monedas-opcion:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 4px 16px rgba(0, 191, 255, 0.3);
+}
+
+.encabezado__modal-monedas-opcion span:first-child {
+	width: 38px;
+	height: 38px;
+	margin-bottom: 6px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.encabezado__modal-monedas-opcion > div:first-of-type {
+	font-weight: 700;
+	font-size: 15px;
+	text-align: center;
+}
+
+.encabezado__modal-monedas-precio {
+	background: #232329;
+	color: #fff;
+	font-weight: 600;
+	font-size: 15px;
+	border-radius: 8px;
+	margin-top: 8px;
+	padding: 4px 12px;
+	border: 1px solid #333;
+}
+
+.encabezado__modal-monedas-info {
+	margin-top: 24px;
+	font-size: 13px;
+	color: #bdbdbd;
+	text-align: center;
+}
+
+
 .encabezado__dashboard {
 	background: #00bfff;
 	border: none;
