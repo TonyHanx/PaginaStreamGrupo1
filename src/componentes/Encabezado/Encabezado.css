@@ -1,3 +1,33 @@
+@keyframes bunny-pulse {
+	0% {
+		transform: scale(1);
+		filter: drop-shadow(0 0 0px #ffe06600);
+	}
+	20% {
+		transform: scale(1.13);
+		filter: drop-shadow(0 0 18px #ffe06688);
+	}
+	40% {
+		transform: scale(0.97);
+		filter: drop-shadow(0 0 8px #ffe06644);
+	}
+	60% {
+		transform: scale(1.09);
+		filter: drop-shadow(0 0 14px #ffe06688);
+	}
+	80% {
+		transform: scale(1);
+		filter: drop-shadow(0 0 0px #ffe06600);
+	}
+	100% {
+		transform: scale(1);
+		filter: drop-shadow(0 0 0px #ffe06600);
+	}
+}
+.bunny-anim {
+	animation: bunny-pulse 2.1s infinite cubic-bezier(.6,0,.4,1);
+	will-change: transform, filter;
+}
 .encabezado__donar-icon {
 	position: relative;
 	display: flex;

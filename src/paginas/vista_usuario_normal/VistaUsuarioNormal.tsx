@@ -3,25 +3,17 @@ import Encabezado, { type EncabezadoHandle } from "../../componentes/Encabezado/
 import BarraLateral from "../../componentes/BarraLateral/BarraLateral";
 import CarruselStreams from "../../componentes/CarruselStreams/CarruselStreams";
 import ListaCategorias from "../../componentes/ListaCategorias/ListaCategorias";
-import "./Inicio.css";
+import "../Inicio/Inicio.css";
 
-const Inicio: React.FC = () => {
+const VistaUsuarioNormal: React.FC = () => {
 	const encabezadoRef = useRef<EncabezadoHandle>(null);
-
-	const handleShowLogin = () => {
-		encabezadoRef.current?.showLoginModal();
-	};
-
-	// Detectar si hay usuario logueado
-	const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
-	const mostrarAuthButtons = !usuario;
 
 	return (
 		<div className="inicio">
 			<div className="inicio__layout">
-				<BarraLateral onShowLogin={handleShowLogin} />
+				<BarraLateral />
 				<div className="inicio__main">
-					<Encabezado ref={encabezadoRef} mostrarAuthButtons={mostrarAuthButtons} />
+					<Encabezado ref={encabezadoRef} mostrarAuthButtons={false} />
 					<div className="inicio__carrusel-container">
 						<CarruselStreams />
 					</div>
@@ -34,4 +26,4 @@ const Inicio: React.FC = () => {
 	);
 };
 
-export default Inicio;
+export default VistaUsuarioNormal;

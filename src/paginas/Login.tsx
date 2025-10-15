@@ -1,20 +1,49 @@
 import { useState } from "react";
-// import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../Styles/auth.css";
-
 import googleIcon from "../assets/icons/google.svg";
 import facebookIcon from "../assets/icons/facebook.svg";
 import appleIcon from "../assets/icons/apple.svg";
 
 export default function Login({ onShowRegister }: { onShowRegister?: () => void }) {
 	const [showPassword, setShowPassword] = useState(false);
+	const [username, setUsername] = useState("");
+	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
+	const navigate = useNavigate();
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		// Validar contra usuario registrado en localStorage
+		const userDataStr = localStorage.getItem("USUARIO_REGISTRADO");
+		if (userDataStr) {
+			const userData = JSON.parse(userDataStr);
+			if (
+				(username === userData.username || username === userData.email) &&
+				password === userData.password
+			) {
+				setError("");
+				sessionStorage.setItem("USUARIO", JSON.stringify({ username: userData.username }));
+				navigate("/usuario");
+				return;
+			}
+		}
+		// Validación simple: usuario "grupo1" y contraseña "123"
+		if (username === "grupo1" && password === "123") {
+			setError("");
+			sessionStorage.setItem("USUARIO", JSON.stringify({ username }));
+			navigate("/usuario");
+		} else {
+			setError("Ingreso incorrecto");
+		}
+	};
 
 	return (
 		<div className="auth-wrap">
 			<div className="auth-card">
 				<h1 className="auth-title">Iniciar sesión</h1>
 
-				<form>
+				<form onSubmit={handleSubmit}>
 					<label className="form-label">Correo electrónico o nombre de usuario</label>
 					<div className="input-group mb-3">
 						<span className="input-group-text">
@@ -25,6 +54,8 @@ export default function Login({ onShowRegister }: { onShowRegister?: () => void 
 							className="form-control auth-input"
 							placeholder="usuario@correo.com"
 							required
+							value={username}
+							onChange={e => setUsername(e.target.value)}
 						/>
 					</div>
 
@@ -38,6 +69,8 @@ export default function Login({ onShowRegister }: { onShowRegister?: () => void 
 							className="form-control auth-input"
 							placeholder="••••••••"
 							required
+							value={password}
+							onChange={e => setPassword(e.target.value)}
 						/>
 						<button
 							type="button"
@@ -49,6 +82,8 @@ export default function Login({ onShowRegister }: { onShowRegister?: () => void 
 							<i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`} />
 						</button>
 					</div>
+
+					{error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
 
 					<div className="text-end mt-1">
 						<a href="#" className="auth-link">¿Olvidaste tu contraseña?</a>
@@ -75,17 +110,17 @@ export default function Login({ onShowRegister }: { onShowRegister?: () => void 
 					</button>
 				</div>
 
-				   <p className="auth-foot">
-					   ¿No tienes una cuenta?{" "}
-					   <button
-						   type="button"
-						   className="auth-link fw-semibold"
-						   style={{background:'none',border:'none',color:'var(--primary)',cursor:'pointer',padding:0}}
-						   onClick={onShowRegister}
-					   >
-						   Registrarse
-					   </button>
-				   </p>
+				<p className="auth-foot">
+					¿No tienes una cuenta?{" "}
+					<button
+						type="button"
+						className="auth-link fw-semibold"
+						style={{background:'none',border:'none',color:'var(--primary)',cursor:'pointer',padding:0}}
+						onClick={onShowRegister}
+					>
+						Registrarse
+					</button>
+				</p>
 			</div>
 		</div>
 	);

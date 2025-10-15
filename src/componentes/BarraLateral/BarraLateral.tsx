@@ -32,7 +32,8 @@ interface BarraLateralProps {
 }
 
 const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
-	// const navigate = useNavigate();
+	// Detectar si hay usuario logueado
+	const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
 	return (
 		<aside className="barra-lateral">
 			<div className="barra-lateral__top">
@@ -45,19 +46,32 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 				</span>
 				<img src={logoNexus} alt="Logo Nexus" className="barra-lateral__logo" />
 			</div>
-					<nav className="barra-lateral__menu-items">
-						   {menuItems.map((item, idx) => (
-							   <div
-								   key={idx}
-								   className="barra-lateral__item"
-								   onClick={item.label === "Siguiendo" ? onShowLogin : undefined}
-								   style={item.label === "Siguiendo" ? { cursor: 'pointer' } : {}}
-							   >
-								   <span className="barra-lateral__icon">{item.icon}</span>
-								   <span className="barra-lateral__label">{item.label}</span>
-							   </div>
-						   ))}
-					</nav>
+			<nav className="barra-lateral__menu-items">
+				{menuItems.map((item, idx) => {
+					if (item.label === "Siguiendo") {
+						return (
+							<div
+								key={idx}
+								className="barra-lateral__item"
+								onClick={!usuario ? onShowLogin : undefined}
+								style={!usuario ? { cursor: 'pointer' } : {}}
+							>
+								<span className="barra-lateral__icon">{item.icon}</span>
+								<span className="barra-lateral__label">{item.label}</span>
+							</div>
+						);
+					}
+					return (
+						<div
+							key={idx}
+							className="barra-lateral__item"
+						>
+							<span className="barra-lateral__icon">{item.icon}</span>
+							<span className="barra-lateral__label">{item.label}</span>
+						</div>
+					);
+				})}
+			</nav>
 			{/* Línea separadora antes de recomendados */}
 			<div className="barra-lateral__divider" />
 			<div className="barra-lateral__recomendados">
