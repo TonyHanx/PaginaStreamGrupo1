@@ -1,7 +1,7 @@
-import React from "react";
+import React, {useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
-
+import NotificacionNivel from '../../componentes/NotificacionNivel/NotificacionNivel';
 
 interface Notification {
     mensaje: string;
@@ -11,16 +11,35 @@ interface Notification {
 interface DashboardProps {
     horasTransmision: number;
     notifications: Notification[];
+    setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
 }
 
 
-
-const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications }) => {
+const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, setNotifications }) => {
     const navigate = useNavigate();
 
-    const metaNivel = 200;
+    const metaNivel = 100;
     const progreso = Math.min((horasTransmision / metaNivel) * 100, 100);
+    const [nivel, setNivel] = useState(1); // ✅ NUEVO (nivel actual del streamer)
+    const [mostrarNotificacionNivel, setMostrarNotificacionNivel] = useState(false);
 
+    useEffect(() => {
+    const totalHoras = horasTransmision;
+    const nivelActual = Math.floor(totalHoras / metaNivel) + 1;
+
+    if (nivelActual > nivel) {
+      // 🟢 Subió de nivel → mostrar notificación visual
+      setNivel(nivelActual);
+      setMostrarNotificacionNivel(true);
+
+      // 🟢 Agregar mensaje al panel de notificaciones
+      const nuevaNotificacion: Notification = {
+        mensaje: `🎉 ¡Has alcanzado el Nivel ${nivelActual}!`,
+        tiempo: new Date().toLocaleTimeString(),
+      };
+      setNotifications((prev) => [nuevaNotificacion, ...prev]);
+    }
+  }, [horasTransmision, nivel, metaNivel, setNotifications]); // 🟢 Se ejecuta cada vez que cambian las dependencias
 
     return (
         <div className="dashboard-full">
@@ -84,6 +103,12 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications }
                     </div>
                 </div>
             </div>
+            {mostrarNotificacionNivel && (
+            <NotificacionNivel
+            nivel={nivel}
+            onClose={() => setMostrarNotificacionNivel(false)}
+            />
+            )}
         </div>        
         </div>
 
@@ -91,3 +116,4 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications }
 };
 
 export default Dashboard;
+
