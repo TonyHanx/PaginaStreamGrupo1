@@ -59,9 +59,8 @@ const CarruselStreams: React.FC = () => {
 					{getCurrentStreams().map((stream) => (
 						<div 
 							key={stream.id} 
-							className="carrusel-streams__card"
+							className="carrusel-streams__card carrusel-streams__card--clickable"
 							onClick={() => navigate(`/stream/${stream.streamerId}`)}
-							style={{ cursor: 'pointer' }}
 						>
 							<div className="carrusel-streams__miniatura">
 								{stream.thumbnail ? (

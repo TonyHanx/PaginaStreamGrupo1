@@ -303,8 +303,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
         {/* Video del stream */}
         <div className={`vista-stream__video-container ${isFullscreen ? 'fullscreen' : ''}`}>
           <div 
-            className="vista-stream__video-placeholder"
-            style={{ backgroundImage: 'url(/imagenes/qué-opinan-de-la-cobra-v0-6m7zlzhyit6d1.webp)' }}
+            className="vista-stream__video-placeholder vista-stream__video-placeholder--cobra"
           >
             {/* Aquí iría el reproductor de video real */}
             <div className="vista-stream__live-indicator">
@@ -451,7 +450,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
                 className={`vista-stream__chat-username ${msg.isBroadcaster ? 'broadcaster' : ''}`}
                 style={{ color: msg.color }}
               >
-                {msg.username} <strong style={{ color: '#FFD700' }}>Nv.{msg.puntos ? calcularNivel(msg.puntos).nivel : 1}</strong>:
+                {msg.username} <strong className="vista-stream__chat-level">Nv.{msg.puntos ? calcularNivel(msg.puntos).nivel : 1}</strong>:
               </span>
               <span className="vista-stream__chat-text">{msg.message}</span>
               {msg.isGift && <span className="vista-stream__chat-gift-sparkle">✨</span>}
@@ -544,7 +543,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
                     }`}
                     onClick={() => enviarRegalo(regalo)}
                   >
-                    <div className="vista-stream__gift-icon" style={{ color: regalo.color }}>
+                    <div className="vista-stream__gift-icon">
                       {regalo.icono}
                     </div>
                     <div className="vista-stream__gift-name">{regalo.nombre}</div>

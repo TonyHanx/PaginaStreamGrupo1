@@ -103,8 +103,8 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
             />
           </div>
 
-          {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-          {success && <div style={{ color: 'green', marginTop: 8 }}>¡Registro exitoso! Ahora puedes iniciar sesión.</div>}
+          {error && <div className="auth-error">{error}</div>}
+          {success && <div className="auth-success">¡Registro exitoso! Ahora puedes iniciar sesión.</div>}
           <button type="submit" className="primary-btn mt-3">
             Registrarte
           </button>
@@ -142,8 +142,7 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
           ¿Ya tienes una cuenta?{" "}
           <button
             type="button"
-            className="auth-link fw-semibold"
-            style={{background:'none',border:'none',color:'var(--primary)',cursor:'pointer',padding:0}}
+            className="auth-link-button"
             onClick={onShowLogin}
           >
             Iniciar sesión

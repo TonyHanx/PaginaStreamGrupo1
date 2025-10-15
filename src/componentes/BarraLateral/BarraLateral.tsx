@@ -66,9 +66,8 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 						return (
 							<div
 								key={idx}
-								className="barra-lateral__item"
+								className="barra-lateral__item barra-lateral__item--clickable"
 								onClick={handleInicioClick}
-								style={{ cursor: 'pointer' }}
 							>
 								<span className="barra-lateral__icon">{item.icon}</span>
 								<span className="barra-lateral__label">{item.label}</span>
@@ -82,9 +81,8 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 										return (
 											<div
 												key={idx}
-												className="barra-lateral__item"
+												className="barra-lateral__item barra-lateral__item--clickable"
 												onClick={onShowLogin}
-												style={{ cursor: 'pointer' }}
 											>
 												<span className="barra-lateral__icon">{item.icon}</span>
 												<span className="barra-lateral__label">{item.label}</span>

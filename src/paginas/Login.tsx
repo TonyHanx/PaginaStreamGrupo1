@@ -103,7 +103,7 @@ export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegist
 						</button>
 					</div>
 
-					{error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+					{error && <div className="auth-error">{error}</div>}
 
 					<div className="text-end mt-1">
 						<a href="#" className="auth-link">¿Olvidaste tu contraseña?</a>
@@ -134,8 +134,7 @@ export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegist
 					¿No tienes una cuenta?{" "}
 					<button
 						type="button"
-						className="auth-link fw-semibold"
-						style={{background:'none',border:'none',color:'var(--primary)',cursor:'pointer',padding:0}}
+						className="auth-link-button"
 						onClick={onShowRegister}
 					>
 						Registrarse

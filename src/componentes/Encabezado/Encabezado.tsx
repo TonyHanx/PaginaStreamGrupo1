@@ -1,5 +1,6 @@
 import React, { useState, useImperativeHandle, forwardRef, useRef, useEffect } from "react";
 import "./Encabezado.css";
+import "./UserMenu.css";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
 import { useNavigate } from "react-router-dom";
@@ -59,68 +60,59 @@ function UserMenu({ username }: { username: string }) {
 	}
 
 	return (
-		<div ref={menuRef} style={{ position: 'relative', marginLeft: 12 }}>
+		<div ref={menuRef} className="user-menu">
 			<button
 				onClick={() => setOpen((v) => !v)}
-				style={{
-					display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 0
-				}}
+				className="user-menu__button"
 			>
-				<span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: '50%', background: '#181b1f' }}>
+				<span className="user-menu__avatar">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
 						<circle cx="12" cy="12" r="12" fill="#181b1f" />
 						<circle cx="12" cy="9.5" r="4" stroke="#00bfff" strokeWidth="1.7" />
 						<path d="M5.5 19c1.2-2.7 4.8-2.7 6.5-2.7s5.3 0 6.5 2.7" stroke="#00bfff" strokeWidth="1.7" strokeLinecap="round" fill="none" />
 					</svg>
 				</span>
-				<span style={{ color: '#fff', fontWeight: 600 }}>{username}</span>
+				<span className="user-menu__username">{username}</span>
 			</button>
 			{open && (
-				<div style={{
-					position: 'absolute', right: 0, top: 44, minWidth: 280, background: '#181b1f', color: '#fff', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,.22)', zIndex: 2000, padding: '10px 0', fontSize: 16
-				}}>
+				<div className="user-menu__dropdown">
 					{/* Información del usuario con avatar */}
-					<div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px 12px 20px', borderBottom: '1px solid #232329' }}>
-						<span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: '50%', background: '#232329' }}>
+					<div className="user-menu__header">
+						<span className="user-menu__header-avatar">
 							<svg width="28" height="28" viewBox="0 0 24 24" fill="none">
 								<circle cx="12" cy="12" r="12" fill="#232329" />
 								<circle cx="12" cy="9.5" r="4" stroke="#00bfff" strokeWidth="1.7" />
 								<path d="M5.5 19c1.2-2.7 4.8-2.7 6.5-2.7s5.3 0 6.5 2.7" stroke="#00bfff" strokeWidth="1.7" strokeLinecap="round" fill="none" />
 							</svg>
 						</span>
-						<div style={{ flex: 1 }}>
-							<div style={{ fontWeight: 700, fontSize: 18 }}>{username}</div>
+						<div className="user-menu__header-info">
+							<div className="user-menu__header-username">{username}</div>
 						</div>
 					</div>
 					
 					{/* Sección de nivel y puntos */}
-					<div style={{ padding: '12px 20px', borderBottom: '1px solid #232329', background: '#1a1d23' }}>
-						<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-							<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+					<div className="user-menu__level-section">
+						<div className="user-menu__level-row">
+							<div className="user-menu__level-info">
 								<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
 									<path d="M10 2L12.5 7.5L18 8.5L14 12.5L15 18L10 15L5 18L6 12.5L2 8.5L7.5 7.5L10 2Z" fill="#FFD700" stroke="#FFA500" strokeWidth="1"/>
 								</svg>
-								<span style={{ fontWeight: 700, fontSize: 16 }}>Nivel {nivel}</span>
+								<span className="user-menu__level-text">Nivel {nivel}</span>
 							</div>
-							<div style={{ fontSize: 14, color: '#999' }}>
+							<div className="user-menu__level-points">
 								{puntosNivel}/{puntosParaSiguiente} pts
 							</div>
 						</div>
 						{/* Barra de progreso */}
-						<div style={{ width: '100%', height: 8, background: '#232329', borderRadius: 4, overflow: 'hidden' }}>
-							<div style={{ 
-								width: `${progresoNivel}%`, 
-								height: '100%', 
-								background: 'linear-gradient(90deg, #00bfff 0%, #0080ff 100%)',
-								transition: 'width 0.3s ease'
-							}}></div>
+						<div className="user-menu__progress-bar">
+							<div className="user-menu__progress-fill" style={{ width: `${progresoNivel}%` }}></div>
 						</div>
-						<div style={{ fontSize: 12, color: '#00bfff', marginTop: 6, fontWeight: 600 }}>
+						<div className="user-menu__total-points">
 							Total: {usuarioData.puntos.toLocaleString()} puntos
 						</div>
 					</div>
 					
-					<div style={{ padding: '10px 0' }}>
+					<div className="user-menu__menu-items">
 						<MenuItem icon={
 							// Casita (home)
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M3 9.5L10 4l7 5.5" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/><rect x="6.5" y="11" width="7" height="5" rx="1" stroke="#fff" strokeWidth="1.5"/></svg>
@@ -139,7 +131,7 @@ function UserMenu({ username }: { username: string }) {
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><g stroke="#fff" strokeWidth="1.5" strokeLinecap="round"><circle cx="10" cy="10" r="3.2" fill="none"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.6 5.6l1.4 1.4M13 13l1.4 1.4M5.6 14.4l1.4-1.4M13 7l1.4-1.4"/></g></svg>
 						} label="Ajustes" />
 					</div>
-					<div style={{ borderTop: '1px solid #232329', marginTop: 6 }}>
+					<div className="user-menu__divider">
 						{/* Solo el icono de cerrar sesión  */}
 						<MenuItem icon={
 							// Icono cerrar sesión 
@@ -156,12 +148,9 @@ function MenuItem({ icon, label, onClick, color }: { icon: React.ReactNode, labe
 	return (
 		<div
 			onClick={onClick}
-			style={{
-				display: 'flex', alignItems: 'center', gap: 12, padding: '10px 22px', cursor: onClick ? 'pointer' : 'default', color: color || '#fff', fontWeight: 500, borderRadius: 8, transition: 'background .15s', userSelect: 'none'
-			}}
+			className={`menu-item ${!onClick ? 'menu-item--default' : ''} ${color === '#f87171' ? 'menu-item--logout' : ''}`}
+			style={{ color: color || '#fff' }}
 			onMouseDown={e => e.preventDefault()}
-			onMouseOver={e => { (e.currentTarget as HTMLDivElement).style.background = '#232329'; }}
-			onMouseOut={e => { (e.currentTarget as HTMLDivElement).style.background = 'none'; }}
 		>
 			{icon}
 			<span>{label}</span>

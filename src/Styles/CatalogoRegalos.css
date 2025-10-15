@@ -1,0 +1,76 @@
+.catalogo-regalos-cliente {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.catalogo-regalos__saldo {
+  background: #0a2a3a;
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.catalogo-regalos__mensaje {
+  margin-bottom: 10px;
+}
+
+.catalogo-regalos__mensaje--error {
+  color: #f87171;
+}
+
+.catalogo-regalos__mensaje--success {
+  color: #00bfff;
+}
+
+.catalogo-regalos__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.catalogo-regalos__item {
+  background: #181b1f;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.catalogo-regalos__emoji {
+  font-size: 32px;
+}
+
+.catalogo-regalos__nombre {
+  font-weight: 600;
+  margin: 8px 0;
+}
+
+.catalogo-regalos__button {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-weight: 600;
+  margin-top: 6px;
+  transition: opacity 0.2s;
+}
+
+.catalogo-regalos__button--active {
+  background: #00bfff;
+  color: #111;
+  cursor: pointer;
+}
+
+.catalogo-regalos__button--active:hover {
+  opacity: 0.9;
+}
+
+.catalogo-regalos__button--disabled {
+  background: #444;
+  color: #aaa;
+  cursor: not-allowed;
+}

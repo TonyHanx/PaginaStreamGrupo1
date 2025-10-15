@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { obtenerMonedasUsuario } from "../utils/monedas";
 import { AccionesPuntos } from "../utils/puntos";
+import "../Styles/CatalogoRegalos.css";
 
 
 const REGALOS = [
@@ -72,29 +73,20 @@ const CatalogoRegalosCliente: React.FC = () => {
   };
 
   return (
-    <div className="catalogo-regalos-cliente" style={{ maxWidth: 420, margin: "0 auto" }}>
+    <div className="catalogo-regalos-cliente">
       <h2>Catálogo de Regalos</h2>
-      <div style={{ background: "#0a2a3a", color: "#fff", borderRadius: 10, padding: 12, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="catalogo-regalos__saldo">
         <span role="img" aria-label="moneda">🪙</span>
         <b>Tus monedas: {saldo}</b>
       </div>
-      {mensaje && <div style={{ color: saldo < 0 ? "#f87171" : "#00bfff", marginBottom: 10 }}>{mensaje}</div>}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+      {mensaje && <div className={`catalogo-regalos__mensaje ${saldo < 0 ? 'catalogo-regalos__mensaje--error' : 'catalogo-regalos__mensaje--success'}`}>{mensaje}</div>}
+      <div className="catalogo-regalos__grid">
         {REGALOS.map((regalo) => (
-          <div key={regalo.nombre} style={{ background: "#181b1f", borderRadius: 12, padding: 16, textAlign: "center", color: "#fff", boxShadow: "0 2px 8px #0002" }}>
-            <div style={{ fontSize: 32 }}>{regalo.emoji}</div>
-            <div style={{ fontWeight: 600, margin: "8px 0" }}>{regalo.nombre}</div>
+          <div key={regalo.nombre} className="catalogo-regalos__item">
+            <div className="catalogo-regalos__emoji">{regalo.emoji}</div>
+            <div className="catalogo-regalos__nombre">{regalo.nombre}</div>
             <button
-              style={{
-                background: saldo >= regalo.precio ? "#00bfff" : "#444",
-                color: saldo >= regalo.precio ? "#111" : "#aaa",
-                border: "none",
-                borderRadius: 8,
-                padding: "6px 16px",
-                fontWeight: 600,
-                cursor: saldo >= regalo.precio ? "pointer" : "not-allowed",
-                marginTop: 6
-              }}
+              className={`catalogo-regalos__button ${saldo >= regalo.precio ? 'catalogo-regalos__button--active' : 'catalogo-regalos__button--disabled'}`}
               disabled={saldo < regalo.precio}
               onClick={() => handleDonar(regalo.precio, regalo.nombre)}
             >

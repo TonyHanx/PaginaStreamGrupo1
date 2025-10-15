@@ -49,6 +49,13 @@
   color: #666;
 }
 
+.vista-stream__video-placeholder--cobra {
+  background-image: url('/imagenes/qué-opinan-de-la-cobra-v0-6m7zlzhyit6d1.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 /* Indicador LIVE */
 .vista-stream__live-indicator {
   position: absolute;
