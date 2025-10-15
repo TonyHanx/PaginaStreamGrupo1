@@ -17,6 +17,11 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications }) => {
     const navigate = useNavigate();
+
+    const metaNivel = 200;
+    const progreso = Math.min((horasTransmision / metaNivel) * 100, 100);
+
+
     return (
         <div className="dashboard-full">
             <header className="dashboard-header">
@@ -66,11 +71,22 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications }
                         <span className="dashboard-value">{horasTransmision}</span>
                     </div>
                 </div>
+                <div className="dashboard-container">
+                    <div className="dashboard-card">
+                        <span className="dashboard-label">Progreso al siguiente nivel:</span>
+
+                    <div className="nivel-progreso-barra">
+                        <div className="nivel-progreso-relleno" style={{ width: `${progreso}%` }}></div>
+                    </div>
+                    <span className="dashboard-value">
+                        {horasTransmision}/{metaNivel} horas
+                    </span>
+                    </div>
+                </div>
             </div>
+        </div>        
         </div>
 
-        </div>
-        
     );
 };
 
