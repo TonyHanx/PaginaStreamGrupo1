@@ -28,8 +28,16 @@ export function obtenerDatosUsuario(): UserData | null {
  */
 export function guardarDatosUsuario(userData: UserData): void {
   try {
-    sessionStorage.setItem('USUARIO', JSON.stringify(userData));
-    
+    // Conservar monedas si existen
+    const usuarioStr = sessionStorage.getItem('USUARIO');
+    let monedas = 1000;
+    if (usuarioStr) {
+      const usuario = JSON.parse(usuarioStr);
+      monedas = usuario.monedas ?? 1000;
+    }
+    const usuarioFinal = { ...userData, monedas };
+    sessionStorage.setItem('USUARIO', JSON.stringify(usuarioFinal));
+
     // También actualizar localStorage si el usuario está registrado
     const registradoStr = localStorage.getItem('USUARIO_REGISTRADO');
     if (registradoStr) {
@@ -37,7 +45,8 @@ export function guardarDatosUsuario(userData: UserData): void {
       if (registrado.username === userData.username) {
         localStorage.setItem('USUARIO_REGISTRADO', JSON.stringify({
           ...registrado,
-          puntos: userData.puntos
+          puntos: userData.puntos,
+          monedas
         }));
       }
     }

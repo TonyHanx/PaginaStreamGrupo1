@@ -75,20 +75,35 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 							</div>
 						);
 					}
-					// Botón Siguiendo - requiere login
-					if (item.label === "Siguiendo") {
-						return (
-							<div
-								key={idx}
-								className="barra-lateral__item"
-								onClick={!usuario ? onShowLogin : undefined}
-								style={!usuario ? { cursor: 'pointer' } : {}}
-							>
-								<span className="barra-lateral__icon">{item.icon}</span>
-								<span className="barra-lateral__label">{item.label}</span>
-							</div>
-						);
-					}
+								// Botón Siguiendo - requiere login
+								if (item.label === "Siguiendo") {
+									if (!usuario) {
+										// Si NO hay usuario, mostrar login al hacer click
+										return (
+											<div
+												key={idx}
+												className="barra-lateral__item"
+												onClick={onShowLogin}
+												style={{ cursor: 'pointer' }}
+											>
+												<span className="barra-lateral__icon">{item.icon}</span>
+												<span className="barra-lateral__label">{item.label}</span>
+											</div>
+										);
+									} else {
+										// Si hay usuario, solo mostrar el botón (puedes poner navegación si existe sección)
+										return (
+											<div
+												key={idx}
+												className="barra-lateral__item"
+												// onClick={() => navigate('/siguiendo')} // Descomenta si tienes ruta
+											>
+												<span className="barra-lateral__icon">{item.icon}</span>
+												<span className="barra-lateral__label">{item.label}</span>
+											</div>
+										);
+									}
+								}
 					// Otros botones
 					return (
 						<div
