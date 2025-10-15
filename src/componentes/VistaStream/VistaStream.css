@@ -378,12 +378,20 @@
 }
 
 /* Input del chat */
-.vista-stream__chat-input {
+.vista-stream__chat-input-container {
   padding: 15px;
   background: #0f0f0f;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   gap: 10px;
+  align-items: center;
+}
+
+.vista-stream__chat-input {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  align-items: center;
 }
 
 .vista-stream__chat-input input {
@@ -418,11 +426,35 @@
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
+  min-width: 49px;
+  height: 41px;
+  justify-content: center;
 }
 
 .vista-stream__chat-send:hover {
   background: linear-gradient(135deg, #00d4ff 0%, #00a6ff 100%);
   box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.vista-stream__chat-gift-btn {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff4757 100%);
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  min-width: 49px;
+  height: 41px;
+  justify-content: center;
+}
+
+.vista-stream__chat-gift-btn:hover {
+  background: linear-gradient(135deg, #ff7f50 0%, #ff5722 100%);
+  box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
   transform: translateY(-1px);
 }
 
@@ -507,4 +539,242 @@
   .vista-stream__chat-messages {
     padding: 10px;
   }
+}
+
+/* Estilos para la tienda de regalos */
+.vista-stream__chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vista-stream__chat-gift-btn {
+  background: #00bfff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.15);
+}
+
+.vista-stream__chat-gift-btn:hover {
+  background: #0099ff;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);
+}
+
+.vista-stream__chat-gift-btn svg {
+  stroke: #111;
+}
+
+.vista-stream__gift-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.vista-stream__gift-modal {
+  background: #181b1f;
+  border-radius: 16px;
+  border: 2px solid #00bfff;
+  max-width: 500px;
+  width: 90vw;
+  max-height: 70vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 191, 255, 0.3);
+  font-family: system-ui, Arial, sans-serif;
+}
+
+.vista-stream__gift-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #232329;
+  background: #1a1d23;
+}
+
+.vista-stream__gift-modal-header h3 {
+  margin: 0;
+  color: #00bfff;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.vista-stream__gift-modal-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.vista-stream__gift-modal-close:hover {
+  background: rgba(0, 191, 255, 0.1);
+  color: #00bfff;
+}
+
+.vista-stream__gift-modal-content {
+  padding: 20px;
+}
+
+.vista-stream__gift-user-coins {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #00bfff;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: rgba(0, 191, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+}
+
+.vista-stream__gift-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+}
+
+.vista-stream__gift-item {
+  background: #232329;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.vista-stream__gift-item:hover {
+  border-color: #00bfff;
+  background: #2a2a2a;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 191, 255, 0.3);
+}
+
+.vista-stream__gift-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #1a1a1a;
+}
+
+.vista-stream__gift-item.disabled:hover {
+  border-color: transparent;
+  background: #1a1a1a;
+  transform: none;
+  box-shadow: none;
+}
+
+.vista-stream__gift-icon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.vista-stream__gift-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+  font-family: system-ui, Arial, sans-serif;
+}
+
+.vista-stream__gift-price {
+  font-size: 0.8rem;
+  color: #00bfff;
+  font-weight: 700;
+  background: rgba(0, 191, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+}
+
+/* Estilos para mensajes de regalo en el chat */
+.vista-stream__chat-message.gift-message {
+  background: linear-gradient(90deg, rgba(0, 191, 255, 0.1), rgba(0, 191, 255, 0.05));
+  border-left: 3px solid #00bfff;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 6px;
+  animation: giftGlow 2s ease-in-out;
+}
+
+.vista-stream__chat-gift-sparkle {
+  margin-left: 8px;
+  animation: sparkle 1.5s infinite;
+  color: #00bfff;
+}
+
+@keyframes giftGlow {
+  0% { 
+    background: linear-gradient(90deg, rgba(0, 191, 255, 0.3), rgba(0, 191, 255, 0.1));
+    transform: scale(1.02);
+  }
+  50% { 
+    background: linear-gradient(90deg, rgba(0, 191, 255, 0.2), rgba(0, 191, 255, 0.05));
+  }
+  100% { 
+    background: linear-gradient(90deg, rgba(0, 191, 255, 0.1), rgba(0, 191, 255, 0.05));
+    transform: scale(1);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+/* Estilos para mensajes de regalo en el chat */
+.vista-stream__chat-message.gift-message {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+  border-left: 3px solid #FFD700;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 0 8px 8px 0;
+  animation: giftGlow 2s ease-in-out;
+}
+
+.vista-stream__chat-gift-sparkle {
+  margin-left: 8px;
+  animation: sparkle 1.5s infinite;
+}
+
+@keyframes giftGlow {
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
 }

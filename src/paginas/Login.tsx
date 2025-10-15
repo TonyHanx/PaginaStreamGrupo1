@@ -25,7 +25,8 @@ export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegist
 				setError("");
 				sessionStorage.setItem("USUARIO", JSON.stringify({ 
 					username: userData.username, 
-					puntos: userData.puntos || 0 
+					puntos: userData.puntos || 0,
+					monedas: userData.monedas || 1000 // Monedas iniciales para demo
 				}));
 				
 				// Si hay callback de éxito (modo modal), ejecutarlo en lugar de navegar
@@ -42,7 +43,8 @@ export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegist
 			setError("");
 			sessionStorage.setItem("USUARIO", JSON.stringify({ 
 				username, 
-				puntos: 0 
+				puntos: 0,
+				monedas: 1000 // Monedas iniciales para demo
 			}));
 			
 			// Si hay callback de éxito (modo modal), ejecutarlo en lugar de navegar
