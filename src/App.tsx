@@ -4,6 +4,8 @@ import Register from "./paginas/Register";
 import Inicio from "./paginas/Inicio/Inicio";
 import CatalogoRegalosCliente from "./paginas/CatalogoRegalosCliente";
 import PanelRegalosStreamer from "./paginas/PanelRegalosStreamer";
+import TerminosyCondiciones from "./paginas/TerminosyCondiciones";
+import PoliticasPrivacidad from "./paginas/PoliticasPrivacidad";
 import Dashboard from "./componentes/Dashboard/Dashboard";
 import Nosotros from "./componentes/Nosotros/Nosotros";
 
@@ -17,6 +19,11 @@ export default function App() {
         {/* Páginas de autenticación (sin layout) */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Página de Términos y Condiciones */}
+        <Route path="/terminos" element={<TerminosyCondiciones />} />
+        <Route path="/politicas" element={<PoliticasPrivacidad />} />
+
         
         {/* Página Nosotros */}
         <Route path="/nosotros" element={<Nosotros />} />
