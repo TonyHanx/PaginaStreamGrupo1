@@ -27,8 +27,8 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
       setError("Completa todos los campos");
       return;
     }
-    // Guardar usuario en localStorage
-    const userData = { username, email, password };
+    // Guardar usuario en localStorage con puntos iniciales
+    const userData = { username, email, password, puntos: 0 };
     localStorage.setItem("USUARIO_REGISTRADO", JSON.stringify(userData));
     setSuccess(true);
     setUsername("");

@@ -1,19 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './VistaStream.css';
+import { agregarPuntos, AccionesPuntos } from '../../utils/puntos';
+import NotificacionPuntos from '../NotificacionPuntos/NotificacionPuntos';
 
 interface VistaStreamProps {
   streamerId?: string;
+  onShowLogin?: () => void;
 }
 
-const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1" }) => {
+interface Notificacion {
+  id: number;
+  puntos: number;
+  mensaje: string;
+}
+
+const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin }) => {
   const [message, setMessage] = useState('');
   const [isFollowing, setIsFollowing] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
+  const chatMessagesRef = useRef<HTMLDivElement>(null);
+
+  // Función helper para mostrar notificación de puntos
+  const mostrarNotificacionPuntos = (puntos: number, mensaje: string) => {
+    const nuevaNotificacion: Notificacion = {
+      id: Date.now(),
+      puntos,
+      mensaje
+    };
+    setNotificaciones(prev => [...prev, nuevaNotificacion]);
+  };
+
+  const cerrarNotificacion = (id: number) => {
+    setNotificaciones(prev => prev.filter(n => n.id !== id));
+  };
 
   // Detectar si el usuario está logueado
-  const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
-  const isLoggedIn = !!usuario;
+  useEffect(() => {
+    const checkLogin = () => {
+      const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
+      setIsLoggedIn(!!usuario);
+    };
+    
+    checkLogin();
+    
+    // Escuchar cambios en el sessionStorage
+    window.addEventListener('storage', checkLogin);
+    
+    // Verificar periódicamente el estado de login
+    const interval = setInterval(checkLogin, 500);
+    
+    return () => {
+      window.removeEventListener('storage', checkLogin);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Sistema de puntos por ver stream (cada 5 minutos)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    
+    // Otorgar puntos cada 5 minutos (300000 ms)
+    const puntosInterval = setInterval(() => {
+      const puntosGanados = agregarPuntos(AccionesPuntos.VER_STREAM_5MIN);
+      if (puntosGanados) {
+        mostrarNotificacionPuntos(AccionesPuntos.VER_STREAM_5MIN, '¡Por ver el stream!');
+      }
+    }, 300000); // 5 minutos
+    
+    return () => {
+      clearInterval(puntosInterval);
+    };
+  }, [isLoggedIn]);
 
   // Datos de ejemplo del stream
   const streamData = {
@@ -29,7 +89,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1" }) => {
   };
 
   // Mensajes de chat de ejemplo
-  const [chatMessages] = useState([
+  const [chatMessages, setChatMessages] = useState([
     { id: 1, username: "pollocdmx", message: "🔥🔥🔥", color: "#FFD700" },
     { id: 2, username: "Domifutbolero", message: "GOLAZO!", color: "#00FF00" },
     { id: 3, username: "rmelcrack", message: "TREMENDO", color: "#FF6B6B" },
@@ -41,10 +101,46 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1" }) => {
     { id: 9, username: "abrah_amm", message: "TREMENDO AD", color: "#1ABC9C" }
   ]);
 
+  // Auto-scroll al agregar nuevos mensajes
+  useEffect(() => {
+    if (chatMessagesRef.current) {
+      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
-      console.log('Mensaje enviado:', message);
+    if (message.trim() && isLoggedIn) {
+      // Obtener nombre de usuario
+      const usuarioStr = sessionStorage.getItem('USUARIO');
+      let username = 'Usuario';
+      try {
+        const usuarioData = usuarioStr ? JSON.parse(usuarioStr) : null;
+        username = usuarioData?.username || 'Usuario';
+      } catch {
+        username = 'Usuario';
+      }
+      
+      // Crear nuevo mensaje con color aleatorio
+      const colores = ['#FFD700', '#00FF00', '#FF6B6B', '#E91E63', '#3498DB', '#2ECC71', '#F39C12', '#1ABC9C', '#9B59B6', '#00bfff'];
+      const colorAleatorio = colores[Math.floor(Math.random() * colores.length)];
+      
+      const nuevoMensaje = {
+        id: Date.now(),
+        username: username,
+        message: message,
+        color: colorAleatorio
+      };
+      
+      // Agregar mensaje al chat
+      setChatMessages(prev => [...prev, nuevoMensaje]);
+      
+      // Otorgar puntos por enviar mensaje en el chat
+      const puntosGanados = agregarPuntos(AccionesPuntos.ENVIAR_MENSAJE_CHAT);
+      if (puntosGanados) {
+        mostrarNotificacionPuntos(AccionesPuntos.ENVIAR_MENSAJE_CHAT, '¡Por enviar mensaje!');
+      }
+      
       setMessage('');
     }
   };
@@ -171,7 +267,16 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1" }) => {
 
             <button 
               className={`vista-stream__action-btn subscribe ${isFollowing ? 'following' : ''}`}
-              onClick={() => setIsFollowing(!isFollowing)}
+              onClick={() => {
+                if (!isFollowing && isLoggedIn) {
+                  // Otorgar puntos por seguir al streamer (solo la primera vez)
+                  const puntosGanados = agregarPuntos(AccionesPuntos.SEGUIR_STREAMER);
+                  if (puntosGanados) {
+                    mostrarNotificacionPuntos(AccionesPuntos.SEGUIR_STREAMER, '¡Por seguir al streamer!');
+                  }
+                }
+                setIsFollowing(!isFollowing);
+              }}
             >
               {isFollowing ? 'Siguiendo' : 'Suscribirse'}
             </button>
@@ -191,7 +296,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1" }) => {
           </button>
         </div>
 
-        <div className="vista-stream__chat-messages">
+        <div className="vista-stream__chat-messages" ref={chatMessagesRef}>
           {chatMessages.map((msg) => (
             <div key={msg.id} className="vista-stream__chat-message">
               <span 
@@ -222,10 +327,25 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1" }) => {
         ) : (
           <div className="vista-stream__chat-login">
             <p>Inicia sesión para chatear</p>
-            <button className="vista-stream__chat-login-btn">Iniciar sesión</button>
+            <button 
+              className="vista-stream__chat-login-btn"
+              onClick={onShowLogin}
+            >
+              Iniciar sesión
+            </button>
           </div>
         )}
       </div>
+      
+      {/* Notificaciones de puntos */}
+      {notificaciones.map((notif) => (
+        <NotificacionPuntos
+          key={notif.id}
+          puntos={notif.puntos}
+          mensaje={notif.mensaje}
+          onClose={() => cerrarNotificacion(notif.id)}
+        />
+      ))}
     </div>
   );
 };

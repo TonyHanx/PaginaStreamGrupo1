@@ -5,7 +5,7 @@ import googleIcon from "../assets/icons/google.svg";
 import facebookIcon from "../assets/icons/facebook.svg";
 import appleIcon from "../assets/icons/apple.svg";
 
-export default function Login({ onShowRegister }: { onShowRegister?: () => void }) {
+export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegister?: () => void; onLoginSuccess?: () => void }) {
 	const [showPassword, setShowPassword] = useState(false);
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -23,16 +23,34 @@ export default function Login({ onShowRegister }: { onShowRegister?: () => void 
 				password === userData.password
 			) {
 				setError("");
-				sessionStorage.setItem("USUARIO", JSON.stringify({ username: userData.username }));
-				navigate("/usuario");
+				sessionStorage.setItem("USUARIO", JSON.stringify({ 
+					username: userData.username, 
+					puntos: userData.puntos || 0 
+				}));
+				
+				// Si hay callback de éxito (modo modal), ejecutarlo en lugar de navegar
+				if (onLoginSuccess) {
+					onLoginSuccess();
+				} else {
+					navigate("/usuario");
+				}
 				return;
 			}
 		}
 		// Validación simple: usuario "grupo1" y contraseña "123"
 		if (username === "grupo1" && password === "123") {
 			setError("");
-			sessionStorage.setItem("USUARIO", JSON.stringify({ username }));
-			navigate("/usuario");
+			sessionStorage.setItem("USUARIO", JSON.stringify({ 
+				username, 
+				puntos: 0 
+			}));
+			
+			// Si hay callback de éxito (modo modal), ejecutarlo en lugar de navegar
+			if (onLoginSuccess) {
+				onLoginSuccess();
+			} else {
+				navigate("/usuario");
+			}
 		} else {
 			setError("Ingreso incorrecto");
 		}

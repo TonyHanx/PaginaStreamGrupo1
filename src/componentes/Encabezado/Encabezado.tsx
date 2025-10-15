@@ -14,10 +14,49 @@ export interface EncabezadoProps {
   mostrarAuthButtons?: boolean;
 }
 
+// Función para calcular nivel basado en puntos
+function calcularNivel(puntos: number): { nivel: number; puntosNivel: number; puntosParaSiguiente: number } {
+	// Sistema de niveles: cada nivel requiere 100 * nivel puntos
+	// Nivel 1: 0-100 pts, Nivel 2: 100-300 pts, Nivel 3: 300-600 pts, etc.
+	let nivel = 1;
+	let puntosAcumulados = 0;
+	let puntosNecesarios = 100;
+	
+	while (puntos >= puntosAcumulados + puntosNecesarios) {
+		puntosAcumulados += puntosNecesarios;
+		nivel++;
+		puntosNecesarios = 100 * nivel;
+	}
+	
+	const puntosEnNivelActual = puntos - puntosAcumulados;
+	
+	return {
+		nivel,
+		puntosNivel: puntosEnNivelActual,
+		puntosParaSiguiente: puntosNecesarios
+	};
+}
+
 function UserMenu({ username }: { username: string }) {
 	const [open, setOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
+	
+	// Obtener datos del usuario desde sessionStorage
+	const usuarioStr = sessionStorage.getItem('USUARIO');
+	let usuarioData = { username, puntos: 0 };
+	try {
+		const parsed = usuarioStr ? JSON.parse(usuarioStr) : {};
+		usuarioData = {
+			username: parsed.username || username,
+			puntos: parsed.puntos || 0
+		};
+	} catch {
+		// Si hay error, usar valores por defecto
+	}
+	
+	const { nivel, puntosNivel, puntosParaSiguiente } = calcularNivel(usuarioData.puntos);
+	const progresoNivel = (puntosNivel / puntosParaSiguiente) * 100;
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -57,8 +96,9 @@ function UserMenu({ username }: { username: string }) {
 			</button>
 			{open && (
 				<div style={{
-					position: 'absolute', right: 0, top: 44, minWidth: 250, background: '#181b1f', color: '#fff', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,.22)', zIndex: 2000, padding: '10px 0', fontSize: 16
+					position: 'absolute', right: 0, top: 44, minWidth: 280, background: '#181b1f', color: '#fff', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,.22)', zIndex: 2000, padding: '10px 0', fontSize: 16
 				}}>
+					{/* Información del usuario con avatar */}
 					<div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px 12px 20px', borderBottom: '1px solid #232329' }}>
 						<span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: '50%', background: '#232329' }}>
 							<svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -67,8 +107,38 @@ function UserMenu({ username }: { username: string }) {
 								<path d="M5.5 19c1.2-2.7 4.8-2.7 6.5-2.7s5.3 0 6.5 2.7" stroke="#00bfff" strokeWidth="1.7" strokeLinecap="round" fill="none" />
 							</svg>
 						</span>
-						<span style={{ fontWeight: 700, fontSize: 18 }}>{username}</span>
+						<div style={{ flex: 1 }}>
+							<div style={{ fontWeight: 700, fontSize: 18 }}>{username}</div>
+						</div>
 					</div>
+					
+					{/* Sección de nivel y puntos */}
+					<div style={{ padding: '12px 20px', borderBottom: '1px solid #232329', background: '#1a1d23' }}>
+						<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+							<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+								<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+									<path d="M10 2L12.5 7.5L18 8.5L14 12.5L15 18L10 15L5 18L6 12.5L2 8.5L7.5 7.5L10 2Z" fill="#FFD700" stroke="#FFA500" strokeWidth="1"/>
+								</svg>
+								<span style={{ fontWeight: 700, fontSize: 16 }}>Nivel {nivel}</span>
+							</div>
+							<div style={{ fontSize: 14, color: '#999' }}>
+								{puntosNivel}/{puntosParaSiguiente} pts
+							</div>
+						</div>
+						{/* Barra de progreso */}
+						<div style={{ width: '100%', height: 8, background: '#232329', borderRadius: 4, overflow: 'hidden' }}>
+							<div style={{ 
+								width: `${progresoNivel}%`, 
+								height: '100%', 
+								background: 'linear-gradient(90deg, #00bfff 0%, #0080ff 100%)',
+								transition: 'width 0.3s ease'
+							}}></div>
+						</div>
+						<div style={{ fontSize: 12, color: '#00bfff', marginTop: 6, fontWeight: 600 }}>
+							Total: {usuarioData.puntos.toLocaleString()} puntos
+						</div>
+					</div>
+					
 					<div style={{ padding: '10px 0' }}>
 						<MenuItem icon={
 							// Casita (home)
@@ -151,6 +221,12 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
 	const closeModal = () => setModal(null);
 
 	const handleLoginClick = () => setModal('login');
+	
+	// Función que se ejecuta cuando el login es exitoso desde el modal
+	const handleLoginSuccess = () => {
+		closeModal(); // Cierra el modal
+		// El componente se actualizará automáticamente porque detectará el cambio en sessionStorage
+	};
 
 	// Detectar usuario logueado
 	const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
@@ -227,7 +303,7 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
 							zIndex: 1020
 						}}>&times;</button>
 						{modal === 'login' ? (
-							<Login onShowRegister={() => setModal('register')} />
+							<Login onShowRegister={() => setModal('register')} onLoginSuccess={handleLoginSuccess} />
 						) : modal === 'register' ? (
 							<Register onShowLogin={() => setModal('login')} />
 						) : (

@@ -19,7 +19,7 @@ const StreamPage: React.FC = () => {
         <BarraLateral onShowLogin={handleShowLogin} />
         <div className="inicio__main">
           <Encabezado ref={encabezadoRef} />
-          <VistaStream streamerId={streamerId} />
+          <VistaStream streamerId={streamerId} onShowLogin={handleShowLogin} />
         </div>
       </div>
     </div>
