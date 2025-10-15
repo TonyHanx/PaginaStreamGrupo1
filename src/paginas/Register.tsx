@@ -5,10 +5,36 @@ import googleIcon from "../assets/icons/google.svg";
 import facebookIcon from "../assets/icons/facebook.svg";
 import appleIcon from "../assets/icons/apple.svg";
 
+import { useState } from "react";
+
 export default function Register({ onShowLogin }: { onShowLogin?: () => void }) {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: lógica de registro
+    setError("");
+    setSuccess(false);
+    if (password !== confirmPassword) {
+      setError("Las contraseñas no coinciden");
+      return;
+    }
+    if (!username || !email || !password) {
+      setError("Completa todos los campos");
+      return;
+    }
+    // Guardar usuario en localStorage
+    const userData = { username, email, password };
+    localStorage.setItem("USUARIO_REGISTRADO", JSON.stringify(userData));
+    setSuccess(true);
+    setUsername("");
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
   };
 
   return (
@@ -27,6 +53,8 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
               className="form-control auth-input"
               placeholder="tuUsuario"
               required
+              value={username}
+              onChange={e => setUsername(e.target.value)}
             />
           </div>
 
@@ -40,6 +68,8 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
               className="form-control auth-input"
               placeholder="correo@ejemplo.com"
               required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
             />
           </div>
 
@@ -53,6 +83,8 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
               className="form-control auth-input"
               placeholder="••••••••"
               required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
             />
           </div>
 
@@ -66,9 +98,13 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
               className="form-control auth-input"
               placeholder="••••••••"
               required
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
             />
           </div>
 
+          {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+          {success && <div style={{ color: 'green', marginTop: 8 }}>¡Registro exitoso! Ahora puedes iniciar sesión.</div>}
           <button type="submit" className="primary-btn mt-3">
             Registrarte
           </button>

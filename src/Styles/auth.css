@@ -2,7 +2,7 @@
   --bg:#f3f4f6;          /* fondo página */
   --card:#ffffff;        /* tarjeta */
   --muted:#6b7280;
-  --heading:#2563eb;     /* azul del título */
+  --heading:#00bfff;     /* azul del título */
   --primary:#7c3aed;     /* morado */
   --primary-2:#8b5cf6;   /* morado claro */
 }
@@ -120,7 +120,7 @@ body{margin:0; background:var(--bg); font-family: system-ui, Arial, sans-serif}
   --bg:#f3f4f6;          /* fondo de la página */
   --card:#ffffff;        /* color de la tarjeta */
   --muted:#6b7280;       /* textos secundarios */
-  --heading:#2563eb;     /* azul del título */
+  --heading:#00bfff;     /* azul del título */
   --primary:#7c3aed;     /* morado principal */
   --primary-2:#8b5cf6;   /* morado claro (degradado) */
   --ring:#c4b5fd;        /* anillo de focus */

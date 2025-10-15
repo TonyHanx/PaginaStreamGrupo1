@@ -1,28 +1,173 @@
-
-import React, { useState, useImperativeHandle, forwardRef } from "react";
+import React, { useState, useImperativeHandle, forwardRef, useRef, useEffect } from "react";
 import "./Encabezado.css";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
 import { useNavigate } from "react-router-dom";
 
+
 export interface EncabezadoHandle {
-	showLoginModal: () => void;
-	showRegisterModal: () => void;
+  showLoginModal: () => void;
+  showRegisterModal: () => void;
 }
 
-const Encabezado = forwardRef<EncabezadoHandle>((props, ref) => {
-	const [modal, setModal] = useState<null | 'login' | 'register'>(null);
-	const closeModal = () => setModal(null);
+export interface EncabezadoProps {
+  mostrarAuthButtons?: boolean;
+}
+
+function UserMenu({ username }: { username: string }) {
+	const [open, setOpen] = useState(false);
+	const menuRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
-	const handleLoginClick = () => {
-		setModal('login');
-	};
+
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+				setOpen(false);
+			}
+		}
+		if (open) {
+			document.addEventListener("mousedown", handleClickOutside);
+		} else {
+			document.removeEventListener("mousedown", handleClickOutside);
+		}
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, [open]);
+
+	function handleLogout() {
+		sessionStorage.removeItem("USUARIO");
+		window.location.reload();
+	}
+
+	return (
+		<div ref={menuRef} style={{ position: 'relative', marginLeft: 12 }}>
+			<button
+				onClick={() => setOpen((v) => !v)}
+				style={{
+					display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 0
+				}}
+			>
+				<span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: '50%', background: '#181b1f' }}>
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+						<circle cx="12" cy="12" r="12" fill="#181b1f" />
+						<circle cx="12" cy="9.5" r="4" stroke="#00bfff" strokeWidth="1.7" />
+						<path d="M5.5 19c1.2-2.7 4.8-2.7 6.5-2.7s5.3 0 6.5 2.7" stroke="#00bfff" strokeWidth="1.7" strokeLinecap="round" fill="none" />
+					</svg>
+				</span>
+				<span style={{ color: '#fff', fontWeight: 600 }}>{username}</span>
+			</button>
+			{open && (
+				<div style={{
+					position: 'absolute', right: 0, top: 44, minWidth: 250, background: '#181b1f', color: '#fff', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,.22)', zIndex: 2000, padding: '10px 0', fontSize: 16
+				}}>
+					<div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px 12px 20px', borderBottom: '1px solid #232329' }}>
+						<span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: '50%', background: '#232329' }}>
+							<svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+								<circle cx="12" cy="12" r="12" fill="#232329" />
+								<circle cx="12" cy="9.5" r="4" stroke="#00bfff" strokeWidth="1.7" />
+								<path d="M5.5 19c1.2-2.7 4.8-2.7 6.5-2.7s5.3 0 6.5 2.7" stroke="#00bfff" strokeWidth="1.7" strokeLinecap="round" fill="none" />
+							</svg>
+						</span>
+						<span style={{ fontWeight: 700, fontSize: 18 }}>{username}</span>
+					</div>
+					<div style={{ padding: '10px 0' }}>
+						<MenuItem icon={
+							// Casita (home)
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M3 9.5L10 4l7 5.5" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/><rect x="6.5" y="11" width="7" height="5" rx="1" stroke="#fff" strokeWidth="1.5"/></svg>
+						} label="Canal" />
+						<MenuItem icon={
+							// Barras (panel de control)
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="4" y="13" width="2.5" height="3" rx="1" stroke="#fff" strokeWidth="1.5"/><rect x="8.75" y="9" width="2.5" height="7" rx="1" stroke="#fff" strokeWidth="1.5"/><rect x="13.5" y="6" width="2.5" height="10" rx="1" stroke="#fff" strokeWidth="1.5"/></svg>
+						} label="Panel de control del creador" onClick={() => navigate("/dashboard")} />
+						<MenuItem icon={
+							// Icono de referencia (adjunto)
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="2" y="5" width="16" height="10" rx="3" stroke="#fff" strokeWidth="1.5"/><rect x="7" y="8" width="6" height="4" rx="1" fill="#fff"/><circle cx="10" cy="10" r="1.5" fill="#181b1f"/></svg>
+						} label="Suscripciones" />
+						{/* Solo el icono de ajustes  */}
+						<MenuItem icon={
+							// Engranaje simple 
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><g stroke="#fff" strokeWidth="1.5" strokeLinecap="round"><circle cx="10" cy="10" r="3.2" fill="none"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.6 5.6l1.4 1.4M13 13l1.4 1.4M5.6 14.4l1.4-1.4M13 7l1.4-1.4"/></g></svg>
+						} label="Ajustes" />
+					</div>
+					<div style={{ borderTop: '1px solid #232329', marginTop: 6 }}>
+						{/* Solo el icono de cerrar sesión  */}
+						<MenuItem icon={
+							// Icono cerrar sesión 
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><g stroke="#f87171" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="5" width="7" height="10" rx="2"/><path d="M13 10h4"/><path d="M15.5 7.5L18 10l-2.5 2.5"/></g></svg>
+						} label="Cerrar sesión" onClick={handleLogout} color="#f87171" />
+					</div>
+				</div>
+			)}
+		</div>
+	);
+}
+
+function MenuItem({ icon, label, onClick, color }: { icon: React.ReactNode, label: string, onClick?: () => void, color?: string }) {
+	return (
+		<div
+			onClick={onClick}
+			style={{
+				display: 'flex', alignItems: 'center', gap: 12, padding: '10px 22px', cursor: onClick ? 'pointer' : 'default', color: color || '#fff', fontWeight: 500, borderRadius: 8, transition: 'background .15s', userSelect: 'none'
+			}}
+			onMouseDown={e => e.preventDefault()}
+			onMouseOver={e => { (e.currentTarget as HTMLDivElement).style.background = '#232329'; }}
+			onMouseOut={e => { (e.currentTarget as HTMLDivElement).style.background = 'none'; }}
+		>
+			{icon}
+			<span>{label}</span>
+		</div>
+	);
+}
+
+
+const BunnySVG = ({ className = "" }: { className?: string }) => (
+	<svg className={className} width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<ellipse cx="14" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
+		<ellipse cx="26" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
+		<ellipse cx="20" cy="22" rx="10" ry="10" fill="#00bfff" stroke="#fff" strokeWidth="2" />
+		<ellipse cx="20" cy="26" rx="2" ry="1.2" fill="#fff" />
+		<ellipse cx="16" cy="22" rx="1" ry="1.5" fill="#fff" />
+		<ellipse cx="24" cy="22" rx="1" ry="1.5" fill="#fff" />
+		<path d="M18 28 Q20 30 22 28" stroke="#fff" strokeWidth="1.5" fill="none" />
+		<g>
+			<polyline points="7,10 12,13 9,17" stroke="#fff200" strokeWidth="2" fill="none" />
+			<polyline points="33,10 28,13 31,17" stroke="#fff200" strokeWidth="2" fill="none" />
+			<polyline points="20,2 18,7 22,7" stroke="#fff200" strokeWidth="2" fill="none" />
+		</g>
+	</svg>
+);
+
+const recargaMonedasOpciones = [
+	{ cantidad: 100, precio: '1,09 US$' },
+	{ cantidad: 250, precio: '2,69 US$' },
+	{ cantidad: 500, precio: '5,29 US$' },
+	{ cantidad: 1000, precio: '10,55 US$' },
+	{ cantidad: 2500, precio: '26,35 US$' },
+	{ cantidad: 5000, precio: '52,69 US$' },
+	{ cantidad: 10000, precio: '105,29 US$' },
+];
+
+const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthButtons = true }, ref) => {
+	const [modal, setModal] = useState<null | 'login' | 'register' | 'monedas'>(null);
+	const closeModal = () => setModal(null);
+
+	const handleLoginClick = () => setModal('login');
+
+	// Detectar usuario logueado
+	const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
+	let usuarioObj: { username?: string } | null = null;
+	try {
+		usuarioObj = usuario ? JSON.parse(usuario) : null;
+	} catch {
+		usuarioObj = null;
+	}
+
 
 	useImperativeHandle(ref, () => ({
 		showLoginModal: () => setModal('login'),
 		showRegisterModal: () => setModal('register')
 	}));
-	
+
+
 	return (
 		<div>
 			<header className="encabezado">
@@ -39,38 +184,24 @@ const Encabezado = forwardRef<EncabezadoHandle>((props, ref) => {
 					<input className="encabezado__busqueda" type="text" placeholder="Buscar" />
 				</div>
 				<div className="encabezado__acciones">
-					  <button className="encabezado__donar" title="Donar a streamers">
+					<button className="encabezado__donar" title="Recargar monedas" onClick={() => setModal('monedas')}>
 						<span className="encabezado__donar-icon">
-							<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-								{/* Orejas largas */}
-								<ellipse cx="14" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
-								<ellipse cx="26" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
-								{/* Cara redonda */}
-								<ellipse cx="20" cy="22" rx="10" ry="10" fill="#00bfff" stroke="#fff" strokeWidth="2" />
-								{/* Nariz */}
-								<ellipse cx="20" cy="26" rx="2" ry="1.2" fill="#fff" />
-								{/* Ojos */}
-								<ellipse cx="16" cy="22" rx="1" ry="1.5" fill="#fff" />
-								<ellipse cx="24" cy="22" rx="1" ry="1.5" fill="#fff" />
-								{/* Boca */}
-								<path d="M18 28 Q20 30 22 28" stroke="#fff" strokeWidth="1.5" fill="none" />
-								{/* Rayos de relámpago */}
-								<g className="encabezado__donar-rays">
-									<polyline points="7,10 12,13 9,17" stroke="#fff200" strokeWidth="2" fill="none" />
-									<polyline points="33,10 28,13 31,17" stroke="#fff200" strokeWidth="2" fill="none" />
-									<polyline points="20,2 18,7 22,7" stroke="#fff200" strokeWidth="2" fill="none" />
-								</g>
-							</svg>
+							<BunnySVG />
 						</span>
 					</button>
-					<button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
-					<button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
-					{/* Botón a Dashboard: usa navigate para ir a /dashboard */}
-					<button className="encabezado__dashboard" onClick={() => navigate("/dashboard")}>Dashboard Streamer</button>
-        		</div>
-      		</header>
+					{/* Mostrar avatar y nombre si hay usuario logueado */}
+					{usuarioObj && usuarioObj.username && <UserMenu username={usuarioObj.username} />}
+					{mostrarAuthButtons && (
+						<>
+							<button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
+							<button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
+						</>
+					)}
+				</div>
+			</header>
 
-			{/* Modal */}
+
+			{/* Modal de login/register/monedas */}
 			{modal && (
 				<div style={{
 					position: 'fixed',
@@ -81,7 +212,7 @@ const Encabezado = forwardRef<EncabezadoHandle>((props, ref) => {
 					alignItems: 'center',
 					justifyContent: 'center',
 				}} onClick={closeModal}>
-					<div style={{ position: 'relative', zIndex: 1010 }} onClick={e => e.stopPropagation()}>
+					<div style={{ position: 'relative', zIndex: 1010, minWidth: modal === 'monedas' ? 420 : undefined }} onClick={e => e.stopPropagation()}>
 						<button onClick={closeModal} style={{
 							position: 'absolute',
 							top: 12, right: 12,
@@ -94,8 +225,41 @@ const Encabezado = forwardRef<EncabezadoHandle>((props, ref) => {
 						}}>&times;</button>
 						{modal === 'login' ? (
 							<Login onShowRegister={() => setModal('register')} />
-						) : (
+						) : modal === 'register' ? (
 							<Register onShowLogin={() => setModal('login')} />
+						) : (
+							// Modal de recarga de monedas
+							<div style={{ background: '#181b1f', borderRadius: 16, padding: 32, color: '#fff', minWidth: 480, maxWidth: 540 }}>
+								<h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Recargar MONEDAS</h2>
+								<div style={{ fontWeight: 500, marginBottom: 12 }}>Tu saldo:</div>
+								<div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+									<span style={{ width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+										<BunnySVG className="bunny-anim" />
+									</span>
+									<span style={{ fontWeight: 700, fontSize: 18 }}>1000</span>
+								</div>
+								<div style={{
+									display: 'grid',
+									gridTemplateColumns: 'repeat(3, 1fr)',
+									gap: 20,
+									justifyContent: 'center',
+									margin: '0 auto',
+									maxWidth: 500
+								}}>
+									{recargaMonedasOpciones.map((op, i) => (
+										<div key={i} style={{ background: '#232329', borderRadius: 12, padding: 16, minWidth: 110, display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 2px 8px #0002', marginBottom: 0 }}>
+											<span style={{ width: 38, height: 38, marginBottom: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+												<BunnySVG className="bunny-anim" />
+											</span>
+											<div style={{ fontWeight: 700, fontSize: 15 }}>{op.cantidad} MONEDAS</div>
+											<div style={{ background: '#232329', color: '#fff', fontWeight: 600, fontSize: 15, borderRadius: 8, marginTop: 8, padding: '4px 12px', border: '1px solid #333' }}>{op.precio}</div>
+										</div>
+									))}
+								</div>
+								<div style={{ marginTop: 24, fontSize: 13, color: '#bdbdbd', textAlign: 'center' }}>
+									Todos los precios se muestran en <b>USD</b> (dólar de Estados Unidos)
+								</div>
+							</div>
 						)}
 					</div>
 				</div>
