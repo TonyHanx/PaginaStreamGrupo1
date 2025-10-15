@@ -4,6 +4,8 @@ import Register from "./paginas/Register";
 import Inicio from "./paginas/Inicio/Inicio";
 import CatalogoRegalosCliente from "./paginas/CatalogoRegalosCliente";
 import PanelRegalosStreamer from "./paginas/PanelRegalosStreamer";
+import TerminosyCondiciones from "./paginas/TerminosyCondiciones";
+import PoliticasPrivacidad from "./paginas/PoliticasPrivacidad";
 
 export default function App() {
   return (
@@ -15,6 +17,11 @@ export default function App() {
         {/* Páginas de autenticación (sin layout) */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Página de Términos y Condiciones */}
+        <Route path="/terminos" element={<TerminosyCondiciones />} />
+        <Route path="/politicas" element={<PoliticasPrivacidad />} />
+
         
         {/* Páginas específicas (con layout) */}
         <Route path="/regalos" element={<CatalogoRegalosCliente />} />
