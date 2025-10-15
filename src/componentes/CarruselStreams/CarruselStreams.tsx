@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getStreamsWithStreamers, formatViewers, getStreamDuration } from "../../data/streamers";
 import "./CarruselStreams.css";
 
 const streamsData = getStreamsWithStreamers();
 
 const CarruselStreams: React.FC = () => {
+	const navigate = useNavigate();
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const itemsPerPage = 4; // Número de streams visibles a la vez
 	const totalPages = Math.ceil(streamsData.length / itemsPerPage);
@@ -55,7 +57,12 @@ const CarruselStreams: React.FC = () => {
 			<div className="carrusel-streams__container">
 				<div className="carrusel-streams__grid">
 					{getCurrentStreams().map((stream) => (
-						<div key={stream.id} className="carrusel-streams__card">
+						<div 
+							key={stream.id} 
+							className="carrusel-streams__card"
+							onClick={() => navigate(`/stream/${stream.streamerId}`)}
+							style={{ cursor: 'pointer' }}
+						>
 							<div className="carrusel-streams__miniatura">
 								{stream.thumbnail ? (
 									<img 

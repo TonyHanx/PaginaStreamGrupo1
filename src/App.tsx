@@ -8,6 +8,7 @@ import TerminosyCondiciones from "./paginas/TerminosyCondiciones";
 import PoliticasPrivacidad from "./paginas/PoliticasPrivacidad";
 import Dashboard from "./componentes/Dashboard/Dashboard";
 import Nosotros from "./componentes/Nosotros/Nosotros";
+import StreamPage from "./paginas/StreamPage";
 
 export default function App() {
   return (
@@ -27,6 +28,9 @@ export default function App() {
         
         {/* Página Nosotros */}
         <Route path="/nosotros" element={<Nosotros />} />
+        
+        {/* Página de visualización de stream */}
+        <Route path="/stream/:streamerId" element={<StreamPage />} />
         
   {/* Páginas específicas (con layout) */}
   <Route path="/regalos" element={<CatalogoRegalosCliente />} />

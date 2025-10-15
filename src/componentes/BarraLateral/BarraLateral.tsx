@@ -38,6 +38,10 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 
 	const navigate = useNavigate();
 	
+	const handleInicioClick = () => {
+		navigate('/');
+	};
+	
 	const handleQuienesSomosClick = () => {
 		navigate('/nosotros');
 	};
@@ -57,6 +61,21 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 
 			<nav className="barra-lateral__menu-items">
 				{menuItems.map((item, idx) => {
+					// Botón Inicio - redirige a la página principal
+					if (item.label === "Inicio") {
+						return (
+							<div
+								key={idx}
+								className="barra-lateral__item"
+								onClick={handleInicioClick}
+								style={{ cursor: 'pointer' }}
+							>
+								<span className="barra-lateral__icon">{item.icon}</span>
+								<span className="barra-lateral__label">{item.label}</span>
+							</div>
+						);
+					}
+					// Botón Siguiendo - requiere login
 					if (item.label === "Siguiendo") {
 						return (
 							<div
@@ -70,6 +89,7 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 							</div>
 						);
 					}
+					// Otros botones
 					return (
 						<div
 							key={idx}

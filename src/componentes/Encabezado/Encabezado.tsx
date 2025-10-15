@@ -189,13 +189,16 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
 							<BunnySVG />
 						</span>
 					</button>
-					{/* Mostrar avatar y nombre si hay usuario logueado */}
-					{usuarioObj && usuarioObj.username && <UserMenu username={usuarioObj.username} />}
-					{mostrarAuthButtons && (
-						<>
-							<button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
-							<button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
-						</>
+					{/* Mostrar avatar y nombre si hay usuario logueado, sino mostrar botones de login */}
+					{usuarioObj && usuarioObj.username ? (
+						<UserMenu username={usuarioObj.username} />
+					) : (
+						mostrarAuthButtons && (
+							<>
+								<button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
+								<button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
+							</>
+						)
 					)}
 				</div>
 			</header>
