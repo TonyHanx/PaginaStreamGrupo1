@@ -3,7 +3,8 @@ import "./Encabezado.css";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
 import { useNavigate } from "react-router-dom";
-import { obtenerMonedasUsuario, agregarMonedas } from "../../utils/monedas";
+import { obtenerMonedasUsuario } from "../../utils/monedas";
+import { calcularNivel } from "../../utils/puntos";
 
 
 export interface EncabezadoHandle {
@@ -15,28 +16,7 @@ export interface EncabezadoProps {
   mostrarAuthButtons?: boolean;
 }
 
-// Función para calcular nivel basado en puntos
-function calcularNivel(puntos: number): { nivel: number; puntosNivel: number; puntosParaSiguiente: number } {
-	// Sistema de niveles: cada nivel requiere 100 * nivel puntos
-	// Nivel 1: 0-100 pts, Nivel 2: 100-300 pts, Nivel 3: 300-600 pts, etc.
-	let nivel = 1;
-	let puntosAcumulados = 0;
-	let puntosNecesarios = 100;
-	
-	while (puntos >= puntosAcumulados + puntosNecesarios) {
-		puntosAcumulados += puntosNecesarios;
-		nivel++;
-		puntosNecesarios = 100 * nivel;
-	}
-	
-	const puntosEnNivelActual = puntos - puntosAcumulados;
-	
-	return {
-		nivel,
-		puntosNivel: puntosEnNivelActual,
-		puntosParaSiguiente: puntosNecesarios
-	};
-}
+// Eliminar la función local duplicada calcularNivel
 
 function UserMenu({ username }: { username: string }) {
 	const [open, setOpen] = useState(false);
@@ -217,196 +197,156 @@ const recargaMonedasOpciones = [
 	{ cantidad: 10000, precio: '105,29 US$' },
 ];
 
-const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthButtons = true }, ref) => {
-	const [modal, setModal] = useState<null | 'login' | 'register' | 'monedas'>(null);
-	const [saldoMonedas, setSaldoMonedas] = useState(0);
-	const closeModal = () => setModal(null);
-
-	const handleLoginClick = () => setModal('login');
-	
-	// Función que se ejecuta cuando el login es exitoso desde el modal
-	const handleLoginSuccess = () => {
-		closeModal(); // Cierra el modal
-		actualizarSaldoMonedas(); // Actualizar saldo al hacer login
-		// El componente se actualizará automáticamente porque detectará el cambio en sessionStorage
-	};
-
-	// Función para actualizar el saldo de monedas
-	const actualizarSaldoMonedas = () => {
-		const datosUsuario = obtenerMonedasUsuario();
-		setSaldoMonedas(datosUsuario?.monedas || 0);
-	};
-
-	// Función para comprar monedas
-	const comprarMonedas = (cantidad: number) => {
-		const exitoso = agregarMonedas(cantidad);
-		if (exitoso) {
-			actualizarSaldoMonedas();
-			// Aquí podrías agregar una notificación de éxito
-		}
-	};
-
-	// Actualizar saldo cuando se abre el modal de monedas o cuando cambia el sessionStorage
-	useEffect(() => {
-		if (modal === 'monedas') {
-			actualizarSaldoMonedas();
-		}
-	}, [modal]);
-
-	// Escuchar evento para abrir tienda de monedas desde VistaStream
-	useEffect(() => {
-		const handleAbrirTiendaMonedas = () => {
-			setModal('monedas');
-		};
-
-		window.addEventListener('abrirTiendaMonedas', handleAbrirTiendaMonedas);
-
-		return () => {
-			window.removeEventListener('abrirTiendaMonedas', handleAbrirTiendaMonedas);
-		};
-	}, []);
-
-	// Detectar usuario logueado
-	const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
-	let usuarioObj: { username?: string } | null = null;
-	try {
-		usuarioObj = usuario ? JSON.parse(usuario) : null;
-	} catch {
-		usuarioObj = null;
+const NOTIFICACIONES_PREDEFINIDAS = [
+	{
+		id: 1,
+		titulo: "¡Bienvenido a la plataforma!",
+		descripcion: "Explora los streams y gana puntos por participar.",
+		fecha: "2025-10-15"
+	},
+	{
+		id: 2,
+		titulo: "Nuevo logro desbloqueado",
+		descripcion: "Has alcanzado el nivel 2. ¡Sigue participando!",
+		fecha: "2025-10-14"
+	},
+	{
+		id: 3,
+		titulo: "Actualización de la plataforma",
+		descripcion: "Ahora puedes canjear monedas por regalos exclusivos.",
+		fecha: "2025-10-13"
 	}
+];
 
+const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthButtons = true }, ref) => {
+  const [modal, setModal] = useState<null | 'login' | 'register' | 'monedas'>(null);
+  const [notiAbierta, setNotiAbierta] = useState(false);
+  const notiRef = useRef<HTMLDivElement>(null);
+  const closeModal = () => setModal(null);
 
-	useImperativeHandle(ref, () => ({
-		showLoginModal: () => setModal('login'),
-		showRegisterModal: () => setModal('register')
-	}));
+  const handleLoginClick = () => setModal('login');
 
+  useImperativeHandle(ref, () => ({
+    showLoginModal: () => setModal('login'),
+    showRegisterModal: () => setModal('register')
+  }));
 
-	return (
-		<div>
-			<header className="encabezado">
-				<div className="encabezado__menu-logo">
-					{/* Solo espacio para alineación izquierda, sin menú hamburguesa ni logo */}
-				</div>
-				<div className="encabezado__busqueda-container">
-					<span className="encabezado__busqueda-icon">
-						<svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<circle cx="9" cy="9" r="7" stroke="#fff" strokeWidth="2" />
-							<line x1="15" y1="15" x2="19" y2="19" stroke="#fff" strokeWidth="2" />
-						</svg>
-					</span>
-					<input className="encabezado__busqueda" type="text" placeholder="Buscar" />
-				</div>
-				<div className="encabezado__acciones">
-					<button className="encabezado__donar" title="Recargar monedas" onClick={() => setModal('monedas')}>
-						<span className="encabezado__donar-icon">
-							<BunnySVG />
-						</span>
-					</button>
-					{/* Mostrar avatar y nombre si hay usuario logueado, sino mostrar botones de login */}
-					{usuarioObj && usuarioObj.username ? (
-						<UserMenu username={usuarioObj.username} />
-					) : (
-						mostrarAuthButtons && (
-							<>
-								<button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
-								<button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
-							</>
-						)
-					)}
-				</div>
-			</header>
+  // Cerrar ventana de notificaciones al hacer click fuera
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (notiRef.current && !notiRef.current.contains(e.target as Node)) {
+        setNotiAbierta(false);
+      }
+    }
+    if (notiAbierta) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [notiAbierta]);
 
+  // Detectar usuario logueado
+  const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
+  let usuarioObj: { username?: string } | null = null;
+  try {
+    usuarioObj = usuario ? JSON.parse(usuario) : null;
+  } catch {
+    usuarioObj = null;
+  }
 
-			{/* Modal de login/register/monedas */}
-			{modal && (
-				<div style={{
-					position: 'fixed',
-					top: 0, left: 0, right: 0, bottom: 0,
-					background: 'rgba(0,0,0,0.7)',
-					zIndex: 1000,
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-				}} onClick={closeModal}>
-					<div style={{ position: 'relative', zIndex: 1010, minWidth: modal === 'monedas' ? 420 : undefined }} onClick={e => e.stopPropagation()}>
-						<button onClick={closeModal} style={{
-							position: 'absolute',
-							top: 12, right: 12,
-							background: 'transparent',
-							border: 'none',
-							color: '#fff',
-							fontSize: 28,
-							cursor: 'pointer',
-							zIndex: 1020
-						}}>&times;</button>
-						{modal === 'login' ? (
-							<Login onShowRegister={() => setModal('register')} onLoginSuccess={handleLoginSuccess} />
-						) : modal === 'register' ? (
-							<Register onShowLogin={() => setModal('login')} />
-						) : (
-							// Modal de recarga de monedas
-							<div style={{ background: '#181b1f', borderRadius: 16, padding: 32, color: '#fff', minWidth: 480, maxWidth: 540 }}>
-								<h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Recargar MONEDAS</h2>
-								<div style={{ fontWeight: 500, marginBottom: 12 }}>Tu saldo:</div>
-								<div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
-									<span style={{ width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-										<BunnySVG className="bunny-anim" />
-									</span>
-									<span style={{ fontWeight: 700, fontSize: 18 }}>{obtenerMonedasUsuario()?.monedas || 0}</span>
-								</div>
-								<div style={{
-									display: 'grid',
-									gridTemplateColumns: 'repeat(3, 1fr)',
-									gap: 20,
-									justifyContent: 'center',
-									margin: '0 auto',
-									maxWidth: 500
-								}}>
-									{recargaMonedasOpciones.map((op, i) => (
-										<div 
-											key={i} 
-											style={{ 
-												background: '#232329', 
-												borderRadius: 12, 
-												padding: 16, 
-												minWidth: 110, 
-												display: 'flex', 
-												flexDirection: 'column', 
-												alignItems: 'center', 
-												boxShadow: '0 2px 8px #0002', 
-												marginBottom: 0,
-												cursor: 'pointer',
-												transition: 'all 0.2s ease'
-											}}
-											onClick={() => comprarMonedas(op.cantidad)}
-											onMouseEnter={(e) => {
-												e.currentTarget.style.transform = 'translateY(-2px)';
-												e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 191, 255, 0.2)';
-											}}
-											onMouseLeave={(e) => {
-												e.currentTarget.style.transform = 'translateY(0)';
-												e.currentTarget.style.boxShadow = '0 2px 8px #0002';
-											}}
-										>
-											<span style={{ width: 38, height: 38, marginBottom: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-												<BunnySVG className="bunny-anim" />
-											</span>
-											<div style={{ fontWeight: 700, fontSize: 15 }}>{op.cantidad} MONEDAS</div>
-											<div style={{ background: '#00bfff', color: '#fff', fontWeight: 600, fontSize: 15, borderRadius: 8, marginTop: 8, padding: '4px 12px', border: '1px solid #00bfff' }}>{op.precio}</div>
-										</div>
-									))}
-								</div>
-								<div style={{ marginTop: 24, fontSize: 13, color: '#bdbdbd', textAlign: 'center' }}>
-									Todos los precios se muestran en <b>USD</b> (dólar de Estados Unidos)
-								</div>
-							</div>
-						)}
-					</div>
-				</div>
-			)}
-		</div>
-	);
+  return (
+    <div>
+      <header className="encabezado">
+        <div className="encabezado__menu-logo"></div>
+        <div className="encabezado__busqueda-container">
+          <span className="encabezado__busqueda-icon">
+            <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="9" cy="9" r="7" stroke="#fff" strokeWidth="2" />
+              <line x1="15" y1="15" x2="19" y2="19" stroke="#fff" strokeWidth="2" />
+            </svg>
+          </span>
+          <input className="encabezado__busqueda" type="text" placeholder="Buscar" />
+        </div>
+        <div className="encabezado__acciones">
+          <button className="encabezado__donar" title="Recargar monedas" onClick={() => setModal('monedas')}>
+            <span className="encabezado__donar-icon">
+              <BunnySVG />
+            </span>
+          </button>
+          {/* Campanita de notificaciones */}
+          <div className="encabezado__noti-wrapper" ref={notiRef}>
+            <button className="encabezado__noti-bell" title="Notificaciones" onClick={() => setNotiAbierta((v) => !v)}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3a5 5 0 0 1 5 5v2c0 1.2.6 2.3 1.6 3l.4.3a1 1 0 0 1-.6 1.8H5.6a1 1 0 0 1-.6-1.8l.4-.3A4.9 4.9 0 0 0 7 10V8a5 5 0 0 1 5-5z" stroke="#fff" strokeWidth="1.7" fill="none"/>
+                <circle cx="12" cy="19" r="1.5" fill="#fff" />
+              </svg>
+            </button>
+            {notiAbierta && (
+              <div className="encabezado__noti-ventana desplegable">
+                <div className="encabezado__noti-titulo">Notificaciones</div>
+                <ul className="encabezado__noti-lista">
+                  {NOTIFICACIONES_PREDEFINIDAS.map(noti => (
+                    <li key={noti.id} className="encabezado__noti-item">
+                      <div className="encabezado__noti-item-titulo">{noti.titulo}</div>
+                      <div className="encabezado__noti-item-desc">{noti.descripcion}</div>
+                      <div className="encabezado__noti-item-fecha">{noti.fecha}</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          {/* Mostrar avatar y nombre si hay usuario logueado, sino mostrar botones de login */}
+          {usuarioObj && usuarioObj.username ? (
+            <UserMenu username={usuarioObj.username} />
+          ) : (
+            mostrarAuthButtons && (
+              <>
+                <button className="encabezado__login" onClick={handleLoginClick}>Iniciar sesión</button>
+                <button className="encabezado__register" onClick={() => setModal('register')}>Registrarse</button>
+              </>
+            )
+          )}
+        </div>
+      </header>
+
+      {/* Modal de login/register/monedas */}
+      {modal && (
+        <div className="encabezado__modal-bg" onClick={closeModal}>
+          <div className="encabezado__modal" onClick={e => e.stopPropagation()}>
+            <button className="encabezado__modal-close" onClick={closeModal}>&times;</button>
+            {modal === 'login' ? (
+              <Login onShowRegister={() => setModal('register')} onLoginSuccess={closeModal} />
+            ) : modal === 'register' ? (
+              <Register onShowLogin={() => setModal('login')} />
+            ) : (
+              <div className="encabezado__modal-monedas">
+                <h2>Recargar MONEDAS</h2>
+                <div className="encabezado__modal-saldo">Tu saldo:</div>
+                <div className="encabezado__modal-saldo-row">
+                  <span><BunnySVG className="bunny-anim" /></span>
+                  <span>{obtenerMonedasUsuario()?.monedas || 0}</span>
+                </div>
+                <div className="encabezado__modal-monedas-grid">
+                  {recargaMonedasOpciones.map((op, i) => (
+                    <div key={i} className="encabezado__modal-monedas-opcion" onClick={() => {/* ... */}}>
+                      <span><BunnySVG className="bunny-anim" /></span>
+                      <div>{op.cantidad} MONEDAS</div>
+                      <div className="encabezado__modal-monedas-precio">{op.precio}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="encabezado__modal-monedas-info">
+                  Todos los precios se muestran en <b>USD</b> (dólar de Estados Unidos)
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 });
 
 export default Encabezado;
