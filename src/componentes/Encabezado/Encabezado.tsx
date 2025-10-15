@@ -3,6 +3,7 @@ import "./Encabezado.css";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
 import { useNavigate } from "react-router-dom";
+import { obtenerMonedasUsuario, agregarMonedas } from "../../utils/monedas";
 
 
 export interface EncabezadoHandle {
@@ -218,6 +219,7 @@ const recargaMonedasOpciones = [
 
 const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthButtons = true }, ref) => {
 	const [modal, setModal] = useState<null | 'login' | 'register' | 'monedas'>(null);
+	const [saldoMonedas, setSaldoMonedas] = useState(0);
 	const closeModal = () => setModal(null);
 
 	const handleLoginClick = () => setModal('login');
@@ -225,8 +227,44 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
 	// Función que se ejecuta cuando el login es exitoso desde el modal
 	const handleLoginSuccess = () => {
 		closeModal(); // Cierra el modal
+		actualizarSaldoMonedas(); // Actualizar saldo al hacer login
 		// El componente se actualizará automáticamente porque detectará el cambio en sessionStorage
 	};
+
+	// Función para actualizar el saldo de monedas
+	const actualizarSaldoMonedas = () => {
+		const datosUsuario = obtenerMonedasUsuario();
+		setSaldoMonedas(datosUsuario?.monedas || 0);
+	};
+
+	// Función para comprar monedas
+	const comprarMonedas = (cantidad: number) => {
+		const exitoso = agregarMonedas(cantidad);
+		if (exitoso) {
+			actualizarSaldoMonedas();
+			// Aquí podrías agregar una notificación de éxito
+		}
+	};
+
+	// Actualizar saldo cuando se abre el modal de monedas o cuando cambia el sessionStorage
+	useEffect(() => {
+		if (modal === 'monedas') {
+			actualizarSaldoMonedas();
+		}
+	}, [modal]);
+
+	// Escuchar evento para abrir tienda de monedas desde VistaStream
+	useEffect(() => {
+		const handleAbrirTiendaMonedas = () => {
+			setModal('monedas');
+		};
+
+		window.addEventListener('abrirTiendaMonedas', handleAbrirTiendaMonedas);
+
+		return () => {
+			window.removeEventListener('abrirTiendaMonedas', handleAbrirTiendaMonedas);
+		};
+	}, []);
 
 	// Detectar usuario logueado
 	const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
@@ -315,7 +353,7 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
 									<span style={{ width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
 										<BunnySVG className="bunny-anim" />
 									</span>
-									<span style={{ fontWeight: 700, fontSize: 18 }}>1000</span>
+									<span style={{ fontWeight: 700, fontSize: 18 }}>{obtenerMonedasUsuario()?.monedas || 0}</span>
 								</div>
 								<div style={{
 									display: 'grid',
@@ -326,12 +364,36 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
 									maxWidth: 500
 								}}>
 									{recargaMonedasOpciones.map((op, i) => (
-										<div key={i} style={{ background: '#232329', borderRadius: 12, padding: 16, minWidth: 110, display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 2px 8px #0002', marginBottom: 0 }}>
+										<div 
+											key={i} 
+											style={{ 
+												background: '#232329', 
+												borderRadius: 12, 
+												padding: 16, 
+												minWidth: 110, 
+												display: 'flex', 
+												flexDirection: 'column', 
+												alignItems: 'center', 
+												boxShadow: '0 2px 8px #0002', 
+												marginBottom: 0,
+												cursor: 'pointer',
+												transition: 'all 0.2s ease'
+											}}
+											onClick={() => comprarMonedas(op.cantidad)}
+											onMouseEnter={(e) => {
+												e.currentTarget.style.transform = 'translateY(-2px)';
+												e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 191, 255, 0.2)';
+											}}
+											onMouseLeave={(e) => {
+												e.currentTarget.style.transform = 'translateY(0)';
+												e.currentTarget.style.boxShadow = '0 2px 8px #0002';
+											}}
+										>
 											<span style={{ width: 38, height: 38, marginBottom: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
 												<BunnySVG className="bunny-anim" />
 											</span>
 											<div style={{ fontWeight: 700, fontSize: 15 }}>{op.cantidad} MONEDAS</div>
-											<div style={{ background: '#232329', color: '#fff', fontWeight: 600, fontSize: 15, borderRadius: 8, marginTop: 8, padding: '4px 12px', border: '1px solid #333' }}>{op.precio}</div>
+											<div style={{ background: '#00bfff', color: '#fff', fontWeight: 600, fontSize: 15, borderRadius: 8, marginTop: 8, padding: '4px 12px', border: '1px solid #00bfff' }}>{op.precio}</div>
 										</div>
 									))}
 								</div>

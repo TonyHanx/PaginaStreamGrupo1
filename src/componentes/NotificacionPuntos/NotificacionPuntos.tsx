@@ -31,7 +31,7 @@ const NotificacionPuntos: React.FC<NotificacionPuntosProps> = ({ puntos, mensaje
         </svg>
       </div>
       <div className="notificacion-puntos__contenido">
-        <div className="notificacion-puntos__puntos">+{puntos} puntos</div>
+        {puntos > 0 && <div className="notificacion-puntos__puntos">+{puntos} puntos</div>}
         <div className="notificacion-puntos__mensaje">{mensaje}</div>
       </div>
     </div>
