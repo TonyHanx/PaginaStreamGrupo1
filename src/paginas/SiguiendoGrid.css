@@ -1,0 +1,118 @@
+.canal-heart-corner {
+  position: absolute;
+  left: 32px;
+  bottom: 10px;
+  z-index: 3;
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+.siguiendo-titulo-derecha {
+  display: none;
+}
+
+.corazon-normal, .corazon-roto {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  transition: opacity 0.2s;
+}
+.corazon-normal {
+  opacity: 1;
+  z-index: 1;
+}
+.corazon-roto {
+  opacity: 0;
+  z-index: 2;
+}
+.canal-heart-corner:hover .corazon-normal {
+  opacity: 0;
+}
+.canal-heart-corner:hover .corazon-roto {
+  opacity: 1;
+}
+
+
+.siguiendo-container {
+  padding: 32px 0 0 0;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.siguiendo-titulo {
+  color: #fff;
+  margin-bottom: 32px;
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: left;
+  margin-left: 24px;
+}
+
+
+
+.siguiendo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+.canal-card {
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  min-height: 160px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  transition: transform 0.2s;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.canal-card:hover {
+  transform: scale(1.03);
+}
+
+.canal-card-overlay {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(0,0,0,0.0) 60%, rgba(0,0,0,0.7) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 24px;
+  padding-top: 40px;
+}
+
+
+.canal-avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  object-fit: cover;
+  margin-bottom: 12px;
+  background: #222;
+  box-shadow: 0 2px 12px #000a;
+}
+
+
+.canal-nombre {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-shadow: 0 2px 8px #000;
+  text-align: center;
+  letter-spacing: 0.5px;
+}

@@ -75,33 +75,33 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 						);
 					}
 								// Botón Siguiendo - requiere login
-								if (item.label === "Siguiendo") {
-									if (!usuario) {
-										// Si NO hay usuario, mostrar login al hacer click
-										return (
-											<div
-												key={idx}
-												className="barra-lateral__item barra-lateral__item--clickable"
-												onClick={onShowLogin}
-											>
-												<span className="barra-lateral__icon">{item.icon}</span>
-												<span className="barra-lateral__label">{item.label}</span>
-											</div>
-										);
-									} else {
-										// Si hay usuario, solo mostrar el botón (puedes poner navegación si existe sección)
-										return (
-											<div
-												key={idx}
-												className="barra-lateral__item"
-												// onClick={() => navigate('/siguiendo')} // Descomenta si tienes ruta
-											>
-												<span className="barra-lateral__icon">{item.icon}</span>
-												<span className="barra-lateral__label">{item.label}</span>
-											</div>
-										);
-									}
-								}
+								   if (item.label === "Siguiendo") {
+									   if (!usuario) {
+										   // Si NO hay usuario, mostrar login al hacer click
+										   return (
+											   <div
+												   key={idx}
+												   className="barra-lateral__item barra-lateral__item--clickable"
+												   onClick={onShowLogin}
+											   >
+												   <span className="barra-lateral__icon">{item.icon}</span>
+												   <span className="barra-lateral__label">{item.label}</span>
+											   </div>
+										   );
+									   } else {
+										   // Si hay usuario, navegar a /siguiendo
+										   return (
+											   <div
+												   key={idx}
+												   className="barra-lateral__item barra-lateral__item--clickable"
+												   onClick={() => navigate('/siguiendo')}
+											   >
+												   <span className="barra-lateral__icon">{item.icon}</span>
+												   <span className="barra-lateral__label">{item.label}</span>
+											   </div>
+										   );
+									   }
+								   }
 					// Otros botones
 					return (
 						<div
