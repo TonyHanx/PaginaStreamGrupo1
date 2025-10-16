@@ -16,7 +16,7 @@ export function obtenerMonedasUsuario(): UserMonedas | null {
     const usuario = JSON.parse(usuarioStr);
     return {
       username: usuario.username || '',
-      monedas: usuario.monedas || 1000 // Por defecto 1000 monedas para demo
+      monedas: usuario.monedas ?? 0 // Cambiar a 0 por defecto en lugar de 1000
     };
   } catch {
     return null;
@@ -67,4 +67,27 @@ export function agregarMonedas(cantidad: number): boolean {
   const nuevasMonedas = datosUsuario.monedas + cantidad;
   guardarMonedasUsuario({ ...datosUsuario, monedas: nuevasMonedas });
   return true;
+}
+
+/**
+ * Inicializa monedas de demostración solo para usuarios nuevos (una sola vez)
+ */
+export function inicializarMonedasDemo(): void {
+  try {
+    const usuarioStr = sessionStorage.getItem('USUARIO');
+    if (!usuarioStr) return;
+    
+    const usuario = JSON.parse(usuarioStr);
+    
+    // Solo dar monedas de demo si es la primera vez que inicia sesión
+    // y no tiene monedas definidas
+    if (usuario.monedas === undefined || usuario.monedas === null) {
+      usuario.monedas = 1000; // 1000 monedas iniciales al registrarse
+      sessionStorage.setItem('USUARIO', JSON.stringify(usuario));
+      console.log("🎉 ¡1000 monedas iniciales otorgadas al usuario!", usuario.username);
+      window.dispatchEvent(new Event('storage'));
+    }
+  } catch {
+    // Si hay error, no hacer nada
+  }
 }

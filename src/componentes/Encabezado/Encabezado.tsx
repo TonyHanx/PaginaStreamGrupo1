@@ -3,6 +3,7 @@ import "./Encabezado.css";
 import "./UserMenu.css";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
+import ModalRecargaMonedas from "../ModalRecargaMonedas/ModalRecargaMonedas.tsx";
 import { useNavigate } from "react-router-dom";
 import { obtenerMonedasUsuario } from "../../utils/monedas";
 import { calcularNivel } from "../../utils/puntos";
@@ -176,15 +177,7 @@ const BunnySVG = ({ className = "" }: { className?: string }) => (
 	</svg>
 );
 
-const recargaMonedasOpciones = [
-	{ cantidad: 100, precio: '1,09 US$' },
-	{ cantidad: 250, precio: '2,69 US$' },
-	{ cantidad: 500, precio: '5,29 US$' },
-	{ cantidad: 1000, precio: '10,55 US$' },
-	{ cantidad: 2500, precio: '26,35 US$' },
-	{ cantidad: 5000, precio: '52,69 US$' },
-	{ cantidad: 10000, precio: '105,29 US$' },
-];
+
 
 const NOTIFICACIONES_PREDEFINIDAS = [
 	{
@@ -300,8 +293,8 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
         </div>
       </header>
 
-      {/* Modal de login/register/monedas */}
-      {modal && (
+      {/* Modal de login/register */}
+      {(modal === 'login' || modal === 'register') && (
         <div className="encabezado__modal-bg" onClick={closeModal}>
           <div className="encabezado__modal" onClick={e => e.stopPropagation()}>
             <button className="encabezado__modal-close" onClick={closeModal}>&times;</button>
@@ -309,31 +302,17 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
               <Login onShowRegister={() => setModal('register')} onLoginSuccess={closeModal} />
             ) : modal === 'register' ? (
               <Register onShowLogin={() => setModal('login')} />
-            ) : (
-              <div className="encabezado__modal-monedas">
-                <h2>Recargar MONEDAS</h2>
-                <div className="encabezado__modal-saldo">Tu saldo:</div>
-                <div className="encabezado__modal-saldo-row">
-                  <span><BunnySVG className="bunny-anim" /></span>
-                  <span>{obtenerMonedasUsuario()?.monedas || 0}</span>
-                </div>
-                <div className="encabezado__modal-monedas-grid">
-                  {recargaMonedasOpciones.map((op, i) => (
-                    <div key={i} className="encabezado__modal-monedas-opcion" onClick={() => {/* ... */}}>
-                      <span><BunnySVG className="bunny-anim" /></span>
-                      <div>{op.cantidad} MONEDAS</div>
-                      <div className="encabezado__modal-monedas-precio">{op.precio}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="encabezado__modal-monedas-info">
-                  Todos los precios se muestran en <b>USD</b> (dólar de Estados Unidos)
-                </div>
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
       )}
+
+      {/* Modal de recarga de monedas */}
+      <ModalRecargaMonedas
+        isOpen={modal === 'monedas'}
+        onClose={closeModal}
+        saldoActual={obtenerMonedasUsuario()?.monedas || 0}
+      />
     </div>
   );
 });
