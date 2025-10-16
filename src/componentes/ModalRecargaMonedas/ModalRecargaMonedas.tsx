@@ -1,5 +1,70 @@
 import React, { useState } from 'react';
 
+// Componente de icono de conejo para las monedas con animación
+const ConejoMoneda = ({ className = "", size = "20", animate = false }: { className?: string, size?: string, animate?: boolean }) => (
+  <svg 
+    className={className} 
+    width={size} 
+    height={size} 
+    viewBox="0 0 40 40" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      animation: animate ? 'bounce 2s infinite, glow 2s ease-in-out infinite alternate' : 'none',
+      filter: animate ? 'drop-shadow(0 0 8px rgba(0, 191, 255, 0.6))' : 'none'
+    }}
+  >
+    <style>
+      {`
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+          }
+          40% {
+            transform: translateY(-10px);
+          }
+          60% {
+            transform: translateY(-5px);
+          }
+        }
+        
+        @keyframes glow {
+          from {
+            filter: drop-shadow(0 0 5px rgba(0, 191, 255, 0.5));
+          }
+          to {
+            filter: drop-shadow(0 0 15px rgba(0, 191, 255, 0.8));
+          }
+        }
+        
+        @keyframes wiggle {
+          0% { transform: rotate(0deg); }
+          10% { transform: rotate(-3deg); }
+          20% { transform: rotate(3deg); }
+          30% { transform: rotate(-3deg); }
+          40% { transform: rotate(3deg); }
+          50% { transform: rotate(0deg); }
+          100% { transform: rotate(0deg); }
+        }
+      `}
+    </style>
+    <g style={{ animation: animate ? 'wiggle 3s ease-in-out infinite' : 'none' }}>
+      <ellipse cx="14" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
+      <ellipse cx="26" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
+      <ellipse cx="20" cy="22" rx="10" ry="10" fill="#00bfff" stroke="#fff" strokeWidth="2" />
+      <ellipse cx="20" cy="26" rx="2" ry="1.2" fill="#fff" />
+      <ellipse cx="16" cy="22" rx="1" ry="1.5" fill="#fff" />
+      <ellipse cx="24" cy="22" rx="1" ry="1.5" fill="#fff" />
+      <path d="M18 28 Q20 30 22 28" stroke="#fff" strokeWidth="1.5" fill="none" />
+      <g>
+        <polyline points="7,10 12,13 9,17" stroke="#fff200" strokeWidth="2" fill="none" />
+        <polyline points="33,10 28,13 31,17" stroke="#fff200" strokeWidth="2" fill="none" />
+        <polyline points="20,2 18,7 22,7" stroke="#fff200" strokeWidth="2" fill="none" />
+      </g>
+    </g>
+  </svg>
+);
+
 interface PaqueteMoneda {
   cantidad: number;
   precio: number;
@@ -24,6 +89,17 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
   const [paqueteBase, setPaqueteBase] = useState<PaqueteMoneda | null>(null);
   const [cantidadSeleccionada, setCantidadSeleccionada] = useState(1);
   const [procesandoPago, setProcesandoPago] = useState(false);
+  
+  // Estados para notificaciones elegantes
+  const [notificacion, setNotificacion] = useState<{
+    tipo: 'success' | 'error' | 'warning' | 'info';
+    mensaje: string;
+    visible: boolean;
+  }>({
+    tipo: 'info',
+    mensaje: '',
+    visible: false
+  });
 
   const paquetes: PaqueteMoneda[] = [
     { cantidad: 100, precio: 1.09 },
@@ -38,12 +114,26 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
   // Funciones para el modo personalizado
   const calcularMonedas = (monto: number) => Math.floor(monto * 95);
   const calcularPrecio = (monedas: number) => (monedas / 95).toFixed(2);
+  
+  // Función para mostrar notificaciones elegantes
+  const mostrarNotificacion = (tipo: 'success' | 'error' | 'warning' | 'info', mensaje: string) => {
+    setNotificacion({
+      tipo,
+      mensaje,
+      visible: true
+    });
+    
+    // Auto-ocultar después de 4 segundos
+    setTimeout(() => {
+      setNotificacion(prev => ({ ...prev, visible: false }));
+    }, 4000);
+  };
 
   const seleccionarPaqueteParaPago = (paquete: PaqueteMoneda) => {
     // Verificar autenticación
     const usuarioLogueado = sessionStorage.getItem('USUARIO');
     if (!usuarioLogueado) {
-      alert('Debes iniciar sesión para recargar monedas.');
+      mostrarNotificacion('warning', '🔒 Debes iniciar sesión para recargar monedas');
       return;
     }
 
@@ -91,13 +181,15 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
       sessionStorage.setItem('USUARIO', JSON.stringify(usuarioActualizado));
       sessionStorage.setItem('saldoMonedas', nuevoSaldo.toString());
 
-      alert(`¡Recarga exitosa! 🎉\n\nMétodo de pago: ${metodoPago}\nSe agregaron ${paqueteSeleccionado.cantidad.toLocaleString()} monedas por $${paqueteSeleccionado.precio.toFixed(2)} USD.\n\nNuevo saldo: ${nuevoSaldo.toLocaleString()} monedas 🪙`);
+      mostrarNotificacion('success', `🎉 ¡Recarga exitosa!\n\n💳 ${metodoPago}\n🐰 +${paqueteSeleccionado.cantidad.toLocaleString()} monedas\n💰 $${paqueteSeleccionado.precio.toFixed(2)} USD\n\n✨ Nuevo saldo: ${nuevoSaldo.toLocaleString()} monedas`);
       
-      // Cerrar modal y actualizar interfaz
+      // Cerrar modal y actualizar saldo sin recargar página
       cerrarModal();
-      window.location.reload();
+      
+      // Disparar evento para actualizar el encabezado
+      window.dispatchEvent(new Event('monedas-actualizadas'));
     } catch (error) {
-      alert('Error al procesar el pago. Inténtalo nuevamente.');
+      mostrarNotificacion('error', '❌ Error al procesar el pago. Inténtalo nuevamente.');
     } finally {
       setProcesandoPago(false);
     }
@@ -124,12 +216,12 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
   const manejarRecargaConMonto = () => {
     const monto = parseFloat(montoPersonalizado);
     if (isNaN(monto) || monto < 1) {
-      alert('Por favor ingresa un monto válido (mínimo $1 USD)');
+      mostrarNotificacion('warning', '⚠️ Por favor ingresa un monto válido (mínimo $1 USD)');
       return;
     }
     
     if (monto > 1000) {
-      alert('El monto máximo es de $1000 USD');
+      mostrarNotificacion('warning', '⚠️ El monto máximo es de $1000 USD');
       return;
     }
 
@@ -145,12 +237,12 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
   const manejarRecargaConMonedas = () => {
     const monedas = parseInt(monedasPersonalizadas);
     if (isNaN(monedas) || monedas < 95) {
-      alert('Por favor ingresa una cantidad válida (mínimo 95 monedas)');
+      mostrarNotificacion('warning', '⚠️ Por favor ingresa una cantidad válida (mínimo 95 monedas)');
       return;
     }
     
     if (monedas > 95000) {
-      alert('El máximo es de 95,000 monedas');
+      mostrarNotificacion('warning', '⚠️ El máximo es de 95,000 monedas');
       return;
     }
 
@@ -164,6 +256,86 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
   };
 
   if (!isOpen) return null;
+
+  // Componente de notificación elegante
+  const NotificacionElegante = () => {
+    if (!notificacion.visible) return null;
+    
+    const colores = {
+      success: { bg: 'rgba(34, 197, 94, 0.9)', border: '#22c55e', icon: '✅' },
+      error: { bg: 'rgba(239, 68, 68, 0.9)', border: '#ef4444', icon: '❌' },
+      warning: { bg: 'rgba(245, 158, 11, 0.9)', border: '#f59e0b', icon: '⚠️' },
+      info: { bg: 'rgba(59, 130, 246, 0.9)', border: '#3b82f6', icon: 'ℹ️' }
+    };
+    
+    const color = colores[notificacion.tipo];
+    
+    return (
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        background: color.bg,
+        border: `2px solid ${color.border}`,
+        borderRadius: '12px',
+        padding: '16px 20px',
+        maxWidth: '400px',
+        zIndex: 10000,
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+        animation: 'slideIn 0.3s ease-out',
+        color: 'white',
+        fontWeight: '500'
+      }}>
+        <style>
+          {`
+            @keyframes slideIn {
+              from {
+                transform: translateX(100%);
+                opacity: 0;
+              }
+              to {
+                transform: translateX(0);
+                opacity: 1;
+              }
+            }
+          `}
+        </style>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'flex-start', 
+          gap: '12px' 
+        }}>
+          <span style={{ fontSize: '20px', flexShrink: 0 }}>{color.icon}</span>
+          <div style={{ 
+            whiteSpace: 'pre-line', 
+            lineHeight: '1.4' 
+          }}>
+            {notificacion.mensaje}
+          </div>
+          <button 
+            onClick={() => setNotificacion(prev => ({ ...prev, visible: false }))}
+            style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '24px',
+              height: '24px',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '16px',
+              flexShrink: 0
+            }}
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const modalStyle = {
     position: 'fixed' as const,
@@ -179,14 +351,16 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
   };
 
   const contentStyle = {
-    background: 'linear-gradient(145deg, #1a1a2e, #16213e)',
-    borderRadius: '15px',
-    padding: '30px',
-    maxWidth: '500px',
+    background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+    borderRadius: '24px',
+    padding: '32px',
+    maxWidth: '700px',
     width: '90%',
     maxHeight: '90vh',
     overflowY: 'auto' as const,
-    color: 'white'
+    color: 'white',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 191, 255, 0.1)',
+    border: '1px solid rgba(0, 191, 255, 0.2)'
   };
 
   return (
@@ -196,11 +370,46 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
       }
     }}>
       <div style={contentStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-          <h2>{mostrarPago ? 'Completa tu compra' : 'Recargar MONEDAS'}</h2>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: '30px',
+          paddingBottom: '20px',
+          borderBottom: '2px solid rgba(0, 191, 255, 0.2)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <ConejoMoneda size="32" animate={true} />
+            <h2 style={{ 
+              margin: 0,
+              fontSize: '24px',
+              fontWeight: '700',
+              background: 'linear-gradient(135deg, #00bfff 0%, #0080cc 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              {mostrarPago ? 'Completa tu compra' : 'Recargar MONEDAS'}
+            </h2>
+          </div>
           <button 
-            style={{ background: 'none', border: 'none', color: '#ccc', fontSize: '28px', cursor: 'pointer' }}
+            style={{ 
+              background: 'rgba(255, 255, 255, 0.1)', 
+              border: 'none', 
+              color: '#ccc', 
+              fontSize: '24px', 
+              cursor: 'pointer',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease'
+            }}
             onClick={mostrarPago ? volverASeleccion : cerrarModal}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+            }}
           >
             ×
           </button>
@@ -218,17 +427,17 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                 border: '1px solid rgba(255,255,255,0.2)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                  <div style={{ 
-                    width: '40px', 
-                    height: '40px', 
-                    backgroundColor: '#4CAF50', 
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: '#00bfff',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginRight: '15px'
                   }}>
-                    🪙
+                    <ConejoMoneda size="30" animate={true} />
                   </div>
                   <div>
                     <div style={{ fontWeight: 'bold', fontSize: '16px' }}>
@@ -273,9 +482,9 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                 padding: '15px', 
                 background: 'rgba(76, 175, 80, 0.1)', 
                 borderRadius: '8px',
-                border: '1px solid rgba(76, 175, 80, 0.3)'
+                border: '1px solid rgba(0, 191, 255, 0.3)'
               }}>
-                <div style={{ fontSize: '14px', color: '#4CAF50', marginBottom: '5px' }}>
+                <div style={{ fontSize: '14px', color: '#00bfff', marginBottom: '5px' }}>
                   💰 Monto total a pagar: <strong>${paqueteSeleccionado.precio.toFixed(2)} USD</strong>
                 </div>
                 <div style={{ fontSize: '12px', color: '#ccc' }}>
@@ -331,15 +540,15 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                   marginTop: '20px',
                   textAlign: 'center',
                   padding: '15px',
-                  background: 'rgba(76, 175, 80, 0.1)',
+                  background: 'rgba(0, 191, 255, 0.1)',
                   borderRadius: '8px',
-                  color: '#4CAF50',
-                  border: '1px solid rgba(76, 175, 80, 0.3)'
+                  color: '#00bfff',
+                  border: '1px solid rgba(0, 191, 255, 0.3)'
                 }}>
                   <div style={{ fontSize: '16px', marginBottom: '5px' }}>
                     🔄 Procesando pago...
                   </div>
-                  <div style={{ fontSize: '12px', color: '#81C784' }}>
+                  <div style={{ fontSize: '12px', color: '#87CEEB' }}>
                     Por favor espera un momento
                   </div>
                 </div>
@@ -369,25 +578,63 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
         ) : (
           // Vista de selección de paquetes (código existente)
           <div>
-            <div style={{ marginBottom: '25px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
-              <span>Tu saldo: 🪙 {saldoActual}</span>
+            <div style={{ 
+              marginBottom: '30px', 
+              padding: '20px', 
+              background: 'linear-gradient(135deg, rgba(0, 191, 255, 0.1) 0%, rgba(0, 191, 255, 0.05) 100%)', 
+              borderRadius: '16px',
+              border: '1px solid rgba(0, 191, 255, 0.2)',
+              boxShadow: '0 4px 6px -1px rgba(0, 191, 255, 0.1)'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                fontSize: '16px',
+                fontWeight: '600'
+              }}>
+                <ConejoMoneda size="24" animate={true} />
+                <span>Tu saldo:</span>
+                <span style={{ 
+                  color: '#00bfff',
+                  fontSize: '18px',
+                  fontWeight: '700'
+                }}>
+                  {saldoActual.toLocaleString()}
+                </span>
+                <span style={{ 
+                  fontSize: '14px',
+                  color: '#94a3b8'
+                }}>
+                  monedas
+                </span>
+              </div>
             </div>
 
             {/* Selector de modo */}
-            <div style={{ marginBottom: '25px' }}>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            <div style={{ marginBottom: '30px' }}>
+              <div style={{ 
+                display: 'flex', 
+                gap: '12px', 
+                marginBottom: '25px',
+                padding: '6px',
+                background: 'rgba(0, 0, 0, 0.3)',
+                borderRadius: '12px'
+              }}>
                 <button
                   onClick={() => setModoPersonalizado(false)}
                   style={{
                     flex: 1,
-                    padding: '12px',
-                    backgroundColor: !modoPersonalizado ? '#4CAF50' : '#333',
-                    color: 'white',
+                    padding: '14px 16px',
+                    backgroundColor: !modoPersonalizado ? '#00bfff' : 'transparent',
+                    color: !modoPersonalizado ? 'white' : '#94a3b8',
                     border: 'none',
                     borderRadius: '8px',
                     cursor: 'pointer',
-                    fontWeight: 'bold',
-                    fontSize: '14px'
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    transition: 'all 0.3s ease',
+                    boxShadow: !modoPersonalizado ? '0 4px 6px -1px rgba(0, 191, 255, 0.3)' : 'none'
                   }}
                 >
                   📦 PAQUETES PREDEFINIDOS
@@ -396,14 +643,16 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                   onClick={() => setModoPersonalizado(true)}
                   style={{
                     flex: 1,
-                    padding: '12px',
-                    backgroundColor: modoPersonalizado ? '#4CAF50' : '#333',
-                    color: 'white',
+                    padding: '14px 16px',
+                    backgroundColor: modoPersonalizado ? '#00bfff' : 'transparent',
+                    color: modoPersonalizado ? 'white' : '#94a3b8',
                     border: 'none',
                     borderRadius: '8px',
                     cursor: 'pointer',
-                    fontWeight: 'bold',
-                    fontSize: '14px'
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    transition: 'all 0.3s ease',
+                    boxShadow: modoPersonalizado ? '0 4px 6px -1px rgba(0, 191, 255, 0.3)' : 'none'
                   }}
                 >
                   💰 MONTO PERSONALIZADO
@@ -415,7 +664,7 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
               // Modo paquetes predefinidos
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '15px',
                 marginBottom: '25px'
               }}>
@@ -423,32 +672,74 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                   <button 
                     key={index} 
                     style={{
-                      background: '#333',
-                      border: '2px solid #555',
-                      borderRadius: '12px',
-                      padding: '20px 15px',
+                      background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                      border: '2px solid #475569',
+                      borderRadius: '16px',
+                      padding: '20px 10px',
                       textAlign: 'center' as const,
                       cursor: 'pointer',
-                      transition: 'all 0.3s ease',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       color: 'white',
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                      transform: 'translateY(0)',
+                      position: 'relative' as const,
+                      overflow: 'hidden'
                     }}
                     onClick={() => seleccionarPaqueteParaPago(paquete)}
                     onMouseOver={(e) => {
-                      e.currentTarget.style.background = '#444';
-                      e.currentTarget.style.borderColor = '#4CAF50';
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)';
+                      e.currentTarget.style.borderColor = '#00bfff';
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 191, 255, 0.1), 0 10px 10px -5px rgba(0, 191, 255, 0.04)';
                     }}
                     onMouseOut={(e) => {
-                      e.currentTarget.style.background = '#333';
-                      e.currentTarget.style.borderColor = '#555';
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #1e293b 0%, #334155 100%)';
+                      e.currentTarget.style.borderColor = '#475569';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
                     }}
                   >
-                    <div style={{ fontSize: '32px', marginBottom: '10px' }}>🪙</div>
-                    <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
-                      {paquete.cantidad.toLocaleString()} MONEDAS
+                    <div style={{ 
+                      marginBottom: '12px',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      height: '32px'
+                    }}>
+                      <ConejoMoneda size="28" animate={true} />
                     </div>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#4CAF50' }}>
-                      ${paquete.precio.toFixed(2)} USD
+                    <div style={{ 
+                      fontWeight: '700', 
+                      marginBottom: '6px',
+                      fontSize: '14px',
+                      letterSpacing: '0.3px'
+                    }}>
+                      {paquete.cantidad.toLocaleString()}
+                    </div>
+                    <div style={{ 
+                      fontSize: '10px', 
+                      color: '#94a3b8',
+                      marginBottom: '8px',
+                      textTransform: 'uppercase' as const,
+                      letterSpacing: '1px'
+                    }}>
+                      MONEDAS
+                    </div>
+                    <div style={{ 
+                      fontSize: '16px', 
+                      fontWeight: '600', 
+                      color: '#00bfff',
+                      textShadow: '0 0 10px rgba(0, 191, 255, 0.3)'
+                    }}>
+                      ${paquete.precio.toFixed(2)}
+                    </div>
+                    <div style={{ 
+                      fontSize: '10px', 
+                      color: '#64748b',
+                      marginTop: '2px'
+                    }}>
+                      USD
                     </div>
                   </button>
                 ))}
@@ -462,7 +753,7 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                   borderRadius: '10px',
                   marginBottom: '20px'
                 }}>
-                  <h4 style={{ marginBottom: '15px', color: '#4CAF50' }}>💸 Ingresa el monto en USD</h4>
+                  <h4 style={{ marginBottom: '15px', color: '#00bfff' }}>💸 Ingresa el monto en USD</h4>
                   <div style={{ marginBottom: '15px' }}>
                     <input
                       type="number"
@@ -490,7 +781,7 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                       borderRadius: '5px',
                       marginBottom: '15px'
                     }}>
-                      <span style={{ color: '#4CAF50' }}>
+                      <span style={{ color: '#00bfff' }}>
                         💰 Recibirás: <strong>{calcularMonedas(parseFloat(montoPersonalizado) || 0).toLocaleString()} monedas</strong>
                       </span>
                     </div>
@@ -500,7 +791,7 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                     style={{
                       width: '100%',
                       padding: '12px',
-                      backgroundColor: '#4CAF50',
+                      backgroundColor: '#00bfff',
                       color: 'white',
                       border: 'none',
                       borderRadius: '8px',
@@ -518,7 +809,9 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                   padding: '20px', 
                   borderRadius: '10px'
                 }}>
-                  <h4 style={{ marginBottom: '15px', color: '#FF9800' }}>🪙 O especifica cantidad de monedas</h4>
+                  <h4 style={{ marginBottom: '15px', color: '#FF9800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ConejoMoneda size="20" /> O especifica cantidad de monedas
+                  </h4>
                   <div style={{ marginBottom: '15px' }}>
                     <input
                       type="number"
@@ -564,7 +857,9 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                       fontSize: '16px'
                     }}
                   >
-                    🪙 Comprar {monedasPersonalizadas || '0'} monedas
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                      <ConejoMoneda size="18" /> Comprar {monedasPersonalizadas || '0'} monedas
+                    </span>
                   </button>
                 </div>
 
@@ -588,6 +883,7 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
           </div>
         )}
       </div>
+      <NotificacionElegante />
     </div>
   );
 };
