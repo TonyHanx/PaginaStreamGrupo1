@@ -52,7 +52,6 @@ interface Regalo {
 }
 
 const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin }) => {
-  console.log("Vista Stream para:", streamerId);
   const [message, setMessage] = useState('');
   const [isFollowing, setIsFollowing] = useState(false);
   const [isMuted, setIsMuted] = useState(false);

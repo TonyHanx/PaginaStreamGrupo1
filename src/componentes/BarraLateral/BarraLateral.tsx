@@ -12,14 +12,6 @@ const menuItems = [
 	), label: "Inicio" },
 	{ icon: <svg width="24" height="24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#fff" strokeWidth="2"/></svg>, label: "Explorar" },
 	{ icon: <svg width="24" height="24" fill="none"><path d="M12 21s-6-4.35-6-10A6 6 0 0112 5a6 6 0 016 6c0 5.65-6 10-6 10z" stroke="#fff" strokeWidth="2"/></svg>, label: "Siguiendo" },
-	{ icon: (
-		<svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<rect x="3" y="3" width="18" height="18" rx="2" stroke="#fff" strokeWidth="2"/>
-			<path d="M9 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-			<path d="M12 2v4" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-			<path d="M12 18v4" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-		</svg>
-	), label: "Regalos" },
 ];
 
 const recomendados = [
@@ -54,10 +46,6 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 		navigate('/nosotros');
 	};
 
-	const handleRegalosClick = () => {
-		navigate('/regalos');
-	};
-
 	return (
 		<aside className="barra-lateral">
 			<div className="barra-lateral__top">
@@ -86,21 +74,6 @@ const BarraLateral: React.FC<BarraLateralProps> = ({ onShowLogin }) => {
 							</div>
 						);
 					}
-
-					// Botón Regalos - redirige a la página de regalos
-					if (item.label === "Regalos") {
-						return (
-							<div
-								key={idx}
-								className="barra-lateral__item barra-lateral__item--clickable"
-								onClick={handleRegalosClick}
-							>
-								<span className="barra-lateral__icon">{item.icon}</span>
-								<span className="barra-lateral__label">{item.label}</span>
-							</div>
-						);
-					}
-
 								// Botón Siguiendo - requiere login
 								if (item.label === "Siguiendo") {
 									if (!usuario) {
