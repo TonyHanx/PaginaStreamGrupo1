@@ -11,7 +11,33 @@
   margin-bottom: 18px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.saldo-info {
+  display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.btn-recargar {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-recargar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
 }
 
 .catalogo-regalos__mensaje {
