@@ -10,6 +10,7 @@ import PoliticasPrivacidad from "./paginas/PoliticasPrivacidad";
 import Dashboard from "./componentes/Dashboard/Dashboard";
 import Nosotros from "./componentes/Nosotros/Nosotros";
 import StreamPage from "./paginas/StreamPage";
+import Siguiendo from "./paginas/Siguiendo";
 
 export default function App() {
   const [dashboardNotifications, setDashboardNotifications] = React.useState([
@@ -45,8 +46,11 @@ export default function App() {
         {/* Página Nosotros */}
         <Route path="/nosotros" element={<Nosotros />} />
         
-        {/* Página de visualización de stream */}
-        <Route path="/stream/:streamerId" element={<StreamPage />} />
+  {/* Página de visualización de stream */}
+  <Route path="/stream/:streamerId" element={<StreamPage />} />
+
+  {/* Página de canales seguidos */}
+  <Route path="/siguiendo" element={<Siguiendo />} />
         
   {/* Páginas específicas (con layout) */}
   <Route path="/regalos" element={<CatalogoRegalosCliente />} />

@@ -1,0 +1,46 @@
+.layout-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #18181b;
+}
+
+.layout-main {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Forzar ancho fijo a la barra lateral */
+.layout-main > .barra-lateral {
+  width: 260px;
+  min-width: 220px;
+  max-width: 300px;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.layout-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  background: transparent;
+  overflow-x: hidden;
+  padding: 0 24px 0 0;
+  box-sizing: border-box;
+}
+
+.layout-content {
+  flex: 1 1 auto;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  background: transparent;
+  overflow-x: hidden;
+}
+
+@media (max-width: 900px) {
+  .layout-main {
+    flex-direction: column;
+  }
+}
