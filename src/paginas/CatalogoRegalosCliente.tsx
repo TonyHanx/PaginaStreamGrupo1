@@ -3,16 +3,81 @@ import React, { useState, useEffect } from "react";
 import { AccionesPuntos } from "../utils/puntos";
 import "../Styles/CatalogoRegalos.css";
 
+// Componente de icono de conejo para las monedas con animación
+const ConejoMoneda = ({ className = "", size = "20", animate = false }: { className?: string, size?: string, animate?: boolean }) => (
+  <svg 
+    className={className} 
+    width={size} 
+    height={size} 
+    viewBox="0 0 40 40" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      animation: animate ? 'bounce 2s infinite, glow 2s ease-in-out infinite alternate' : 'none',
+      filter: animate ? 'drop-shadow(0 0 8px rgba(0, 191, 255, 0.6))' : 'none'
+    }}
+  >
+    <style>
+      {`
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+          }
+          40% {
+            transform: translateY(-10px);
+          }
+          60% {
+            transform: translateY(-5px);
+          }
+        }
+        
+        @keyframes glow {
+          from {
+            filter: drop-shadow(0 0 5px rgba(0, 191, 255, 0.5));
+          }
+          to {
+            filter: drop-shadow(0 0 15px rgba(0, 191, 255, 0.8));
+          }
+        }
+        
+        @keyframes wiggle {
+          0% { transform: rotate(0deg); }
+          10% { transform: rotate(-3deg); }
+          20% { transform: rotate(3deg); }
+          30% { transform: rotate(-3deg); }
+          40% { transform: rotate(3deg); }
+          50% { transform: rotate(0deg); }
+          100% { transform: rotate(0deg); }
+        }
+      `}
+    </style>
+    <g style={{ animation: animate ? 'wiggle 3s ease-in-out infinite' : 'none' }}>
+      <ellipse cx="14" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
+      <ellipse cx="26" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
+      <ellipse cx="20" cy="22" rx="10" ry="10" fill="#00bfff" stroke="#fff" strokeWidth="2" />
+      <ellipse cx="20" cy="26" rx="2" ry="1.2" fill="#fff" />
+      <ellipse cx="16" cy="22" rx="1" ry="1.5" fill="#fff" />
+      <ellipse cx="24" cy="22" rx="1" ry="1.5" fill="#fff" />
+      <path d="M18 28 Q20 30 22 28" stroke="#fff" strokeWidth="1.5" fill="none" />
+      <g>
+        <polyline points="7,10 12,13 9,17" stroke="#fff200" strokeWidth="2" fill="none" />
+        <polyline points="33,10 28,13 31,17" stroke="#fff200" strokeWidth="2" fill="none" />
+        <polyline points="20,2 18,7 22,7" stroke="#fff200" strokeWidth="2" fill="none" />
+      </g>
+    </g>
+  </svg>
+);
+
 
 const REGALOS = [
-  { nombre: "Estrella", precio: 5, emoji: "🪙" },
-  { nombre: "Corazón", precio: 10, emoji: "🪙" },
-  { nombre: "Confeti", precio: 25, emoji: "🪙" },
-  { nombre: "Fuego", precio: 50, emoji: "🪙" },
-  { nombre: "Diamante", precio: 100, emoji: "🪙" },
-  { nombre: "Corona", precio: 200, emoji: "🪙" },
-  { nombre: "Cohete", precio: 500, emoji: "🪙" },
-  { nombre: "Diana", precio: 1000, emoji: "🪙" },
+  { nombre: "Estrella", precio: 5, emoji: <ConejoMoneda size="24" animate={true} /> },
+  { nombre: "Corazón", precio: 10, emoji: <ConejoMoneda size="24" animate={true} /> },
+  { nombre: "Confeti", precio: 25, emoji: <ConejoMoneda size="24" animate={true} /> },
+  { nombre: "Fuego", precio: 50, emoji: <ConejoMoneda size="24" animate={true} /> },
+  { nombre: "Diamante", precio: 100, emoji: <ConejoMoneda size="24" animate={true} /> },
+  { nombre: "Corona", precio: 200, emoji: <ConejoMoneda size="24" animate={true} /> },
+  { nombre: "Cohete", precio: 500, emoji: <ConejoMoneda size="24" animate={true} /> },
+  { nombre: "Diana", precio: 1000, emoji: <ConejoMoneda size="24" animate={true} /> },
 ];
 
 const PAQUETES_MONEDAS = [
@@ -26,13 +91,38 @@ const PAQUETES_MONEDAS = [
 
 const CatalogoRegalosCliente: React.FC = () => {
   const [saldo, setSaldo] = useState(0);
-  const [mensaje, setMensaje] = useState("");
+
   
   // Estados para recarga personalizada
   const [mostrarModalRecarga, setMostrarModalRecarga] = useState(false);
   const [cantidadPersonalizada, setCantidadPersonalizada] = useState("");
   const [metodoPago, setMetodoPago] = useState("");
   const [modoPersonalizado, setModoPersonalizado] = useState(false);
+
+  // Estado para notificaciones elegantes
+  const [notificacion, setNotificacion] = useState<{
+    tipo: 'success' | 'error' | 'warning' | 'info';
+    mensaje: string;
+    visible: boolean;
+  }>({
+    tipo: 'info',
+    mensaje: '',
+    visible: false
+  });
+
+  // Función para mostrar notificaciones elegantes
+  const mostrarNotificacion = (tipo: 'success' | 'error' | 'warning' | 'info', mensaje: string) => {
+    setNotificacion({
+      tipo,
+      mensaje,
+      visible: true
+    });
+    
+    // Auto-ocultar después de 4 segundos
+    setTimeout(() => {
+      setNotificacion(prev => ({ ...prev, visible: false }));
+    }, 4000);
+  };
 
   // Verificar usuario registrado
   const verificarUsuario = () => {
@@ -67,15 +157,13 @@ const CatalogoRegalosCliente: React.FC = () => {
     // Obtener usuario actual
     const usuarioStr = sessionStorage.getItem('USUARIO');
     if (!usuarioStr) {
-      setMensaje("No hay usuario activo");
-      setTimeout(() => setMensaje(""), 2000);
+      mostrarNotificacion('error', 'No hay usuario activo');
       return;
     }
     const usuario = JSON.parse(usuarioStr);
     const saldoActual = usuario.monedas ?? 1000;
     if (saldoActual < precio) {
-      setMensaje("No tienes suficientes monedas");
-      setTimeout(() => setMensaje(""), 2000);
+      mostrarNotificacion('warning', 'No tienes suficientes monedas');
       return;
     }
     // Restar monedas y sumar puntos
@@ -98,16 +186,14 @@ const CatalogoRegalosCliente: React.FC = () => {
       }
     }
     window.dispatchEvent(new Event('monedas-actualizadas'));
-    setMensaje(`¡Has enviado ${nombre}!`);
+    mostrarNotificacion('success', `¡Has enviado ${nombre}!`);
     actualizarSaldo();
-    setTimeout(() => setMensaje(""), 2000);
   };
 
   // Función para abrir modal de recarga (solo usuarios registrados)
   const abrirRecarga = () => {
     if (!verificarUsuario()) {
-      setMensaje("Debes iniciar sesión para recargar monedas");
-      setTimeout(() => setMensaje(""), 3000);
+      mostrarNotificacion('error', 'Debes iniciar sesión para recargar monedas');
       return;
     }
     setMostrarModalRecarga(true);
@@ -116,21 +202,18 @@ const CatalogoRegalosCliente: React.FC = () => {
   // Función para procesar recarga personalizada
   const procesarRecarga = () => {
     if (!verificarUsuario()) {
-      setMensaje("Debes iniciar sesión para recargar");
-      setTimeout(() => setMensaje(""), 3000);
+      mostrarNotificacion('error', 'Debes iniciar sesión para recargar');
       return;
     }
 
     const cantidad = parseInt(cantidadPersonalizada);
     if (!cantidad || cantidad <= 0) {
-      setMensaje("Ingresa una cantidad válida");
-      setTimeout(() => setMensaje(""), 3000);
+      mostrarNotificacion('warning', 'Ingresa una cantidad válida');
       return;
     }
 
     if (!metodoPago) {
-      setMensaje("Selecciona un método de pago");
-      setTimeout(() => setMensaje(""), 3000);
+      mostrarNotificacion('warning', 'Selecciona un método de pago');
       return;
     }
 
@@ -155,8 +238,7 @@ const CatalogoRegalosCliente: React.FC = () => {
       }
 
       actualizarSaldo();
-      setMensaje(`¡Recarga exitosa! Agregaste ${cantidad} monedas`);
-      setTimeout(() => setMensaje(""), 3000);
+      mostrarNotificacion('success', `¡Recarga exitosa! Agregaste ${cantidad} monedas`);
       
       // Cerrar modal y limpiar
       setMostrarModalRecarga(false);
@@ -167,10 +249,13 @@ const CatalogoRegalosCliente: React.FC = () => {
   };
 
   return (
-    <div className="catalogo-regalos-cliente">
+    <>
+      <div className="catalogo-regalos-cliente">
       <h2>Catálogo de Regalos</h2>
       <div className="catalogo-regalos__saldo">
-        <b>Tus monedas: {saldo} 🪙</b>
+        <b style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          Tus monedas: {saldo} <ConejoMoneda size="18" animate={true} />
+        </b>
         <button 
           onClick={abrirRecarga}
           style={{
@@ -189,7 +274,7 @@ const CatalogoRegalosCliente: React.FC = () => {
           ✏️ ESCRIBIR MI CANTIDAD PERSONALIZADA
         </button>
       </div>
-      {mensaje && <div className={`catalogo-regalos__mensaje ${saldo < 0 ? 'catalogo-regalos__mensaje--error' : 'catalogo-regalos__mensaje--success'}`}>{mensaje}</div>}
+
       <div className="catalogo-regalos__grid">
         {REGALOS.map((regalo) => (
           <div key={regalo.nombre} className="catalogo-regalos__item">
@@ -392,7 +477,59 @@ const CatalogoRegalosCliente: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+
+      {/* Notificación elegante */}
+      {notificacion.visible && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            zIndex: 10000,
+            maxWidth: '400px',
+            padding: '16px 20px',
+            borderRadius: '12px',
+            background: notificacion.tipo === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' :
+                       notificacion.tipo === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' :
+                       notificacion.tipo === 'warning' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                       'linear-gradient(135deg, #3b82f6, #2563eb)',
+            color: 'white',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(10px)',
+            transform: 'translateX(0)',
+            animation: 'slideInFromRight 0.4s ease-out',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            fontSize: '14px',
+            fontWeight: '500',
+            lineHeight: '1.4'
+          }}
+        >
+          <span style={{ fontSize: '18px' }}>
+            {notificacion.tipo === 'success' ? '✅' : 
+             notificacion.tipo === 'error' ? '❌' : 
+             notificacion.tipo === 'warning' ? '⚠️' : 'ℹ️'}
+          </span>
+          <span>{notificacion.mensaje}</span>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideInFromRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
+    </>
   );
 };
 
