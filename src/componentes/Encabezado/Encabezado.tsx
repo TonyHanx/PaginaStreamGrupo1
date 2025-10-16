@@ -3,7 +3,7 @@ import "./Encabezado.css";
 import "./UserMenu.css";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
-import ModalRecargaMonedas from "../ModalRecargaMonedas/ModalRecargaMonedas";
+import ModalRecargaMonedas from "../ModalRecargaMonedas/ModalRecargaMonedas.tsx";
 import { useNavigate } from "react-router-dom";
 import { obtenerMonedasUsuario } from "../../utils/monedas";
 import { calcularNivel } from "../../utils/puntos";

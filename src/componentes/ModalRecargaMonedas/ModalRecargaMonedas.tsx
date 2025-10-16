@@ -21,6 +21,8 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
   const [monedasPersonalizadas, setMonedasPersonalizadas] = useState('');
   const [mostrarPago, setMostrarPago] = useState(false);
   const [paqueteSeleccionado, setPaqueteSeleccionado] = useState<PaqueteMoneda | null>(null);
+  const [paqueteBase, setPaqueteBase] = useState<PaqueteMoneda | null>(null);
+  const [cantidadSeleccionada, setCantidadSeleccionada] = useState(1);
   const [procesandoPago, setProcesandoPago] = useState(false);
 
   const paquetes: PaqueteMoneda[] = [
@@ -45,9 +47,25 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
       return;
     }
 
-    // Ir al paso de selección de método de pago
-    setPaqueteSeleccionado(paquete);
+    // Guardar paquete base y calcular con cantidad
+    setPaqueteBase(paquete);
+    const paqueteConCantidad = {
+      cantidad: paquete.cantidad * cantidadSeleccionada,
+      precio: paquete.precio * cantidadSeleccionada
+    };
+    setPaqueteSeleccionado(paqueteConCantidad);
     setMostrarPago(true);
+  };
+
+  const actualizarCantidad = (nuevaCantidad: number) => {
+    setCantidadSeleccionada(nuevaCantidad);
+    if (paqueteBase) {
+      const paqueteActualizado = {
+        cantidad: paqueteBase.cantidad * nuevaCantidad,
+        precio: paqueteBase.precio * nuevaCantidad
+      };
+      setPaqueteSeleccionado(paqueteActualizado);
+    }
   };
 
   const procesarPagoFinal = async (metodoPago: string) => {
@@ -76,7 +94,7 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
       alert(`¡Recarga exitosa! 🎉\n\nMétodo de pago: ${metodoPago}\nSe agregaron ${paqueteSeleccionado.cantidad.toLocaleString()} monedas por $${paqueteSeleccionado.precio.toFixed(2)} USD.\n\nNuevo saldo: ${nuevoSaldo.toLocaleString()} monedas 🪙`);
       
       // Cerrar modal y actualizar interfaz
-      onClose();
+      cerrarModal();
       window.location.reload();
     } catch (error) {
       alert('Error al procesar el pago. Inténtalo nuevamente.');
@@ -88,6 +106,19 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
   const volverASeleccion = () => {
     setMostrarPago(false);
     setPaqueteSeleccionado(null);
+    setPaqueteBase(null);
+    setCantidadSeleccionada(1);
+  };
+
+  const cerrarModal = () => {
+    setMostrarPago(false);
+    setPaqueteSeleccionado(null);
+    setPaqueteBase(null);
+    setCantidadSeleccionada(1);
+    setMontoPersonalizado('');
+    setMonedasPersonalizadas('');
+    setModoPersonalizado(false);
+    onClose();
   };
 
   const manejarRecargaConMonto = () => {
@@ -161,7 +192,7 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
   return (
     <div style={modalStyle} onClick={(e) => {
       if (e.target === e.currentTarget) {
-        onClose();
+        cerrarModal();
       }
     }}>
       <div style={contentStyle} onClick={(e) => e.stopPropagation()}>
@@ -169,7 +200,7 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
           <h2>{mostrarPago ? 'Completa tu compra' : 'Recargar MONEDAS'}</h2>
           <button 
             style={{ background: 'none', border: 'none', color: '#ccc', fontSize: '28px', cursor: 'pointer' }}
-            onClick={mostrarPago ? volverASeleccion : onClose}
+            onClick={mostrarPago ? volverASeleccion : cerrarModal}
           >
             ×
           </button>
@@ -211,14 +242,17 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                     </div>
                   </div>
                   <div style={{ marginLeft: 'auto' }}>
-                    <select style={{
-                      background: '#444',
-                      color: 'white',
-                      border: '1px solid #666',
-                      borderRadius: '5px',
-                      padding: '5px 10px',
-                      cursor: 'pointer'
-                    }}>
+                    <select 
+                      value={cantidadSeleccionada}
+                      onChange={(e) => actualizarCantidad(parseInt(e.target.value))}
+                      style={{
+                        background: '#444',
+                        color: 'white',
+                        border: '1px solid #666',
+                        borderRadius: '5px',
+                        padding: '5px 10px',
+                        cursor: 'pointer'
+                      }}>
                       <option value="1">1</option>
                       <option value="2">2</option>
                       <option value="3">3</option>
@@ -229,6 +263,23 @@ const ModalRecargaMonedas: React.FC<ModalRecargaMonedasProps> = ({
                       <option value="100">100</option>
                     </select>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {paqueteSeleccionado && (
+              <div style={{ 
+                marginBottom: '20px', 
+                padding: '15px', 
+                background: 'rgba(76, 175, 80, 0.1)', 
+                borderRadius: '8px',
+                border: '1px solid rgba(76, 175, 80, 0.3)'
+              }}>
+                <div style={{ fontSize: '14px', color: '#4CAF50', marginBottom: '5px' }}>
+                  💰 Monto total a pagar: <strong>${paqueteSeleccionado.precio.toFixed(2)} USD</strong>
+                </div>
+                <div style={{ fontSize: '12px', color: '#ccc' }}>
+                  RECARGA DE SALDO DE MANERA SEGURA
                 </div>
               </div>
             )}
