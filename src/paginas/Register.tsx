@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useModalContext } from "../context/ModalContext";
 import "../Styles/auth.css";
 
 import googleIcon from "../assets/icons/google.svg";
@@ -8,6 +9,7 @@ import appleIcon from "../assets/icons/apple.svg";
 import { useState } from "react";
 
 export default function Register({ onShowLogin }: { onShowLogin?: () => void }) {
+  const { showTerminos, showPoliticas } = useModalContext();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -128,13 +130,21 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
 
         <p className="auth-foot">
           Al registrarte, aceptas nuestra{" "}
-          <Link to="/politicas" className="auth-link" target="_blank">
-          Politica de privacidad
-          </Link>{" "}
+          <button
+            type="button"
+            className="auth-link-button"
+            onClick={showPoliticas}
+          >
+            Política de privacidad
+          </button>{" "}
           y nuestros{" "}
-          <Link to="/terminos" className="auth-link" target="_blank">
-          Términos y Condiciones
-          </Link>
+          <button
+            type="button"
+            className="auth-link-button"
+            onClick={showTerminos}
+          >
+            Términos y Condiciones
+          </button>
           .
         </p>
 

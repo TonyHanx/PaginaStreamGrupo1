@@ -3,6 +3,9 @@ import "./Encabezado.css";
 import "./UserMenu.css";
 import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
+import TerminosyCondiciones from "../../paginas/TerminosyCondiciones";
+import PoliticasPrivacidad from "../../paginas/PoliticasPrivacidad";
+import { ModalProvider } from "../../context/ModalContext";
 import { useNavigate } from "react-router-dom";
 import { obtenerMonedasUsuario } from "../../utils/monedas";
 import { calcularNivel } from "../../utils/puntos";
@@ -11,6 +14,8 @@ import { calcularNivel } from "../../utils/puntos";
 export interface EncabezadoHandle {
   showLoginModal: () => void;
   showRegisterModal: () => void;
+  showTerminosModal: () => void;
+  showPoliticasModal: () => void;
 }
 
 export interface EncabezadoProps {
@@ -208,16 +213,26 @@ const NOTIFICACIONES_PREDEFINIDAS = [
 ];
 
 const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthButtons = true }, ref) => {
-  const [modal, setModal] = useState<null | 'login' | 'register' | 'monedas'>(null);
+  const [modal, setModal] = useState<null | 'login' | 'register' | 'monedas' | 'terminos' | 'politicas'>(null);
   const [notiAbierta, setNotiAbierta] = useState(false);
   const notiRef = useRef<HTMLDivElement>(null);
-  const closeModal = () => setModal(null);
+  
+  const closeModal = () => {
+    // Si estamos en términos o políticas, volver al registro
+    if (modal === 'terminos' || modal === 'politicas') {
+      setModal('register');
+    } else {
+      setModal(null);
+    }
+  };
 
   const handleLoginClick = () => setModal('login');
 
   useImperativeHandle(ref, () => ({
     showLoginModal: () => setModal('login'),
-    showRegisterModal: () => setModal('register')
+    showRegisterModal: () => setModal('register'),
+    showTerminosModal: () => setModal('terminos'),
+    showPoliticasModal: () => setModal('politicas')
   }));
 
   // Cerrar ventana de notificaciones al hacer click fuera
@@ -308,7 +323,20 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
             {modal === 'login' ? (
               <Login onShowRegister={() => setModal('register')} onLoginSuccess={closeModal} />
             ) : modal === 'register' ? (
-              <Register onShowLogin={() => setModal('login')} />
+              <ModalProvider value={{
+                showTerminos: () => setModal('terminos'),
+                showPoliticas: () => setModal('politicas')
+              }}>
+                <Register onShowLogin={() => setModal('login')} />
+              </ModalProvider>
+            ) : modal === 'terminos' ? (
+              <div className="encabezado__modal-content">
+                <TerminosyCondiciones isModal={true} />
+              </div>
+            ) : modal === 'politicas' ? (
+              <div className="encabezado__modal-content">
+                <PoliticasPrivacidad isModal={true} />
+              </div>
             ) : (
               <div className="encabezado__modal-monedas">
                 <h2>Recargar MONEDAS</h2>

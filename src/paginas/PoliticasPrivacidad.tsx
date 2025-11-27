@@ -1,8 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/PoliticaPrivacidad.css";
 
-export default function PoliticaPrivacidad() {
+export default function PoliticaPrivacidad({ isModal = false }: { isModal?: boolean }) {
+  const navigate = useNavigate();
+
   return (
     <div className="privacy-wrapper text-light">
       <div className="container py-5">
@@ -89,11 +92,22 @@ export default function PoliticaPrivacidad() {
             </p>
           </section>
 
-          <div className="text-center">
-            <a href="/register" className="btn btn-lg nexus-btn px-4">
-              Volver al registro
-            </a>
-          </div>
+          {!isModal && (
+            <div className="text-center">
+              <button
+                onClick={() => navigate('/?openRegister=true')}
+                className="btn btn-lg nexus-btn px-4 me-2"
+              >
+                Volver al registro
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="btn btn-lg nexus-btn px-4"
+              >
+                Ir al inicio
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

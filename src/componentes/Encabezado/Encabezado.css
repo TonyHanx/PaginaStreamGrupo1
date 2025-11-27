@@ -453,3 +453,27 @@
 	color: #7fd6ff;
 	text-align: right;
 }
+
+/* Estilos para el contenido de términos y políticas en modal */
+.encabezado__modal-content {
+	background: #181b1f;
+	border-radius: 16px;
+	padding: 0;
+	max-width: 800px;
+	max-height: 85vh;
+	overflow-y: auto;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.encabezado__modal-content .terms-wrapper,
+.encabezado__modal-content .privacy-wrapper {
+	background: transparent;
+	min-height: auto;
+}
+
+.encabezado__modal-content .terms-card,
+.encabezado__modal-content .privacy-card {
+	box-shadow: none;
+	margin: 0;
+	max-width: 100%;
+}

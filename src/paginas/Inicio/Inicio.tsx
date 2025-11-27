@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Encabezado, { type EncabezadoHandle } from "../../componentes/Encabezado/Encabezado";
 import BarraLateral from "../../componentes/BarraLateral/BarraLateral";
 import CarruselStreams from "../../componentes/CarruselStreams/CarruselStreams";
@@ -7,6 +8,15 @@ import "./Inicio.css";
 
 const Inicio: React.FC = () => {
 	const encabezadoRef = useRef<EncabezadoHandle>(null);
+	const location = useLocation();
+
+	useEffect(() => {
+		// Detectar si viene de términos o políticas
+		const params = new URLSearchParams(location.search);
+		if (params.get('openRegister') === 'true') {
+			encabezadoRef.current?.showRegisterModal();
+		}
+	}, [location]);
 
 	const handleShowLogin = () => {
 		encabezadoRef.current?.showLoginModal();
