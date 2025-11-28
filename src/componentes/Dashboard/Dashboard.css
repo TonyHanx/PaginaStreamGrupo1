@@ -483,6 +483,8 @@
   font-weight: 600;
 }
 
+.dashboard-creator__gift-price svg { vertical-align: middle; margin-right: 6px; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.5)); }
+
 .dashboard-creator__gift-btn {
   background: #2c2c2e;
   border: 1px solid #464649;

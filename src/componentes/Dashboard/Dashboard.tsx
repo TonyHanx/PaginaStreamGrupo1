@@ -2,6 +2,9 @@ import React, {useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import NotificacionNivel from '../../componentes/NotificacionNivel/NotificacionNivel';
+import GiftOverlay from '../RegaloOverlay/GiftOverlay';
+import BunnySVG from '../Icons/BunnySVG';
+import type { GiftData } from '../RegaloOverlay/GiftOverlay';
 import { obtenerMonedasUsuario } from '../../utils/monedas';
 import { AccionesPuntos } from '../../utils/puntos';
 import { 
@@ -47,6 +50,8 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     
     // Estados del chat y transmisión
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    // overlay for incoming gifts (visible only in the creator control panel)
+    const [activeGift, setActiveGift] = useState<GiftData | null>(null);
     const [messageInput, setMessageInput] = useState('');
     const [tiempoTransmision, setTiempoTransmision] = useState({ horas: 0, minutos: 0, segundos: 0 });
     const [isStreaming, setIsStreaming] = useState(false);
@@ -75,14 +80,19 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     const usuarioStr = sessionStorage.getItem('USUARIO');
     let displayName = 'grupo1';
     let username = 'grupo1';
+    let parsedUsuario: any = null;
     try {
         const usuarioData = usuarioStr ? JSON.parse(usuarioStr) : null;
+        parsedUsuario = usuarioData;
         displayName = usuarioData?.username || 'grupo1';
         username = usuarioData?.username || 'grupo1';
     } catch {
         displayName = 'grupo1';
         username = 'grupo1';
     }
+
+    // possible user id field used by routing (e.g. /stream/:streamerId)
+    const currentUserId = parsedUsuario?.userId ?? parsedUsuario?.id ?? username;
 
     // Actualizar saldo
     const actualizarSaldo = () => {
@@ -296,7 +306,39 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
             tipo: 'donacion'
         };
         setNotifications((prev) => [nuevaNotificacion, ...prev]);
+
+        // Also notify the control panel overlay (simulate a global event that viewers would dispatch)
+        try {
+            window.dispatchEvent(new CustomEvent('regaloEnviado', { detail: { streamerId: username, sender: username, gift: { nombre: regalo.nombre, icono: regalo.emoji, color: regalo.color } } }));
+        } catch {
+            // ignore
+        }
     };
+
+    // Listen for incoming gifts (from viewers) and show overlay to streamer in dashboard
+    useEffect(() => {
+        const handler = (e: any) => {
+            const d = e?.detail;
+            if (!d) return;
+            // Show overlay only if the event is targeted to this streamer
+            if (
+                String(d.streamerId) === String(username)
+                || String(d.streamerId) === String(displayName)
+                || String(d.streamerId) === String(currentUserId)
+            ) {
+                const giftInfo: GiftData = {
+                    sender: String(d.sender ?? 'Espectador'),
+                    nombre: String(d.gift?.nombre ?? 'Regalo'),
+                    icono: String(d.gift?.icono ?? d.gift?.emoji ?? '🎁'),
+                    color: d.gift?.color
+                };
+                setActiveGift(giftInfo);
+            }
+        };
+
+        window.addEventListener('regaloEnviado', handler as EventListener);
+        return () => window.removeEventListener('regaloEnviado', handler as EventListener);
+    }, [username, displayName]);
 
     // Toggle de streaming
     const toggleStreaming = () => {
@@ -349,6 +391,8 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
             </div>
 
             <div className="dashboard-creator__layout">
+                {/* Animated gift overlay (visible only to creator) */}
+                <GiftOverlay gift={activeGift} visible={!!activeGift} onClose={() => setActiveGift(null)} />
                 {/* Columna izquierda: Vista previa del stream */}
                 <div className="dashboard-creator__left">
                     <div className="dashboard-creator__section">
@@ -400,6 +444,10 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                 <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
                             </svg>
                             <h2>Chat</h2>
+                            <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <BunnySVG width={20} height={20} />
+                                <div style={{ color: '#00bfff', fontWeight: 700 }}>{saldo}</div>
+                            </div>
                             <button className="dashboard-creator__settings-btn">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
@@ -505,7 +553,9 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                             >
                                                 <span className="dashboard-creator__gift-icon">{regalo.emoji}</span>
                                                 <span className="dashboard-creator__gift-name">{regalo.nombre}</span>
-                                                <span className="dashboard-creator__gift-price">{regalo.precio} 🪙</span>
+                                                <span className="dashboard-creator__gift-price">
+                                                    <BunnySVG width={18} height={18} /> {regalo.precio}
+                                                </span>
                                             </button>
                                         ))
                                     )}
