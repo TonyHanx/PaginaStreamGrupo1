@@ -31,15 +31,17 @@ function UserMenu({ username }: { username: string }) {
 	
 	// Obtener datos del usuario desde sessionStorage
 	const usuarioStr = sessionStorage.getItem('USUARIO');
-	let usuarioData = { username, puntos: 0 };
+	let usuarioData = { username, puntos: 0, userId: 'demo-user' };
 	try {
 		const parsed = usuarioStr ? JSON.parse(usuarioStr) : {};
 		usuarioData = {
 			username: parsed.username || username,
-			puntos: parsed.puntos || 0
+			puntos: parsed.puntos || 0,
+			userId: parsed.userId || 'demo-' + username
 		};
 	} catch {
-		// Si hay error, usar valores por defecto
+		// Si hay error, usar valores por defecto con un ID único
+		usuarioData = { username, puntos: 0, userId: 'demo-' + username };
 	}
 	
 	const { nivel, puntosNivel, puntosParaSiguiente } = calcularNivel(usuarioData.puntos);
@@ -119,25 +121,33 @@ function UserMenu({ username }: { username: string }) {
 					
 					<div className="user-menu__menu-items">
 						<MenuItem icon={
-							// Casita (home)
-							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M3 9.5L10 4l7 5.5" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/><rect x="6.5" y="11" width="7" height="5" rx="1" stroke="#fff" strokeWidth="1.5"/></svg>
-						} label="Canal" />
+							// Icono TV/Canal
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="2" y="4" width="16" height="11" rx="1.5" stroke="#fff" strokeWidth="1.5"/><path d="M2 7h16M6 17h8" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>
+						} label="Canal" onClick={() => {
+							setOpen(false);
+							navigate(`/stream/${usuarioData.userId}`);
+						}} />
 						<MenuItem icon={
 							// Barras (panel de control)
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="4" y="13" width="2.5" height="3" rx="1" stroke="#fff" strokeWidth="1.5"/><rect x="8.75" y="9" width="2.5" height="7" rx="1" stroke="#fff" strokeWidth="1.5"/><rect x="13.5" y="6" width="2.5" height="10" rx="1" stroke="#fff" strokeWidth="1.5"/></svg>
-						} label="Panel de control del creador" onClick={() => navigate("/dashboard")} />
+						} label="Panel de control del creador" onClick={() => {
+							setOpen(false);
+							navigate("/dashboard");
+						}} />
 						<MenuItem icon={
-							// Icono de referencia (adjunto)
-							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="2" y="5" width="16" height="10" rx="3" stroke="#fff" strokeWidth="1.5"/><rect x="7" y="8" width="6" height="4" rx="1" fill="#fff"/><circle cx="10" cy="10" r="1.5" fill="#181b1f"/></svg>
+							// Icono estrella para suscripciones
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M10 2L12.5 7.5L18 8.5L14 12.5L15 18L10 15L5 18L6 12.5L2 8.5L7.5 7.5L10 2Z" stroke="#fff" strokeWidth="1.5"/></svg>
 						} label="Suscripciones" />
-						{/* Solo el icono de ajustes  */}
 						<MenuItem icon={
-							// Engranaje simple 
+							// Engranaje para ajustes
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><g stroke="#fff" strokeWidth="1.5" strokeLinecap="round"><circle cx="10" cy="10" r="3.2" fill="none"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.6 5.6l1.4 1.4M13 13l1.4 1.4M5.6 14.4l1.4-1.4M13 7l1.4-1.4"/></g></svg>
 						} label="Ajustes" />
+						<MenuItem icon={
+							// Icono de regalo/drops
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="3" y="8" width="14" height="9" rx="1" stroke="#fff" strokeWidth="1.5"/><path d="M10 8v9M3 11h14" stroke="#fff" strokeWidth="1.5"/><path d="M7 8c0-1.5.5-3 3-3s3 1.5 3 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>
+						} label="Drops y recompensas" />
 					</div>
 					<div className="user-menu__divider">
-						{/* Solo el icono de cerrar sesión  */}
 						<MenuItem icon={
 							// Icono cerrar sesión 
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><g stroke="#f87171" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="5" width="7" height="10" rx="2"/><path d="M13 10h4"/><path d="M15.5 7.5L18 10l-2.5 2.5"/></g></svg>

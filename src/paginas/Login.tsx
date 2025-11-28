@@ -26,7 +26,8 @@ export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegist
 				sessionStorage.setItem("USUARIO", JSON.stringify({ 
 					username: userData.username, 
 					puntos: userData.puntos || 0,
-					monedas: userData.monedas || 1000 // Monedas iniciales para demo
+					monedas: userData.monedas || 1000,
+					userId: userData.userId || '1'
 				}));
 				
 				// Si hay callback de éxito (modo modal), ejecutarlo en lugar de navegar
@@ -41,10 +42,12 @@ export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegist
 		// Validación simple: usuario "grupo1" y contraseña "123"
 		if (username === "grupo1" && password === "123") {
 			setError("");
+			const userId = "demo-" + username; // ID único para usuario demo
 			sessionStorage.setItem("USUARIO", JSON.stringify({ 
 				username, 
 				puntos: 0,
-				monedas: 1000 // Monedas iniciales para demo
+				monedas: 1000,
+				userId: userId
 			}));
 			
 			// Si hay callback de éxito (modo modal), ejecutarlo en lugar de navegar

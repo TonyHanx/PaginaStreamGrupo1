@@ -60,6 +60,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [showGiftStore, setShowGiftStore] = useState(false);
   const [saldoActual, setSaldoActual] = useState(0);
+  const [activeTab, setActiveTab] = useState('Inicio');
   const chatMessagesRef = useRef<HTMLDivElement>(null);
 
   // Función para actualizar el saldo
@@ -68,6 +69,18 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
     const nuevoSaldo = datos?.monedas || 0;
     setSaldoActual(nuevoSaldo);
   };
+
+  // Obtener información del usuario actual
+  const usuarioActualStr = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
+  let usuarioActual: any = null;
+  try {
+    usuarioActual = usuarioActualStr ? JSON.parse(usuarioActualStr) : null;
+  } catch {
+    usuarioActual = null;
+  }
+
+  // Verificar si este stream es del usuario actual
+  const esCanPropio = usuarioActual && usuarioActual.userId === streamerId;
 
   // Función helper para mostrar notificación de puntos
   const mostrarNotificacionPuntos = (puntos: number, mensaje: string) => {
@@ -219,7 +232,17 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
   }, [isLoggedIn]);
 
   // Datos de ejemplo del stream
-  const streamData = {
+  const streamData = esCanPropio ? {
+    username: usuarioActual?.username || "Usuario",
+    displayName: usuarioActual?.username || "Usuario",
+    title: "Canal sin transmisión en vivo",
+    viewers: "0",
+    category: "Offline",
+    tags: ["Offline"],
+    isLive: false,
+    avatar: "",
+    isVerified: false
+  } : {
     username: "LACOBRAAA",
     displayName: "LACOBRAAA",
     title: "GOLEÓ ARGENTINA, GANÓ ESPAÑA 4-0. DOBLETE DE CRISTIANO. SE VIENE MÉXICO-ECUADO...",
@@ -232,17 +255,19 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
   };
 
   // Mensajes de chat de ejemplo
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { id: 1, username: "pollocdmx", message: "🔥🔥🔥", color: "#FFD700", puntos: 120 },
-    { id: 2, username: "Domifutbolero", message: "GOLAZO!", color: "#00FF00", puntos: 350 },
-    { id: 3, username: "rmelcrack", message: "TREMENDO", color: "#FF6B6B", puntos: 80 },
-    { id: 4, username: "LACOBRAAA", message: "SALVAME GEMINIII", color: "#9B59B6", isBroadcaster: true, puntos: 900 },
-    { id: 5, username: "SilverAngell", message: "🎵🎶", color: "#E91E63", puntos: 210 },
-    { id: 6, username: "adrianxtacs", message: "jajajaja", color: "#3498DB", puntos: 60 },
-    { id: 7, username: "Lukveg", message: "ICI", color: "#2ECC71", puntos: 40 },
-    { id: 8, username: "chalols6", message: "XDDD", color: "#F39C12", puntos: 500 },
-    { id: 9, username: "abrah_amm", message: "TREMENDO AD", color: "#1ABC9C", puntos: 300 }
-  ]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(
+    esCanPropio ? [] : [
+      { id: 1, username: "pollocdmx", message: "🔥🔥🔥", color: "#FFD700", puntos: 120 },
+      { id: 2, username: "Domifutbolero", message: "GOLAZO!", color: "#00FF00", puntos: 350 },
+      { id: 3, username: "rmelcrack", message: "TREMENDO", color: "#FF6B6B", puntos: 80 },
+      { id: 4, username: "LACOBRAAA", message: "SALVAME GEMINIII", color: "#9B59B6", isBroadcaster: true, puntos: 900 },
+      { id: 5, username: "SilverAngell", message: "🎵🎶", color: "#E91E63", puntos: 210 },
+      { id: 6, username: "adrianxtacs", message: "jajajaja", color: "#3498DB", puntos: 60 },
+      { id: 7, username: "Lukveg", message: "ICI", color: "#2ECC71", puntos: 40 },
+      { id: 8, username: "chalols6", message: "XDDD", color: "#F39C12", puntos: 500 },
+      { id: 9, username: "abrah_amm", message: "TREMENDO AD", color: "#1ABC9C", puntos: 300 }
+    ]
+  );
 
   // Auto-scroll al agregar nuevos mensajes
   useEffect(() => {
@@ -300,19 +325,33 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
     <div className="vista-stream">
       {/* Área principal del stream */}
       <div className="vista-stream__main">
-        {/* Video del stream */}
-        <div className={`vista-stream__video-container ${isFullscreen ? 'fullscreen' : ''}`}>
-          <div 
-            className="vista-stream__video-placeholder vista-stream__video-placeholder--cobra"
-          >
-            {/* Aquí iría el reproductor de video real */}
-            <div className="vista-stream__live-indicator">
-              <span className="vista-stream__live-badge">LIVE</span>
-              <span className="vista-stream__live-viewers">{streamData.viewers} espectadores</span>
-            </div>
-            
-            {/* Controles del reproductor */}
-            <div className="vista-stream__controls">
+        {/* Video del stream - solo mostrar si NO es canal propio O si está en vivo */}
+        {(!esCanPropio || streamData.isLive) && (
+          <div className={`vista-stream__video-container ${isFullscreen ? 'fullscreen' : ''}`}>
+            <div 
+              className="vista-stream__video-placeholder vista-stream__video-placeholder--cobra"
+            >
+              {/* Verificar si el canal está offline */}
+              {!streamData.isLive ? (
+                <div className="vista-stream__offline-container">
+                  <div className="vista-stream__offline-content">
+                    <div className="vista-stream__offline-badge">DESCONECTADO</div>
+                    <h2 className="vista-stream__offline-title">{streamData.displayName} está fuera de línea</h2>
+                    <p className="vista-stream__offline-message">Este canal todavía no tiene contenido</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Aquí iría el reproductor de video real */}
+                  <div className="vista-stream__live-indicator">
+                    <span className="vista-stream__live-badge">LIVE</span>
+                    <span className="vista-stream__live-viewers">{streamData.viewers} espectadores</span>
+                  </div>
+                </>
+              )}
+              
+              {/* Controles del reproductor */}
+              <div className="vista-stream__controls">
               <button className="vista-stream__control-btn play-pause">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                   <polygon points="8,5 8,19 19,12" />
@@ -354,6 +393,23 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
             </div>
           </div>
         </div>
+        )}
+
+        {/* Banner del canal propio - solo mostrar si es canal propio y está offline */}
+        {esCanPropio && !streamData.isLive && (
+          <div className="vista-stream__channel-banner">
+            <div className="vista-stream__channel-banner-bg">
+              <div className="vista-stream__channel-banner-content">
+                <div className="vista-stream__channel-offline-badge">
+                  DESCONECTADO
+                </div>
+                <h2 className="vista-stream__channel-offline-title">
+                  {streamData.displayName} está fuera de línea
+                </h2>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Información del streamer */}
         <div className="vista-stream__info">
@@ -389,44 +445,119 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
           </div>
 
           <div className="vista-stream__actions">
-            <button className="vista-stream__action-btn notifications">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke="white" strokeWidth="2" fill="none"/>
-              </svg>
-            </button>
-            
-            <button className="vista-stream__action-btn favorite">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="white" strokeWidth="2" fill="none"/>
-              </svg>
-            </button>
+            {!esCanPropio && (
+              <>
+                <button className="vista-stream__action-btn notifications">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke="white" strokeWidth="2" fill="none"/>
+                  </svg>
+                </button>
+                
+                <button className="vista-stream__action-btn favorite">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="white" strokeWidth="2" fill="none"/>
+                  </svg>
+                </button>
 
-            <button className="vista-stream__action-btn gift">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <rect x="3" y="8" width="18" height="4" stroke="white" strokeWidth="2" fill="none"/>
-                <rect x="5" y="12" width="14" height="9" stroke="white" strokeWidth="2" fill="none"/>
-                <path d="M12 8V21 M12 8C12 5 14 5 14 5C14 5 16 5 16 8 M12 8C12 5 10 5 10 5C10 5 8 5 8 8" stroke="white" strokeWidth="2" fill="none"/>
-              </svg>
-              Regala Suscripciones
-            </button>
+                <button className="vista-stream__action-btn gift">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <rect x="3" y="8" width="18" height="4" stroke="white" strokeWidth="2" fill="none"/>
+                    <rect x="5" y="12" width="14" height="9" stroke="white" strokeWidth="2" fill="none"/>
+                    <path d="M12 8V21 M12 8C12 5 14 5 14 5C14 5 16 5 16 8 M12 8C12 5 10 5 10 5C10 5 8 5 8 8" stroke="white" strokeWidth="2" fill="none"/>
+                  </svg>
+                  Regala Suscripciones
+                </button>
 
-            <button 
-              className={`vista-stream__action-btn subscribe ${isFollowing ? 'following' : ''}`}
-              onClick={() => {
-                if (!isFollowing && isLoggedIn) {
-                  // Otorgar puntos por seguir al streamer (solo la primera vez)
-                  const puntosGanados = agregarPuntos(AccionesPuntos.SEGUIR_STREAMER);
-                  if (puntosGanados) {
-                    mostrarNotificacionPuntos(AccionesPuntos.SEGUIR_STREAMER, '¡Por seguir al streamer!');
-                  }
-                }
-                setIsFollowing(!isFollowing);
-              }}
-            >
-              {isFollowing ? 'Siguiendo' : 'Suscribirse'}
-            </button>
+                <button 
+                  className={`vista-stream__action-btn subscribe ${isFollowing ? 'following' : ''}`}
+                  onClick={() => {
+                    if (!isFollowing && isLoggedIn) {
+                      // Otorgar puntos por seguir al streamer (solo la primera vez)
+                      const puntosGanados = agregarPuntos(AccionesPuntos.SEGUIR_STREAMER);
+                      if (puntosGanados) {
+                        mostrarNotificacionPuntos(AccionesPuntos.SEGUIR_STREAMER, '¡Por seguir al streamer!');
+                      }
+                    }
+                    setIsFollowing(!isFollowing);
+                  }}
+                >
+                  {isFollowing ? 'Siguiendo' : 'Suscribirse'}
+                </button>
+              </>
+            )}
+            {esCanPropio && (
+              <>
+                <button className="vista-stream__action-btn customize-channel">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" fill="currentColor"/>
+                  </svg>
+                  Personaliza tu canal
+                </button>
+                <button className="vista-stream__action-btn icon-only">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <circle cx="18" cy="5" r="3" stroke="white" strokeWidth="2" fill="none"/>
+                    <circle cx="6" cy="12" r="3" stroke="white" strokeWidth="2" fill="none"/>
+                    <circle cx="18" cy="19" r="3" stroke="white" strokeWidth="2" fill="none"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="white" strokeWidth="2"/>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="white" strokeWidth="2"/>
+                  </svg>
+                </button>
+                <button className="vista-stream__action-btn icon-only">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <circle cx="12" cy="5" r="2" fill="white"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <circle cx="12" cy="19" r="2" fill="white"/>
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
         </div>
+
+        {/* Tabs de navegación - solo mostrar en canal propio offline */}
+        {esCanPropio && !streamData.isLive && (
+          <>
+            <div className="vista-stream__tabs">
+              <button 
+                className={`vista-stream__tab ${activeTab === 'Inicio' ? 'active' : ''}`}
+                onClick={() => setActiveTab('Inicio')}
+              >
+                Inicio
+              </button>
+              <button 
+                className={`vista-stream__tab ${activeTab === 'Sobre' ? 'active' : ''}`}
+                onClick={() => setActiveTab('Sobre')}
+              >
+                Sobre
+              </button>
+              <button 
+                className={`vista-stream__tab ${activeTab === 'Videos' ? 'active' : ''}`}
+                onClick={() => setActiveTab('Videos')}
+              >
+                Videos
+              </button>
+              <button 
+                className={`vista-stream__tab ${activeTab === 'Clips' ? 'active' : ''}`}
+                onClick={() => setActiveTab('Clips')}
+              >
+                Clips
+              </button>
+            </div>
+
+            <div className="vista-stream__content">
+              <div className="vista-stream__empty-state">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.3, marginBottom: '16px' }}>
+                  <rect x="3" y="3" width="18" height="18" rx="2" stroke="#adadb8" strokeWidth="2"/>
+                  <circle cx="8" cy="9" r="2" stroke="#adadb8" strokeWidth="2"/>
+                  <polyline points="3 15 8 10 12 14 21 5" stroke="#adadb8" strokeWidth="2"/>
+                </svg>
+                <h3 className="vista-stream__empty-title">No hay contenido disponible</h3>
+                <p className="vista-stream__empty-subtitle">Este canal todavía no tiene contenido</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Chat lateral */}
