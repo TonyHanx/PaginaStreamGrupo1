@@ -4,23 +4,9 @@ import { agregarPuntos, AccionesPuntos, calcularNivel } from '../../utils/puntos
 import { obtenerMonedasUsuario, gastarMonedas } from '../../utils/monedas';
 import NotificacionPuntos from '../NotificacionPuntos/NotificacionPuntos';
 
-// Componente del logo de monedas (conejito azul)
-const BunnySVG = ({ className = "", width = "20", height = "20" }: { className?: string, width?: string, height?: string }) => (
-  <svg className={className} width={width} height={height} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="14" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
-    <ellipse cx="26" cy="10" rx="3" ry="8" fill="#00bfff" stroke="#fff" strokeWidth="2" />
-    <ellipse cx="20" cy="22" rx="10" ry="10" fill="#00bfff" stroke="#fff" strokeWidth="2" />
-    <ellipse cx="20" cy="26" rx="2" ry="1.2" fill="#fff" />
-    <ellipse cx="16" cy="22" rx="1" ry="1.5" fill="#fff" />
-    <ellipse cx="24" cy="22" rx="1" ry="1.5" fill="#fff" />
-    <path d="M18 28 Q20 30 22 28" stroke="#fff" strokeWidth="1.5" fill="none" />
-    <g>
-      <polyline points="7,10 12,13 9,17" stroke="#fff200" strokeWidth="2" fill="none" />
-      <polyline points="33,10 28,13 31,17" stroke="#fff200" strokeWidth="2" fill="none" />
-      <polyline points="20,2 18,7 22,7" stroke="#fff200" strokeWidth="2" fill="none" />
-    </g>
-  </svg>
-);
+import BunnySVG from '../Icons/BunnySVG';
+import GiftOverlay from '../RegaloOverlay/GiftOverlay';
+import type { GiftData } from '../RegaloOverlay/GiftOverlay';
 
 interface VistaStreamProps {
   streamerId?: string;
@@ -177,6 +163,13 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
     };
     
     setChatMessages(prev => [...prev, mensajeRegalo]);
+    // Emitir evento global para notificar que se envió un regalo (puede ser escuchado por el streamer)
+    try {
+      window.dispatchEvent(new CustomEvent('regaloEnviado', { detail: { streamerId, sender: datosUsuario?.username, gift: regalo } }));
+    } catch (e) {
+      // En navegadores más antiguos puede fallar, pero no es crítico
+      console.warn('No se pudo emitir evento de regalo', e);
+    }
     mostrarNotificacionPuntos(-regalo.precio, `¡Regalo enviado!`);
     setShowGiftStore(false);
   };
@@ -275,6 +268,29 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
       chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
     }
   }, [chatMessages]);
+
+  // Overlay state for this stream view (visible to page viewers and streamer inside the stream page)
+  const [activeGiftOverlay, setActiveGiftOverlay] = useState<GiftData | null>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      const d = e?.detail;
+      if (!d) return;
+      if (String(d.streamerId) === String(streamerId)) {
+        const giftInfo: GiftData = {
+          sender: String(d.sender ?? 'Espectador'),
+          nombre: String(d.gift?.nombre ?? 'Regalo'),
+          icono: String(d.gift?.icono ?? '🎁'),
+          color: d.gift?.color
+        };
+        setActiveGiftOverlay(giftInfo);
+      }
+    };
+
+    window.addEventListener('regaloEnviado', handler as EventListener);
+    return () => window.removeEventListener('regaloEnviado', handler as EventListener);
+  }, [streamerId]);
+
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -494,6 +510,19 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
                   </svg>
                   Personaliza tu canal
                 </button>
+                <button
+                  className="vista-stream__action-btn simulate-gift"
+                  onClick={() => {
+                    // Simulación sencilla: tomar regalo aleatorio y emitir evento como si fuera enviado por un espectador
+                    const idx = Math.floor(Math.random() * regalosDisponibles.length);
+                    const regaloAleatorio = regalosDisponibles[idx];
+                    const sender = 'spontaneoUser';
+                    window.dispatchEvent(new CustomEvent('regaloEnviado', { detail: { streamerId, sender, gift: regaloAleatorio } }));
+                  }}
+                  title="Simular regalo (solo en entorno de desarrollo)"
+                >
+                  Simular regalo
+                </button>
                 <button className="vista-stream__action-btn icon-only">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                     <circle cx="18" cy="5" r="3" stroke="white" strokeWidth="2" fill="none"/>
@@ -629,6 +658,9 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
         )}
       </div>
       
+      {/* Overlay visible in the stream view for viewers */}
+      <GiftOverlay gift={activeGiftOverlay} visible={!!activeGiftOverlay} onClose={() => setActiveGiftOverlay(null)} playSound={false} />
+
       {/* Notificaciones de puntos */}
       {notificaciones.map((notif) => (
         <NotificacionPuntos
@@ -638,6 +670,9 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
           onClose={() => cerrarNotificacion(notif.id)}
         />
       ))}
+
+      {/* Overlay animado para el streamer */}
+      {/* Overlay is now shown in the Creator Dashboard only (control panel). */}
 
       {/* Modal de tienda de regalos */}
       {showGiftStore && (
@@ -661,7 +696,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
             
             <div className="vista-stream__gift-modal-content">
               <div className="vista-stream__gift-user-coins">
-                <BunnySVG width="24" height="24" />
+                <BunnySVG width={24} height={24} />
                 Tus monedas: {saldoActual}
               </div>
               

@@ -13,6 +13,30 @@ The React Compiler is not enabled on this template because of its impact on dev 
 
 ## Expanding the ESLint configuration
 
+## 🧪 Pruebas: Overlay animado de regalos (Streamer)
+
+Para verificar localmente el nuevo overlay animado que aparece cuando un streamer recibe un regalo sigue estos pasos:
+
+1. Ejecuta la app en modo desarrollo:
+
+```powershell
+npm install
+npm run dev
+```
+
+2. Abre la página del stream (ej. ruta `/stream/1`) — para simular que la sesión es del streamer asegúrate de tener en sessionStorage el usuario que coincide con el `streamerId` (ej. `userId: "1"`).
+
+3. Si estás en la página del canal propio (como streamer) verás un botón "Simular regalo" en las acciones. Haz click para generar un evento de regalo y observar el overlay animado en pantalla.
+
+4. Para probar la experiencia de un espectador: abre la misma página del stream en otra ventana (o en otra pestaña sin sesión de streamer) y envía un regalo desde la tienda de regalos — cuando el evento se dispare el streamer verá el overlay si está en su canal.
+
+> Importante: el overlay animado ahora aparece en el Panel de Control del Creador (Dashboard). Eso significa que cuando un espectador envíe un regalo desde la página de viewer o desde la tienda, el streamer que tenga abierto su Panel de Control verá el overlay animado en su vista (no se muestra a espectadores).
+
+Notas:
+- El overlay se auto-cierra tras unos segundos, y también puedes cerrarlo manualmente.
+- En una app real, el evento vendría desde el backend / websocket; aquí usamos un CustomEvent para simularlo durante desarrollo.
+
+
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
 ```js
