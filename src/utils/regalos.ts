@@ -27,7 +27,9 @@ export const obtenerRegalosDeStreamer = (streamerId: string): Regalo[] => {
 /**
  * Obtiene todos los regalos (predeterminados + personalizados) de un streamer
  */
-export const obtenerTodosLosRegalos = (streamerId?: string): { predeterminados: Regalo[], personalizados: Regalo[] } => {
+export const obtenerTodosLosRegalos = (
+  streamerId?: string
+): { predeterminados: Regalo[]; personalizados: Regalo[] } => {
   const personalizados = streamerId ? obtenerRegalosDeStreamer(streamerId) : [];
   return {
     predeterminados: REGALOS_PREDETERMINADOS,
@@ -37,18 +39,23 @@ export const obtenerTodosLosRegalos = (streamerId?: string): { predeterminados: 
 
 /**
  * Crea un nuevo regalo personalizado
+ * Ahora puede ser:
+ *  - solo imagen (imagenUrl)
+ *  - solo audio (audioUrl)
+ *  - imagen + audio (si quisieras)
  */
 export const crearRegalo = (
   nombre: string,
   precio: number,
   imagenUrl: string,
   puntos: number,
-  streamerId: string
+  streamerId: string,
+  audioUrl?: string
 ): Regalo | null => {
   try {
     const regalos = obtenerRegalosPersonalizados();
-    
-    // Validaciones
+
+    // Validaciones básicas
     if (!nombre || nombre.trim().length === 0) {
       throw new Error("El nombre del regalo es obligatorio");
     }
@@ -58,15 +65,21 @@ export const crearRegalo = (
     if (puntos < 0) {
       throw new Error("Los puntos no pueden ser negativos");
     }
-    if (!imagenUrl || imagenUrl.trim().length === 0) {
-      throw new Error("La URL de la imagen es obligatoria");
+
+    const tieneImagen = !!imagenUrl && imagenUrl.trim().length > 0;
+    const tieneAudio = !!audioUrl && audioUrl.trim().length > 0;
+
+    // Nuevo: permitimos imagen o audio, pero al menos uno
+    if (!tieneImagen && !tieneAudio) {
+      throw new Error("Debes ingresar una imagen o un audio para el regalo");
     }
 
     const nuevoRegalo: Regalo = {
       id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       nombre: nombre.trim(),
       precio,
-      imagenUrl: imagenUrl.trim(),
+      imagenUrl: tieneImagen ? imagenUrl.trim() : undefined,
+      audioUrl: tieneAudio ? audioUrl.trim() : undefined,
       puntos,
       esPredeterminado: false,
       streamerId,
@@ -74,7 +87,7 @@ export const crearRegalo = (
 
     regalos.push(nuevoRegalo);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(regalos));
-    
+
     return nuevoRegalo;
   } catch (error) {
     console.error("Error al crear regalo:", error);
@@ -90,7 +103,8 @@ export const editarRegalo = (
   nombre: string,
   precio: number,
   imagenUrl: string,
-  puntos: number
+  puntos: number,
+  audioUrl?: string
 ): boolean => {
   try {
     const regalos = obtenerRegalosPersonalizados();
@@ -105,7 +119,7 @@ export const editarRegalo = (
       throw new Error("No se pueden editar regalos predeterminados");
     }
 
-    // Validaciones
+    // Validaciones básicas
     if (!nombre || nombre.trim().length === 0) {
       throw new Error("El nombre del regalo es obligatorio");
     }
@@ -115,15 +129,20 @@ export const editarRegalo = (
     if (puntos < 0) {
       throw new Error("Los puntos no pueden ser negativos");
     }
-    if (!imagenUrl || imagenUrl.trim().length === 0) {
-      throw new Error("La URL de la imagen es obligatoria");
+
+    const tieneImagen = !!imagenUrl && imagenUrl.trim().length > 0;
+    const tieneAudio = !!audioUrl && audioUrl.trim().length > 0;
+
+    if (!tieneImagen && !tieneAudio) {
+      throw new Error("Debes ingresar una imagen o un audio para el regalo");
     }
 
     regalos[index] = {
       ...regalos[index],
       nombre: nombre.trim(),
       precio,
-      imagenUrl: imagenUrl.trim(),
+      imagenUrl: tieneImagen ? imagenUrl.trim() : undefined,
+      audioUrl: tieneAudio ? audioUrl.trim() : undefined,
       puntos,
     };
 
@@ -154,7 +173,7 @@ export const eliminarRegalo = (id: string): boolean => {
 
     const nuevosRegalos = regalos.filter((r) => r.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(nuevosRegalos));
-    
+
     return true;
   } catch (error) {
     console.error("Error al eliminar regalo:", error);
@@ -165,7 +184,10 @@ export const eliminarRegalo = (id: string): boolean => {
 /**
  * Verifica si un streamer puede crear más regalos (límite opcional)
  */
-export const puedeCrearMasRegalos = (streamerId: string, limite: number = 20): boolean => {
+export const puedeCrearMasRegalos = (
+  streamerId: string,
+  limite: number = 20
+): boolean => {
   const regalos = obtenerRegalosDeStreamer(streamerId);
   return regalos.length < limite;
 };

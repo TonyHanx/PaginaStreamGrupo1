@@ -7,6 +7,7 @@ export interface GiftData {
   icono: string;
   color?: string;
   precio?: number;
+  audioUrl?: string;
 }
 
 interface GiftOverlayProps {
@@ -20,33 +21,67 @@ interface GiftOverlayProps {
 
 const GiftOverlay: React.FC<GiftOverlayProps> = ({ gift = null, visible, duration = 3800, onClose, playSound = true }) => {
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || !gift) return;
+
+    console.log("🎁 Gift recibido en overlay:", gift); 
+
 
     // auto-dismiss
     const t = setTimeout(() => onClose?.(), duration);
 
-    // small celebratory sound using WebAudio (no external files)
     let audioCtx: any = null;
+    let htmlAudio: HTMLAudioElement | null = null;
+
     try {
-      if (playSound !== false && typeof window !== 'undefined' && (window as any).AudioContext) {
-        try {
-          audioCtx = new (window as any).AudioContext();
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-          gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.02);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          // little arpeggio
-          osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.12);
-          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
-          setTimeout(() => {
-            try { osc.stop(); audioCtx.close(); } catch { /* ignore */ }
-          }, 450);
-        } catch { /* ignore noisy browsers */ }
+      if (playSound !== false) {
+        // 1) Si el regalo tiene audioUrl, usamos ese audio
+        if (gift.audioUrl) {
+          htmlAudio = new Audio(gift.audioUrl);
+          htmlAudio.volume = 0.8;
+          htmlAudio.play().catch(() => {
+            // por si el navegador bloquea autoplay
+          });
+        }
+        // 2) Si NO tiene audioUrl, usamos sonido WebAudio de siempre
+        else if (
+          typeof window !== "undefined" &&
+          (window as any).AudioContext
+        ) {
+          try {
+            audioCtx = new (window as any).AudioContext();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(
+              0.08,
+              audioCtx.currentTime + 0.02
+            );
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            // little arpeggio
+            osc.frequency.exponentialRampToValueAtTime(
+              1320,
+              audioCtx.currentTime + 0.12
+            );
+            gain.gain.exponentialRampToValueAtTime(
+              0.0001,
+              audioCtx.currentTime + 0.4
+            );
+            setTimeout(() => {
+              try {
+                osc.stop();
+                audioCtx?.close();
+              } catch {
+                /* ignore */
+              }
+            }, 450);
+          } catch {
+            /* ignore noisy browsers */
+          }
+        }
       }
     } catch {
       // fail silently on older browsers
@@ -54,9 +89,18 @@ const GiftOverlay: React.FC<GiftOverlayProps> = ({ gift = null, visible, duratio
 
     return () => {
       clearTimeout(t);
-      try { if (audioCtx) audioCtx.close?.(); } catch {}
+      try {
+        if (audioCtx) audioCtx.close?.();
+        if (htmlAudio) {
+          htmlAudio.pause();
+          htmlAudio.src = "";
+        }
+      } catch {
+        /* ignore */
+      }
     };
-  }, [visible, duration, onClose, playSound]);
+  }, [visible, duration, onClose, playSound, gift]);
+
 
   if (!visible || !gift) return null;
 
