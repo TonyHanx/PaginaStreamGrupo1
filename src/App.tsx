@@ -10,6 +10,7 @@ import PoliticasPrivacidad from "./paginas/PoliticasPrivacidad";
 import Dashboard from "./componentes/Dashboard/Dashboard";
 import Nosotros from "./componentes/Nosotros/Nosotros";
 import StreamPage from "./paginas/StreamPage";
+import ModalRecargaMonedas from "./componentes/ModalRecargaMonedas/ModalRecargaMonedas";
 
 export default function App() {
   const [dashboardNotifications, setDashboardNotifications] = React.useState([
@@ -29,6 +30,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ModalRecargaMonedas />
       <Routes>
         {/* Página principal con layout completo */}
         <Route path="/" element={<Inicio />} />

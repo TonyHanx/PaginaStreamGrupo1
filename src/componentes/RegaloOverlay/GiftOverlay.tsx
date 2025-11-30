@@ -68,7 +68,20 @@ const GiftOverlay: React.FC<GiftOverlayProps> = ({ gift = null, visible, duratio
       >
         <div className="gift-overlay__icon-wrap">
           <div className="gift-overlay__icon-bg" style={{ boxShadow: `0 8px 30px ${gift.color || '#ffd70088'}` }}>
-            <div className="gift-overlay__icon">{gift.icono}</div>
+            <div className="gift-overlay__icon">
+              {gift.icono?.startsWith('http') ? (
+                <img 
+                  src={gift.icono} 
+                  alt={gift.nombre}
+                  style={{ width: '80px', height: '80px', objectFit: 'contain' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><text y="70" font-size="64">🎁</text></svg>';
+                  }}
+                />
+              ) : (
+                gift.icono
+              )}
+            </div>
           </div>
         </div>
 
@@ -77,7 +90,22 @@ const GiftOverlay: React.FC<GiftOverlayProps> = ({ gift = null, visible, duratio
           <div className="gift-overlay__message">
             <strong className="gift-overlay__sender">{gift.sender}</strong>
             <span className="gift-overlay__text"> te regaló</span>
-            <span className="gift-overlay__gift-name" style={{ color: gift.color || '#fff' }}> {gift.icono} {gift.nombre}</span>
+            <span className="gift-overlay__gift-name" style={{ color: gift.color || '#fff' }}>
+              {' '}
+              {gift.icono?.startsWith('http') ? (
+                <img 
+                  src={gift.icono} 
+                  alt={gift.nombre}
+                  style={{ width: '24px', height: '24px', objectFit: 'contain', verticalAlign: 'middle', display: 'inline' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><text y="20" font-size="18">🎁</text></svg>';
+                  }}
+                />
+              ) : (
+                gift.icono
+              )}
+              {' '}{gift.nombre}
+            </span>
           </div>
         </div>
 

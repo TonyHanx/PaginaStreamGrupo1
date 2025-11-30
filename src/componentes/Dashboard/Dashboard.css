@@ -387,7 +387,7 @@
   background: #18181b;
   border: 2px solid #00bfff;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 191, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 191, 255, 0.5), 0 0 50px rgba(0, 191, 255, 0.2);
   max-height: 500px;
   overflow-y: auto;
   z-index: 9999;
@@ -464,11 +464,37 @@
 .dashboard-creator__gift-item:hover {
   background: #2c2c2e;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);
 }
 
 .dashboard-creator__gift-icon {
   font-size: 2rem;
+}
+
+.dashboard-creator__gift-image {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.dashboard-creator__gift-item--custom {
+  background: linear-gradient(135deg, #2c2c2e 0%, #1e3a5f 100%);
+  border-width: 2px;
+}
+
+.dashboard-creator__gift-section {
+  margin-bottom: 1rem;
+}
+
+.dashboard-creator__gift-section-title {
+  color: #00bfff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.75rem 1rem 0.5rem;
+  margin: 0;
+  border-bottom: 1px solid #2c2c2e;
+  text-shadow: 0 0 10px rgba(0, 191, 255, 0.4);
 }
 
 .dashboard-creator__gift-name {

@@ -25,8 +25,8 @@ export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegist
 				setError("");
 				sessionStorage.setItem("USUARIO", JSON.stringify({ 
 					username: userData.username, 
-					puntos: userData.puntos || 0,
-					monedas: userData.monedas || 1000,
+					puntos: userData.puntos ?? 0,
+					monedas: userData.monedas ?? 0,
 					userId: userData.userId || '1'
 				}));
 				
@@ -46,7 +46,7 @@ export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegist
 			sessionStorage.setItem("USUARIO", JSON.stringify({ 
 				username, 
 				puntos: 0,
-				monedas: 1000,
+				monedas: 500,
 				userId: userId
 			}));
 			

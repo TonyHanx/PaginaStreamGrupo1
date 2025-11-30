@@ -1,72 +1,164 @@
 .catalogo-regalos-cliente {
-  max-width: 420px;
+  max-width: 900px;
   margin: 0 auto;
+  padding: 1rem;
+}
+
+.catalogo-regalos-cliente h2 {
+  text-align: center;
+  color: #00bfff;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 20px rgba(0, 191, 255, 0.6);
 }
 
 .catalogo-regalos__saldo {
-  background: #0a2a3a;
+  background: linear-gradient(135deg, #1f1f23 0%, #1e3a5f 100%);
   color: #fff;
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 18px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  border: 2px solid #00bfff;
+  box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
 }
 
 .catalogo-regalos__mensaje {
   margin-bottom: 10px;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
 }
 
 .catalogo-regalos__mensaje--error {
-  color: #f87171;
+  background: rgba(255, 59, 48, 0.15);
+  color: #ff3b30;
+  border: 1px solid #ff3b30;
 }
 
 .catalogo-regalos__mensaje--success {
+  background: rgba(0, 191, 255, 0.15);
   color: #00bfff;
+  border: 1px solid #00bfff;
+}
+
+/* Secciones */
+.catalogo-seccion {
+  margin-bottom: 3rem;
+}
+
+.catalogo-seccion__titulo {
+  color: #00bfff;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #00bfff;
+  text-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
 }
 
 .catalogo-regalos__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 16px;
 }
 
 .catalogo-regalos__item {
-  background: #181b1f;
+  background: #18181b;
   border-radius: 12px;
   padding: 16px;
   text-align: center;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid transparent;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.catalogo-regalos__item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 191, 255, 0.4);
+}
+
+.catalogo-regalos__item--predeterminado {
+  border-color: #2c2c2e;
+}
+
+.catalogo-regalos__item--personalizado {
+  border-color: #00bfff;
+  background: linear-gradient(135deg, #18181b 0%, #1e3a5f 100%);
+}
+
+.catalogo-regalos__badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #00bfff 0%, #0099cc 100%);
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.6);
 }
 
 .catalogo-regalos__emoji {
-  font-size: 32px;
+  font-size: 40px;
+  margin-bottom: 0.5rem;
+}
+
+.catalogo-regalos__imagen {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.catalogo-regalos__imagen img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .catalogo-regalos__nombre {
   font-weight: 600;
   margin: 8px 0;
+  font-size: 0.95rem;
+}
+
+.catalogo-regalos__puntos {
+  color: #adadb8;
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
 }
 
 .catalogo-regalos__button {
   border: none;
   border-radius: 8px;
-  padding: 6px 16px;
+  padding: 8px 16px;
   font-weight: 600;
-  margin-top: 6px;
-  transition: opacity 0.2s;
+  margin-top: 8px;
+  width: 100%;
+  transition: all 0.3s;
+  font-size: 0.9rem;
 }
 
 .catalogo-regalos__button--active {
-  background: #00bfff;
-  color: #111;
+  background: linear-gradient(135deg, #00bfff 0%, #0099cc 100%);
+  color: #fff;
   cursor: pointer;
+  font-weight: 700;
 }
 
 .catalogo-regalos__button--active:hover {
-  opacity: 0.9;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.6);
+  background: linear-gradient(135deg, #0099cc 0%, #0080b3 100%);
 }
 
 .catalogo-regalos__button--disabled {
@@ -74,3 +166,26 @@
   color: #aaa;
   cursor: not-allowed;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .catalogo-regalos__grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .catalogo-regalos__emoji {
+    font-size: 32px;
+  }
+
+  .catalogo-seccion__titulo {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalogo-regalos__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+

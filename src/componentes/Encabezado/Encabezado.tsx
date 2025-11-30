@@ -136,6 +136,13 @@ function UserMenu({ username }: { username: string }) {
 							navigate("/dashboard");
 						}} />
 						<MenuItem icon={
+							// Icono de regalo personalizado
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="3" y="8" width="14" height="9" rx="1" stroke="#fff" strokeWidth="1.5"/><path d="M10 8v9M3 11h14" stroke="#fff" strokeWidth="1.5"/><path d="M7 8c0-1.5.5-3 3-3s3 1.5 3 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>
+						} label="Gestionar Regalos" onClick={() => {
+							setOpen(false);
+							navigate("/streamer/panel");
+						}} />
+						<MenuItem icon={
 							// Icono estrella para suscripciones
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M10 2L12.5 7.5L18 8.5L14 12.5L15 18L10 15L5 18L6 12.5L2 8.5L7.5 7.5L10 2Z" stroke="#fff" strokeWidth="1.5"/></svg>
 						} label="Suscripciones" />
@@ -146,7 +153,10 @@ function UserMenu({ username }: { username: string }) {
 						<MenuItem icon={
 							// Icono de regalo/drops
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="3" y="8" width="14" height="9" rx="1" stroke="#fff" strokeWidth="1.5"/><path d="M10 8v9M3 11h14" stroke="#fff" strokeWidth="1.5"/><path d="M7 8c0-1.5.5-3 3-3s3 1.5 3 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>
-						} label="Drops y recompensas" />
+						} label="Catálogo de Regalos" onClick={() => {
+							setOpen(false);
+							navigate("/regalos");
+						}} />
 					</div>
 					<div className="user-menu__divider">
 						<MenuItem icon={
@@ -211,8 +221,29 @@ const NOTIFICACIONES_PREDEFINIDAS = [
 const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthButtons = true }, ref) => {
   const [modal, setModal] = useState<null | 'login' | 'register' | 'monedas' | 'terminos' | 'politicas'>(null);
   const [notiAbierta, setNotiAbierta] = useState(false);
+  const [saldoMonedas, setSaldoMonedas] = useState(0);
   const notiRef = useRef<HTMLDivElement>(null);
   
+  // Actualizar saldo de monedas
+  const actualizarSaldo = () => {
+    const datos = obtenerMonedasUsuario();
+    setSaldoMonedas(datos?.monedas || 0);
+  };
+
+  // Escuchar cambios en el saldo
+  useEffect(() => {
+    actualizarSaldo();
+    window.addEventListener('monedas-actualizadas', actualizarSaldo);
+    window.addEventListener('saldo-actualizado', actualizarSaldo);
+    window.addEventListener('storage', actualizarSaldo);
+    
+    return () => {
+      window.removeEventListener('monedas-actualizadas', actualizarSaldo);
+      window.removeEventListener('saldo-actualizado', actualizarSaldo);
+      window.removeEventListener('storage', actualizarSaldo);
+    };
+  }, []);
+
   const closeModal = () => {
     // Si estamos en términos o políticas, volver al registro
     if (modal === 'terminos' || modal === 'politicas') {
@@ -269,7 +300,7 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
           <input className="encabezado__busqueda" type="text" placeholder="Buscar" />
         </div>
         <div className="encabezado__acciones">
-          <button className="encabezado__donar" title="Recargar monedas" onClick={() => setModal('monedas')}>
+          <button className="encabezado__donar" title="Recargar monedas" onClick={() => window.dispatchEvent(new CustomEvent('abrirTiendaMonedas'))}>
             <span className="encabezado__donar-icon">
               <BunnySVG />
             </span>
@@ -339,7 +370,7 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
                 <div className="encabezado__modal-saldo">Tu saldo:</div>
                 <div className="encabezado__modal-saldo-row">
                   <span><BunnySVG className="bunny-anim" /></span>
-                  <span>{obtenerMonedasUsuario()?.monedas || 0}</span>
+                  <span>{saldoMonedas}</span>
                 </div>
                 <div className="encabezado__modal-monedas-grid">
                   {recargaMonedasOpciones.map((op, i) => (

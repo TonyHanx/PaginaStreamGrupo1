@@ -3,6 +3,8 @@ import './VistaStream.css';
 import { agregarPuntos, AccionesPuntos, calcularNivel } from '../../utils/puntos';
 import { obtenerMonedasUsuario, gastarMonedas } from '../../utils/monedas';
 import NotificacionPuntos from '../NotificacionPuntos/NotificacionPuntos';
+import { obtenerTodosLosRegalos } from '../../utils/regalos';
+import type { Regalo as RegaloType } from '../../types/regalos';
 
 import BunnySVG from '../Icons/BunnySVG';
 import GiftOverlay from '../RegaloOverlay/GiftOverlay';
@@ -29,14 +31,6 @@ interface ChatMessage {
   isGift?: boolean;
 }
 
-interface Regalo {
-  id: number;
-  nombre: string;
-  precio: number;
-  icono: string;
-  color: string;
-}
-
 const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin }) => {
   const [message, setMessage] = useState('');
   const [isFollowing, setIsFollowing] = useState(false);
@@ -47,6 +41,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
   const [showGiftStore, setShowGiftStore] = useState(false);
   const [saldoActual, setSaldoActual] = useState(0);
   const [activeTab, setActiveTab] = useState('Inicio');
+  const [regalosDisponibles, setRegalosDisponibles] = useState<RegaloType[]>([]);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
 
   // Función para actualizar el saldo
@@ -100,49 +95,36 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
     setNotificaciones(prev => prev.filter(n => n.id !== id));
   };
 
-  // Datos de regalos disponibles
-  const regalosDisponibles: Regalo[] = [
-    { id: 1, nombre: "⭐ Estrella", precio: 5, icono: "⭐", color: "#FFD700" },
-    { id: 2, nombre: "❤️ Corazón", precio: 10, icono: "❤️", color: "#FF6B6B" },
-    { id: 3, nombre: "🎉 Confeti", precio: 25, icono: "🎉", color: "#9B59B6" },
-    { id: 4, nombre: "🔥 Fuego", precio: 50, icono: "🔥", color: "#FF4500" },
-    { id: 5, nombre: "💎 Diamante", precio: 100, icono: "💎", color: "#00CED1" },
-    { id: 6, nombre: "👑 Corona", precio: 200, icono: "👑", color: "#FFD700" },
-    { id: 7, nombre: "🚀 Cohete", precio: 500, icono: "🚀", color: "#FF69B4" },
-    { id: 8, nombre: "🎯 Diana", precio: 1000, icono: "🎯", color: "#32CD32" },
-  ];
-
   // Función para enviar regalo
-  const enviarRegalo = (regalo: Regalo) => {
+  const enviarRegalo = (regalo: RegaloType) => {
     const datosUsuario = obtenerMonedasUsuario();
     if (!datosUsuario) {
       onShowLogin?.();
       return;
     }
 
-    if (datosUsuario.monedas < regalo.precio) {
-      mostrarNotificacionSimple('No tienes suficientes monedas');
-      // Redirigir a la tienda de monedas después de un breve delay
-      setTimeout(() => {
-        abrirTiendaMonedas();
-      }, 1500);
+    // Verificar saldo ACTUAL desde sessionStorage
+    const saldoReal = datosUsuario.monedas;
+    console.log('💰 [VistaStream] Verificando saldo:', saldoReal, 'vs precio:', regalo.precio);
+    
+    if (saldoReal < regalo.precio) {
+      console.log('❌ [VistaStream] Saldo insuficiente - Abriendo modal de recarga');
+      // Abrir modal de recarga inmediatamente
+      abrirTiendaMonedas();
       return;
     }
 
-    // Gastar monedas
-    const saldoAnterior = saldoActual;
-    console.log('Enviando regalo - Saldo anterior:', saldoAnterior, 'Precio regalo:', regalo.precio);
-    
+    // Gastar monedas usando la función centralizada
+    console.log('💸 [VistaStream] Gastando monedas:', regalo.precio);
     const gastadoExitoso = gastarMonedas(regalo.precio);
     if (!gastadoExitoso) {
       mostrarNotificacionSimple('Error al procesar el regalo');
       return;
     }
 
-    // Actualizar el estado inmediatamente basado en el gasto realizado
-    const nuevoSaldo = saldoAnterior - regalo.precio;
-    console.log('Nuevo saldo calculado:', nuevoSaldo);
-    setSaldoActual(nuevoSaldo);
+    // Actualizar el estado local (el evento ya actualizará el resto)
+    console.log('✅ [VistaStream] Regalo enviado exitosamente');
+    actualizarSaldo();
 
     // Agregar puntos de experiencia equivalentes al precio del regalo
     const puntosGanados = agregarPuntos(regalo.precio);
@@ -154,15 +136,20 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
     }
 
     // Agregar mensaje de regalo al chat
+    const iconoRegalo = regalo.emoji || regalo.imagenUrl || '🎁';
     const mensajeRegalo: ChatMessage = {
       id: Date.now(),
       username: datosUsuario.username,
-      message: `envió ${regalo.icono} ${regalo.nombre}`,
-      color: regalo.color,
+      message: `envió ${iconoRegalo} ${regalo.nombre}`,
+      color: regalo.color || '#00bfff',
       isGift: true
     };
     
     setChatMessages(prev => [...prev, mensajeRegalo]);
+    
+    // NO cerrar la tienda de regalos después de enviar
+    // setShowGiftStore(false); - El usuario puede cerrarla manualmente o enviar más
+    
     // Emitir evento global para notificar que se envió un regalo (puede ser escuchado por el streamer)
     try {
       window.dispatchEvent(new CustomEvent('regaloEnviado', { detail: { streamerId, sender: datosUsuario?.username, gift: regalo } }));
@@ -176,6 +163,11 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
 
   // Detectar si el usuario está logueado y actualizar saldo
   useEffect(() => {
+    // Cargar regalos del streamer
+    const todosLosRegalos = obtenerTodosLosRegalos(streamerId);
+    const regalos = [...todosLosRegalos.predeterminados, ...todosLosRegalos.personalizados];
+    setRegalosDisponibles(regalos);
+    
     const checkLogin = () => {
       const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;
       setIsLoggedIn(!!usuario);
@@ -206,6 +198,26 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
       console.log('Tienda abierta - Saldo inicial:', saldoReal);
     }
   }, [showGiftStore]);
+
+  // Escuchar cambios globales de saldo desde cualquier componente
+  useEffect(() => {
+    const actualizarSaldoGlobal = () => {
+      const datos = obtenerMonedasUsuario();
+      const saldoReal = datos?.monedas || 0;
+      setSaldoActual(saldoReal);
+      console.log('💰 Saldo actualizado globalmente:', saldoReal);
+    };
+
+    window.addEventListener('monedas-actualizadas', actualizarSaldoGlobal);
+    window.addEventListener('saldo-actualizado', actualizarSaldoGlobal);
+    window.addEventListener('storage', actualizarSaldoGlobal);
+
+    return () => {
+      window.removeEventListener('monedas-actualizadas', actualizarSaldoGlobal);
+      window.removeEventListener('saldo-actualizado', actualizarSaldoGlobal);
+      window.removeEventListener('storage', actualizarSaldoGlobal);
+    };
+  }, []);
 
   // Sistema de puntos por ver stream (cada 5 minutos)
   useEffect(() => {
@@ -701,21 +713,38 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
               </div>
               
               <div className="vista-stream__gift-grid">
-                {regalosDisponibles.map((regalo) => (
-                  <div 
-                    key={regalo.id} 
-                    className={`vista-stream__gift-item ${
-                      saldoActual < regalo.precio ? 'disabled' : ''
-                    }`}
-                    onClick={() => enviarRegalo(regalo)}
-                  >
-                    <div className="vista-stream__gift-icon">
-                      {regalo.icono}
+                {regalosDisponibles.map((regalo) => {
+                  return (
+                    <div 
+                      key={regalo.id} 
+                      className={`vista-stream__gift-item ${!regalo.esPredeterminado ? 'vista-stream__gift-item--custom' : ''}`}
+                      onClick={() => enviarRegalo(regalo)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="vista-stream__gift-icon">
+                        {regalo.imagenUrl ? (
+                          <img 
+                            src={regalo.imagenUrl} 
+                            alt={regalo.nombre}
+                            style={{ width: '48px', height: '48px', objectFit: 'contain' }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><text y="40" font-size="36">🎁</text></svg>';
+                            }}
+                          />
+                        ) : (
+                          regalo.emoji
+                        )}
+                      </div>
+                      <div className="vista-stream__gift-name">{regalo.nombre}</div>
+                      <div className="vista-stream__gift-price">
+                        <BunnySVG width={16} height={16} /> {regalo.precio}
+                      </div>
+                      {!regalo.esPredeterminado && (
+                        <div className="vista-stream__gift-badge">Exclusivo</div>
+                      )}
                     </div>
-                    <div className="vista-stream__gift-name">{regalo.nombre}</div>
-                    <div className="vista-stream__gift-price">💰 {regalo.precio}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

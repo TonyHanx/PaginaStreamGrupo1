@@ -31,7 +31,7 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
     }
     // Guardar usuario en localStorage con puntos y monedas iniciales
     const userId = Date.now().toString(); // Generar ID único basado en timestamp
-    const userData = { username, email, password, puntos: 0, monedas: 1000, userId };
+    const userData = { username, email, password, puntos: 0, monedas: 500, userId };
     localStorage.setItem("USUARIO_REGISTRADO", JSON.stringify(userData));
     setSuccess(true);
     setUsername("");

@@ -5,7 +5,9 @@ import NotificacionNivel from '../../componentes/NotificacionNivel/NotificacionN
 import GiftOverlay from '../RegaloOverlay/GiftOverlay';
 import BunnySVG from '../Icons/BunnySVG';
 import type { GiftData } from '../RegaloOverlay/GiftOverlay';
-import { obtenerMonedasUsuario } from '../../utils/monedas';
+import type { Regalo } from '../../types/regalos';
+import { obtenerTodosLosRegalos } from '../../utils/regalos';
+import { obtenerMonedasUsuario, gastarMonedas } from '../../utils/monedas';
 import { AccionesPuntos } from '../../utils/puntos';
 import { 
     obtenerDatosStreamer, 
@@ -64,17 +66,8 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     const intervalRef = useRef<number | null>(null);
     const inicioStreamRef = useRef<Date | null>(null);
 
-    // Regalos disponibles (los mismos del catálogo)
-    const regalos = [
-        { nombre: "Estrella", precio: 5, emoji: "⭐", color: '#FFD700' },
-        { nombre: "Corazón", precio: 10, emoji: "💖", color: '#FF69B4' },
-        { nombre: "Confeti", precio: 25, emoji: "🎉", color: '#FF6347' },
-        { nombre: "Fuego", precio: 50, emoji: "🔥", color: '#FF4500' },
-        { nombre: "Diamante", precio: 100, emoji: "💎", color: '#00FFFF' },
-        { nombre: "Corona", precio: 200, emoji: "👑", color: '#FFD700' },
-        { nombre: "Cohete", precio: 500, emoji: "🚀", color: '#4169E1' },
-        { nombre: "Diana", precio: 1000, emoji: "🎯", color: '#DC143C' },
-    ];
+    // Regalos disponibles (predeterminados + personalizados del streamer)
+    const [regalos, setRegalos] = useState<Regalo[]>([]);
 
     // Obtener datos del usuario
     const usuarioStr = sessionStorage.getItem('USUARIO');
@@ -133,12 +126,29 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     useEffect(() => {
         actualizarSaldo();
         window.addEventListener("storage", actualizarSaldo);
+        window.addEventListener("monedas-actualizadas", actualizarSaldo);
+        window.addEventListener("saldo-actualizado", actualizarSaldo);
         const interval = setInterval(actualizarSaldo, 1000);
         return () => {
             window.removeEventListener("storage", actualizarSaldo);
+            window.removeEventListener("monedas-actualizadas", actualizarSaldo);
+            window.removeEventListener("saldo-actualizado", actualizarSaldo);
             clearInterval(interval);
         };
     }, []);
+
+    // Cargar regalos (predeterminados + personalizados del streamer actual)
+    useEffect(() => {
+        console.log('🎁 Cargando regalos para streamer:', username);
+        const todosLosRegalos = obtenerTodosLosRegalos(username);
+        console.log('🎁 Regalos obtenidos:', todosLosRegalos);
+        const regalosConColor = [
+            ...todosLosRegalos.predeterminados.map(r => ({ ...r, color: '#00bfff' })),
+            ...todosLosRegalos.personalizados.map(r => ({ ...r, color: '#764ba2' }))
+        ];
+        console.log('🎁 Total regalos con color:', regalosConColor.length);
+        setRegalos(regalosConColor);
+    }, [username]);
 
     // Auto-scroll del chat
     useEffect(() => {
@@ -251,57 +261,69 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
 
     // Enviar regalo
     const handleSendGift = (regalo: any) => {
-        // Verificar si tiene suficientes monedas
-        if (saldo < regalo.precio) {
-            alert(`No tienes suficientes monedas. Necesitas ${regalo.precio} 🪙`);
+        // Importar gastarMonedas y obtenerMonedasUsuario
+        const datosUsuario = obtenerMonedasUsuario();
+        if (!datosUsuario) return;
+
+        const saldoReal = datosUsuario.monedas;
+        console.log('💰 [Dashboard] Verificando saldo:', saldoReal, 'vs precio:', regalo.precio);
+
+        // Si no hay suficiente saldo, abrir tienda de monedas
+        if (saldoReal < regalo.precio) {
+            console.log('❌ [Dashboard] Saldo insuficiente');
+            // Disparar evento para abrir tienda de monedas
+            window.dispatchEvent(new CustomEvent('abrirTiendaMonedas'));
+            // NO cerrar el panel de regalos, dejar que el usuario decida
             return;
         }
 
-        // Restar monedas
+        // Gastar monedas usando la función centralizada
+        console.log('💸 [Dashboard] Gastando monedas:', regalo.precio);
+        const gastadoExitoso = gastarMonedas(regalo.precio);
+        if (!gastadoExitoso) {
+            return;
+        }
+
+        // Agregar puntos
         const usuarioStr = sessionStorage.getItem('USUARIO');
         if (usuarioStr) {
             const usuario = JSON.parse(usuarioStr);
-            const saldoActual = usuario.monedas ?? 0;
-            const nuevasMonedas = saldoActual - regalo.precio;
             const puntosActuales = usuario.puntos ?? 0;
             const nuevosPuntos = puntosActuales + (AccionesPuntos.DONAR || 50);
-
-            const nuevoUsuario = { ...usuario, monedas: nuevasMonedas, puntos: nuevosPuntos };
-            sessionStorage.setItem('USUARIO', JSON.stringify(nuevoUsuario));
-
-            // Actualizar localStorage si está registrado
+            usuario.puntos = nuevosPuntos;
+            sessionStorage.setItem('USUARIO', JSON.stringify(usuario));
+            
+            // Sincronizar localStorage
             const registradoStr = localStorage.getItem('USUARIO_REGISTRADO');
             if (registradoStr) {
                 const registrado = JSON.parse(registradoStr);
                 if (registrado.username === usuario.username) {
-                    localStorage.setItem('USUARIO_REGISTRADO', JSON.stringify({
-                        ...registrado,
-                        monedas: nuevasMonedas,
-                        puntos: nuevosPuntos
-                    }));
+                    registrado.puntos = nuevosPuntos;
+                    localStorage.setItem('USUARIO_REGISTRADO', JSON.stringify(registrado));
                 }
             }
-
-            window.dispatchEvent(new Event('monedas-actualizadas'));
-            actualizarSaldo();
         }
+
+        console.log('✅ [Dashboard] Regalo enviado exitosamente');
 
         const nuevoMensaje: ChatMessage = {
             id: Date.now(),
             username: username,
-            message: `${regalo.nombre}`,
+            message: `${regalo.nombre} (${regalo.precio} monedas)`,
             timestamp: new Date().toLocaleTimeString(),
             color: regalo.color,
             isGift: true,
-            giftIcon: regalo.emoji
+            giftIcon: regalo.emoji || regalo.imagenUrl
         };
 
         setChatMessages(prev => [...prev, nuevoMensaje]);
-        setShowGiftPanel(false);
+        // NO cerrar el panel de regalos después de enviar
+        // setShowGiftPanel(false); - El usuario puede cerrarla manualmente o enviar más
 
         // Agregar notificación al feed
+        const iconoRegalo = regalo.emoji || '🎁';
         const nuevaNotificacion: Notification = {
-            mensaje: `🎁 ${username} envió ${regalo.emoji} ${regalo.nombre}`,
+            mensaje: `🎁 ${username} envió ${iconoRegalo} ${regalo.nombre}`,
             tiempo: new Date().toLocaleTimeString(),
             tipo: 'donacion'
         };
@@ -309,7 +331,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
 
         // Also notify the control panel overlay (simulate a global event that viewers would dispatch)
         try {
-            window.dispatchEvent(new CustomEvent('regaloEnviado', { detail: { streamerId: username, sender: username, gift: { nombre: regalo.nombre, icono: regalo.emoji, color: regalo.color } } }));
+            window.dispatchEvent(new CustomEvent('regaloEnviado', { detail: { streamerId: username, sender: username, gift: { nombre: regalo.nombre, icono: regalo.emoji || regalo.imagenUrl, color: regalo.color } } }));
         } catch {
             // ignore
         }
@@ -468,7 +490,18 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                                 <>
                                                     <span className="dashboard-creator__chat-time">{msg.timestamp}</span>
                                                     <div className="dashboard-creator__gift-message-content">
-                                                        <span className="dashboard-creator__gift-message-icon">{msg.giftIcon}</span>
+                                                        {msg.giftIcon?.startsWith('http') ? (
+                                                            <img 
+                                                                src={msg.giftIcon} 
+                                                                alt="gift"
+                                                                style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                                                                onError={(e) => {
+                                                                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><text y="28" font-size="28">🎁</text></svg>';
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <span className="dashboard-creator__gift-message-icon">{msg.giftIcon}</span>
+                                                        )}
                                                         <div className="dashboard-creator__gift-message-text">
                                                             <span className="dashboard-creator__chat-username" style={{ color: msg.color }}>
                                                                 {msg.username}
@@ -540,26 +573,67 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                     <h3>Enviar regalo ({regalos.length} disponibles)</h3>
                                     <button onClick={() => setShowGiftPanel(false)}>×</button>
                                 </div>
-                                <div className="dashboard-creator__gift-grid">
-                                    {regalos.length === 0 ? (
-                                        <p style={{color: 'white', padding: '20px'}}>No hay regalos disponibles</p>
-                                    ) : (
-                                        regalos.map((regalo, index) => (
-                                            <button
-                                                key={index}
-                                                className="dashboard-creator__gift-item"
-                                                onClick={() => handleSendGift(regalo)}
-                                                style={{ borderColor: regalo.color }}
-                                            >
-                                                <span className="dashboard-creator__gift-icon">{regalo.emoji}</span>
-                                                <span className="dashboard-creator__gift-name">{regalo.nombre}</span>
-                                                <span className="dashboard-creator__gift-price">
-                                                    <BunnySVG width={18} height={18} /> {regalo.precio}
-                                                </span>
-                                            </button>
-                                        ))
-                                    )}
-                                </div>
+                                
+                                {/* Regalos Predeterminados */}
+                                {regalos.filter(r => r.esPredeterminado).length > 0 && (
+                                    <div className="dashboard-creator__gift-section">
+                                        <h4 className="dashboard-creator__gift-section-title">🎁 Predeterminados</h4>
+                                        <div className="dashboard-creator__gift-grid">
+                                            {regalos.filter(r => r.esPredeterminado).map((regalo, index) => (
+                                                <button
+                                                    key={regalo.id}
+                                                    className="dashboard-creator__gift-item"
+                                                    onClick={() => handleSendGift(regalo)}
+                                                    style={{ borderColor: regalo.color || '#00bfff' }}
+                                                >
+                                                    <span className="dashboard-creator__gift-icon">{regalo.emoji}</span>
+                                                    <span className="dashboard-creator__gift-name">{regalo.nombre}</span>
+                                                    <span className="dashboard-creator__gift-price">
+                                                        <BunnySVG width={18} height={18} /> {regalo.precio}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Regalos Personalizados */}
+                                {regalos.filter(r => !r.esPredeterminado).length > 0 && (
+                                    <div className="dashboard-creator__gift-section">
+                                        <h4 className="dashboard-creator__gift-section-title">✨ Exclusivos del Streamer</h4>
+                                        <div className="dashboard-creator__gift-grid">
+                                            {regalos.filter(r => !r.esPredeterminado).map((regalo, index) => (
+                                                <button
+                                                    key={regalo.id}
+                                                    className="dashboard-creator__gift-item dashboard-creator__gift-item--custom"
+                                                    onClick={() => handleSendGift(regalo)}
+                                                    style={{ borderColor: regalo.color || '#764ba2' }}
+                                                >
+                                                    {regalo.imagenUrl ? (
+                                                        <img 
+                                                            src={regalo.imagenUrl} 
+                                                            alt={regalo.nombre}
+                                                            className="dashboard-creator__gift-image"
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><text y="40" font-size="36">🎁</text></svg>';
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <span className="dashboard-creator__gift-icon">🎁</span>
+                                                    )}
+                                                    <span className="dashboard-creator__gift-name">{regalo.nombre}</span>
+                                                    <span className="dashboard-creator__gift-price">
+                                                        <BunnySVG width={18} height={18} /> {regalo.precio}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {regalos.length === 0 && (
+                                    <p style={{color: 'white', padding: '20px', textAlign: 'center'}}>No hay regalos disponibles</p>
+                                )}
                             </div>
                         )}
                     </div>

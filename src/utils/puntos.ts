@@ -30,10 +30,10 @@ export function guardarDatosUsuario(userData: UserData): void {
   try {
     // Conservar monedas si existen
     const usuarioStr = sessionStorage.getItem('USUARIO');
-    let monedas = 1000;
+    let monedas = 0;
     if (usuarioStr) {
       const usuario = JSON.parse(usuarioStr);
-      monedas = usuario.monedas ?? 1000;
+      monedas = usuario.monedas ?? 0;
     }
     const usuarioFinal = { ...userData, monedas };
     sessionStorage.setItem('USUARIO', JSON.stringify(usuarioFinal));

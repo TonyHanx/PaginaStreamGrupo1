@@ -16,7 +16,7 @@ export function obtenerMonedasUsuario(): UserMonedas | null {
     const usuario = JSON.parse(usuarioStr);
     return {
       username: usuario.username || '',
-      monedas: usuario.monedas || 1000 // Por defecto 1000 monedas para demo
+      monedas: usuario.monedas ?? 0 // Si no existe, iniciar en 0
     };
   } catch {
     return null;
@@ -36,8 +36,22 @@ export function guardarMonedasUsuario(userData: UserMonedas): void {
     
     sessionStorage.setItem('USUARIO', JSON.stringify(usuario));
     
-    // Disparar evento de storage para notificar cambios
+    // Sincronizar con localStorage si está registrado
+    const registradoStr = localStorage.getItem('USUARIO_REGISTRADO');
+    if (registradoStr) {
+      const registrado = JSON.parse(registradoStr);
+      if (registrado.username === usuario.username) {
+        registrado.monedas = userData.monedas;
+        localStorage.setItem('USUARIO_REGISTRADO', JSON.stringify(registrado));
+      }
+    }
+    
+    // Disparar múltiples eventos para asegurar sincronización
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('monedas-actualizadas'));
+    window.dispatchEvent(new CustomEvent('saldo-actualizado', { 
+      detail: { monedas: userData.monedas } 
+    }));
   } catch {
     // Si hay error, no hacer nada
   }

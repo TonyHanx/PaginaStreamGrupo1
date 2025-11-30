@@ -733,23 +733,38 @@
   box-shadow: 0 5px 15px rgba(0, 191, 255, 0.3);
 }
 
-.vista-stream__gift-item.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: #1a1a1a;
+.vista-stream__gift-item--custom {
+  border-color: rgba(0, 191, 255, 0.3);
+  background: linear-gradient(135deg, #232329 0%, #1e2a3a 100%);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.15);
 }
 
-.vista-stream__gift-item.disabled:hover {
-  border-color: transparent;
-  background: #1a1a1a;
-  transform: none;
-  box-shadow: none;
+.vista-stream__gift-item--custom:hover {
+  border-color: rgba(0, 191, 255, 0.6);
+  box-shadow: 0 5px 20px rgba(0, 191, 255, 0.4);
+}
+
+.vista-stream__gift-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #00bfff;
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .vista-stream__gift-icon {
   font-size: 2.5rem;
   margin-bottom: 8px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
 }
 
 .vista-stream__gift-name {
@@ -767,7 +782,9 @@
   background: rgba(0, 191, 255, 0.1);
   padding: 4px 8px;
   border-radius: 12px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   border: 1px solid rgba(0, 191, 255, 0.3);
 }
 
