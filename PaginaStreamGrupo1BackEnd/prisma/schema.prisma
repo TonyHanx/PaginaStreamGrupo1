@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(uuid())
+  username    String        @unique
+  email       String        @unique
+  password    String
+  puntos      Int           @default(0)
+  monedas     Int           @default(500)
+  isStreamer  Boolean       @default(false)
+  avatar      String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  streamer    Streamer?
+  transactions Transaction[]
+  
+  @@map("users")
+}
+
+model Streamer {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  displayName String
+  description String?  @db.Text
+  followers   Int      @default(0)
+  verified    Boolean  @default(false)
+  isLive      Boolean  @default(false)
+  socialMedia Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  streams     Stream[]
+  gifts       Gift[]
+  transactions Transaction[]
+  
+  @@map("streamers")
+}
+
+model Stream {
+  id          String    @id @default(uuid())
+  streamerId  String
+  title       String
+  category    String
+  game        String
+  thumbnail   String?
+  viewers     Int       @default(0)
+  language    String    @default("Español")
+  tags        Json      @default("[]")
+  isRecording Boolean   @default(false)
+  isMature    Boolean   @default(false)
+  startedAt   DateTime?
+  endedAt     DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  streamer    Streamer  @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  
+  @@map("streams")
+}
+
+model Gift {
+  id               String   @id @default(uuid())
+  nombre           String
+  precio           Int
+  emoji            String?
+  imagenUrl        String?
+  puntos           Int
+  esPredeterminado Boolean  @default(false)
+  streamerId       String?
+  color            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  streamer         Streamer?      @relation(fields: [streamerId], references: [id], onDelete: SetNull)
+  transactions     Transaction[]
+  
+  @@map("gifts")
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  streamerId  String?
+  giftId      String?
+  tipo        TransactionType
+  monto       Int
+  descripcion String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  streamer    Streamer? @relation(fields: [streamerId], references: [id], onDelete: SetNull)
+  gift        Gift?     @relation(fields: [giftId], references: [id], onDelete: SetNull)
+  
+  @@map("transactions")
+}
+
+enum TransactionType {
+  regalo
+  compra_monedas
+  puntos
+}

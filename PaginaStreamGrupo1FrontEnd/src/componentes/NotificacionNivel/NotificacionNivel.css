@@ -1,0 +1,40 @@
+.notificacion-nivel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ff8c00, #ffcc33);
+  color: white;
+  padding: 1.2rem 1.5rem;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.35s ease;
+  z-index: 1000;
+}
+
+.notificacion-nivel.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.notificacion-nivel__icono {
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notificacion-nivel__titulo {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.notificacion-nivel__detalle {
+  font-size: 0.95rem;
+  color: #fff;
+  opacity: 0.9;
+}
+

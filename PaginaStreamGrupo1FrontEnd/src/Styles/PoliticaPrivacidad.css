@@ -1,0 +1,49 @@
+.privacy-wrapper {
+  background-color: #0e0e10;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.privacy-card {
+  background-color: #18181b;
+  color: #ddd;
+  max-width: 900px;
+  border: 1px solid #2c2c2e;
+}
+
+.text-accent {
+  color: #6C63FF; /* Morado principal */
+  font-weight: 600;
+}
+
+.text-primary-glow {
+  color: #00BFFF; /* Azul neón */
+  text-shadow: 0 0 8px rgba(0, 191, 255, 0.7);
+}
+
+a {
+  color: #00BFFF;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  color: #6C63FF;
+  text-decoration: underline;
+}
+
+/* Botón de regreso */
+.nexus-btn {
+  background-color: #6C63FF;
+  color: white;
+  border-radius: 30px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.nexus-btn:hover {
+  background-color: #00BFFF;
+  color: white;
+  transform: scale(1.05);
+}
