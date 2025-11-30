@@ -4,60 +4,85 @@ import "../Styles/auth.css";
 import googleIcon from "../assets/icons/google.svg";
 import facebookIcon from "../assets/icons/facebook.svg";
 import appleIcon from "../assets/icons/apple.svg";
+import { authService } from "../services/authService";
 
 export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegister?: () => void; onLoginSuccess?: () => void }) {
 	const [showPassword, setShowPassword] = useState(false);
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		// Validar contra usuario registrado en localStorage
-		const userDataStr = localStorage.getItem("USUARIO_REGISTRADO");
-		if (userDataStr) {
-			const userData = JSON.parse(userDataStr);
-			if (
-				(username === userData.username || username === userData.email) &&
-				password === userData.password
-			) {
-				setError("");
-				sessionStorage.setItem("USUARIO", JSON.stringify({ 
-					username: userData.username, 
-					puntos: userData.puntos ?? 0,
-					monedas: userData.monedas ?? 0,
-					userId: userData.userId || '1'
-				}));
-				
-				// Si hay callback de éxito (modo modal), ejecutarlo en lugar de navegar
-				if (onLoginSuccess) {
-					onLoginSuccess();
-				} else {
-					navigate("/usuario");
-				}
-				return;
-			}
-		}
-		// Validación simple: usuario "grupo1" y contraseña "123"
-		if (username === "grupo1" && password === "123") {
-			setError("");
-			const userId = "demo-" + username; // ID único para usuario demo
-			sessionStorage.setItem("USUARIO", JSON.stringify({ 
-				username, 
-				puntos: 0,
-				monedas: 500,
-				userId: userId
-			}));
-			
+		setError("");
+		setIsLoading(true);
+
+		try {
+			// Intentar login con el backend
+			const response = await authService.login({
+				email: username, // El backend acepta email, pero el usuario puede poner username
+				password: password,
+			});
+
+			// Guardar token y usuario
+			authService.saveToken(response.token);
+			authService.saveUser(response.user);
+
 			// Si hay callback de éxito (modo modal), ejecutarlo en lugar de navegar
 			if (onLoginSuccess) {
 				onLoginSuccess();
 			} else {
 				navigate("/usuario");
 			}
-		} else {
-			setError("Ingreso incorrecto");
+		} catch (err: any) {
+			setError(err.message || "Error al iniciar sesión");
+			
+			// Fallback a validación local para demo
+			const userDataStr = localStorage.getItem("USUARIO_REGISTRADO");
+			if (userDataStr) {
+				const userData = JSON.parse(userDataStr);
+				if (
+					(username === userData.username || username === userData.email) &&
+					password === userData.password
+				) {
+					setError("");
+					sessionStorage.setItem("USUARIO", JSON.stringify({ 
+						username: userData.username, 
+						puntos: userData.puntos ?? 0,
+						monedas: userData.monedas ?? 0,
+						userId: userData.userId || '1'
+					}));
+					
+					if (onLoginSuccess) {
+						onLoginSuccess();
+					} else {
+						navigate("/usuario");
+					}
+					return;
+				}
+			}
+			
+			// Usuario demo
+			if (username === "grupo1" && password === "123") {
+				setError("");
+				const userId = "demo-" + username;
+				sessionStorage.setItem("USUARIO", JSON.stringify({ 
+					username, 
+					puntos: 0,
+					monedas: 500,
+					userId: userId
+				}));
+				
+				if (onLoginSuccess) {
+					onLoginSuccess();
+				} else {
+					navigate("/usuario");
+				}
+			}
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -112,8 +137,8 @@ export default function Login({ onShowRegister, onLoginSuccess }: { onShowRegist
 						<a href="#" className="auth-link">¿Olvidaste tu contraseña?</a>
 					</div>
 
-					<button type="submit" className="primary-btn mt-3">
-						Iniciar sesión
+					<button type="submit" className="primary-btn mt-3" disabled={isLoading}>
+						{isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
 					</button>
 				</form>
 

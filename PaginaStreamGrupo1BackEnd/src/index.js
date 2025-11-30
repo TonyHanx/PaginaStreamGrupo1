@@ -16,17 +16,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rutas básicas
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Bienvenido al API de Streaming',
-    version: '1.0.0',
-    status: 'OK',
-    endpoints: {
-      auth: '/api/auth',
-      streams: '/api/streams',
-      gifts: '/api/gifts',
-      health: '/api/health'
-    }
-  });
+  res.send(`
+    <h1>API de Streaming - Servidor Backend</h1>
+    <p>✅ Servidor escuchando en el puerto ${PORT}</p>
+    <h3>Endpoints disponibles:</h3>
+    <ul>
+      <li><a href="/api/auth">/api/auth</a> - Autenticación</li>
+      <li><a href="/api/streams">/api/streams</a> - Streams</li>
+      <li><a href="/api/gifts">/api/gifts</a> - Regalos</li>
+      <li><a href="/api/health">/api/health</a> - Estado del servidor</li>
+    </ul>
+  `);
 });
 
 app.get('/api/health', (req, res) => {

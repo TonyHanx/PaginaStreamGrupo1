@@ -7,6 +7,7 @@ import facebookIcon from "../assets/icons/facebook.svg";
 import appleIcon from "../assets/icons/apple.svg";
 
 import { useState } from "react";
+import { authService } from "../services/authService";
 
 export default function Register({ onShowLogin }: { onShowLogin?: () => void }) {
   const { showTerminos, showPoliticas } = useModalContext();
@@ -16,11 +17,13 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
+    
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden");
       return;
@@ -29,15 +32,49 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
       setError("Completa todos los campos");
       return;
     }
-    // Guardar usuario en localStorage con puntos y monedas iniciales
-    const userId = Date.now().toString(); // Generar ID único basado en timestamp
-    const userData = { username, email, password, puntos: 0, monedas: 500, userId };
-    localStorage.setItem("USUARIO_REGISTRADO", JSON.stringify(userData));
-    setSuccess(true);
-    setUsername("");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
+
+    setIsLoading(true);
+
+    try {
+      // Intentar registro con el backend
+      const response = await authService.register({
+        username,
+        email,
+        password,
+      });
+
+      // Guardar token y usuario
+      authService.saveToken(response.token);
+      authService.saveUser(response.user);
+
+      setSuccess(true);
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+
+      // Redirigir al login después de 2 segundos
+      setTimeout(() => {
+        if (onShowLogin) {
+          onShowLogin();
+        }
+      }, 2000);
+
+    } catch (err: any) {
+      setError(err.message || "Error al registrar usuario");
+      
+      // Fallback a localStorage para demo
+      const userId = Date.now().toString();
+      const userData = { username, email, password, puntos: 0, monedas: 500, userId };
+      localStorage.setItem("USUARIO_REGISTRADO", JSON.stringify(userData));
+      setSuccess(true);
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -108,8 +145,8 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
 
           {error && <div className="auth-error">{error}</div>}
           {success && <div className="auth-success">¡Registro exitoso! Ahora puedes iniciar sesión.</div>}
-          <button type="submit" className="primary-btn mt-3">
-            Registrarte
+          <button type="submit" className="primary-btn mt-3" disabled={isLoading}>
+            {isLoading ? "Registrando..." : "Registrarte"}
           </button>
         </form>
 

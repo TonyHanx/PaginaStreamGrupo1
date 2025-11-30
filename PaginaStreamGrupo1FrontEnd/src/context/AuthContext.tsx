@@ -5,35 +5,48 @@ import {
   useState,
   type ReactNode,   
 } from "react";
+import { authService } from "../services/authService";
 
 type AuthContextType = {
   isAuthed: boolean;
   login: () => void;
   logout: () => void;
+  user: any;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthed, setIsAuthed] = useState<boolean>(() => {
-    // persistencia simple de demo
-    return localStorage.getItem("auth") === "1";
+    return authService.isAuthenticated();
+  });
+  
+  const [user, setUser] = useState<any>(() => {
+    return authService.getUser();
   });
 
   const login = () => {
     setIsAuthed(true);
-    localStorage.setItem("auth", "1");
+    setUser(authService.getUser());
   };
 
   const logout = () => {
+    authService.removeToken();
+    authService.removeUser();
     setIsAuthed(false);
-    localStorage.removeItem("auth");
+    setUser(null);
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    // Verificar si hay token al cargar
+    if (authService.isAuthenticated()) {
+      setIsAuthed(true);
+      setUser(authService.getUser());
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthed, login, logout }}>
+    <AuthContext.Provider value={{ isAuthed, login, logout, user }}>
       {children}
     </AuthContext.Provider>
   );
