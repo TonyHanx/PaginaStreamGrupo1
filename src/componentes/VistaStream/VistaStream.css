@@ -1,0 +1,1041 @@
+/* Vista Stream - Layout Principal */
+.vista-stream {
+  display: flex;
+  height: calc(100vh - 60px);
+  background-color: #0f0f0f;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* Área principal del stream */
+.vista-stream__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-width: calc(100% - 400px);
+}
+
+/* Contenedor del video */
+.vista-stream__video-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* Aspect ratio 16:9 */
+  background: #000;
+  overflow: hidden;
+}
+
+.vista-stream__video-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding-top: 0;
+  z-index: 9999;
+}
+
+.vista-stream__video-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  font-size: 2rem;
+  color: #666;
+}
+
+.vista-stream__video-placeholder--cobra {
+  background-image: url('/imagenes/qué-opinan-de-la-cobra-v0-6m7zlzhyit6d1.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Indicador LIVE */
+.vista-stream__live-indicator {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  z-index: 10;
+}
+
+.vista-stream__live-badge {
+  background: #ff0000;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Estilos para canal offline */
+.vista-stream__offline-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0e0e10;
+}
+
+.vista-stream__offline-content {
+  text-align: center;
+  padding: 2rem;
+}
+
+.vista-stream__offline-badge {
+  background: #53535f;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+}
+
+.vista-stream__offline-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  color: #efeff1;
+}
+
+.vista-stream__offline-message {
+  font-size: 1.1rem;
+  color: #adadb8;
+  margin: 0;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.vista-stream__live-viewers {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Controles del reproductor */
+.vista-stream__controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 70%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.vista-stream__video-container:hover .vista-stream__controls {
+  opacity: 1;
+}
+
+.vista-stream__control-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.vista-stream__control-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.vista-stream__time {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.vista-stream__controls-right {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+}
+
+/* Información del streamer */
+.vista-stream__info {
+  padding: 24px 32px;
+  background-color: #18181b;
+  border-bottom: 1px solid #2c2c2e;
+}
+
+.vista-stream__streamer-info {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.vista-stream__streamer-avatar {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+  border: 3px solid #00bfff;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);
+}
+
+.vista-stream__streamer-avatar img,
+.vista-stream__avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.vista-stream__avatar-placeholder {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.vista-stream__verified {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: #1a1a1a;
+  border-radius: 50%;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vista-stream__streamer-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.vista-stream__streamer-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  color: #fff;
+}
+
+.vista-stream__stream-title {
+  font-size: 1rem;
+  color: #e0e0e0;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+.vista-stream__stream-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vista-stream__category,
+.vista-stream__tag {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+}
+
+.vista-stream__category {
+  background: linear-gradient(135deg, rgba(0, 191, 255, 0.2) 0%, rgba(0, 150, 255, 0.2) 100%);
+  border: 1px solid rgba(0, 191, 255, 0.3);
+  color: #00bfff;
+  font-weight: 600;
+}
+
+/* Acciones del streamer */
+.vista-stream__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.vista-stream__action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.vista-stream__action-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.vista-stream__action-btn.subscribe {
+  background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+  border-color: #00ff00;
+  color: #000;
+  font-weight: 700;
+}
+
+.vista-stream__action-btn.subscribe:hover {
+  background: linear-gradient(135deg, #00ff00 0%, #00dd00 100%);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+}
+
+.vista-stream__action-btn.subscribe.following {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.vista-stream__action-btn.gift {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+}
+
+/* Chat lateral */
+.vista-stream__chat {
+  width: 400px;
+  background: #1a1a1a;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.vista-stream__chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0f0f0f;
+}
+
+.vista-stream__chat-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.vista-stream__chat-settings {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.vista-stream__chat-settings:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mensajes del chat */
+.vista-stream__chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vista-stream__chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.vista-stream__chat-messages::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.vista-stream__chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.vista-stream__chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.vista-stream__chat-message {
+  padding: 8px 10px;
+  border-radius: 4px;
+  line-height: 1.5;
+  transition: background 0.2s ease;
+}
+
+.vista-stream__chat-message:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.vista-stream__chat-username {
+  font-weight: 700;
+  margin-right: 5px;
+  font-size: 0.9rem;
+}
+
+.vista-stream__chat-username.broadcaster {
+  background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.vista-stream__chat-username .nivel-usuario {
+  color: #FFD700;
+  font-weight: bold;
+  margin: 0 4px;
+}
+
+.vista-stream__chat-text {
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  word-wrap: break-word;
+}
+
+/* Input del chat */
+.vista-stream__chat-input-container {
+  padding: 15px;
+  background: #0f0f0f;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.vista-stream__chat-input {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  align-items: center;
+}
+
+.vista-stream__chat-input input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.vista-stream__chat-input input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #00bfff;
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.2);
+}
+
+.vista-stream__chat-input input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.vista-stream__chat-send {
+  background: linear-gradient(135deg, #00bfff 0%, #0096ff 100%);
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  min-width: 49px;
+  height: 41px;
+  justify-content: center;
+}
+
+.vista-stream__chat-send:hover {
+  background: linear-gradient(135deg, #00d4ff 0%, #00a6ff 100%);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.vista-stream__chat-gift-btn {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff4757 100%);
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  min-width: 49px;
+  height: 41px;
+  justify-content: center;
+}
+
+.vista-stream__chat-gift-btn:hover {
+  background: linear-gradient(135deg, #ff7f50 0%, #ff5722 100%);
+  box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Login del chat */
+.vista-stream__chat-login {
+  padding: 20px;
+  background: #0f0f0f;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.vista-stream__chat-login p {
+  margin: 0 0 15px 0;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+}
+
+.vista-stream__chat-login-btn {
+  background: linear-gradient(135deg, #00bfff 0%, #0096ff 100%);
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.vista-stream__chat-login-btn:hover {
+  background: linear-gradient(135deg, #00d4ff 0%, #00a6ff 100%);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .vista-stream__chat {
+    width: 350px;
+  }
+  
+  .vista-stream__main {
+    max-width: calc(100% - 350px);
+  }
+}
+
+@media (max-width: 900px) {
+  .vista-stream {
+    flex-direction: column;
+  }
+  
+  .vista-stream__main {
+    max-width: 100%;
+  }
+  
+  .vista-stream__chat {
+    width: 100%;
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 600px) {
+  .vista-stream__info {
+    padding: 15px;
+  }
+  
+  .vista-stream__streamer-avatar {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .vista-stream__actions {
+    flex-direction: column;
+  }
+  
+  .vista-stream__action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .vista-stream__chat-messages {
+    padding: 10px;
+  }
+}
+
+/* Estilos para la tienda de regalos */
+.vista-stream__chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vista-stream__chat-gift-btn {
+  background: #00bfff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.15);
+}
+
+.vista-stream__chat-gift-btn:hover {
+  background: #0099ff;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);
+}
+
+.vista-stream__chat-gift-btn svg {
+  stroke: #111;
+}
+
+.vista-stream__gift-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.vista-stream__gift-modal {
+  background: #181b1f;
+  border-radius: 16px;
+  border: 2px solid #00bfff;
+  max-width: 500px;
+  width: 90vw;
+  max-height: 70vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 191, 255, 0.3);
+  font-family: system-ui, Arial, sans-serif;
+}
+
+.vista-stream__gift-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #232329;
+  background: #1a1d23;
+}
+
+.vista-stream__gift-modal-header h3 {
+  margin: 0;
+  color: #00bfff;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.vista-stream__gift-modal-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.vista-stream__gift-modal-close:hover {
+  background: rgba(0, 191, 255, 0.1);
+  color: #00bfff;
+}
+
+.vista-stream__gift-modal-content {
+  padding: 20px;
+}
+
+.vista-stream__gift-user-coins {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #00bfff;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: rgba(0, 191, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+}
+
+.vista-stream__gift-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+}
+
+.vista-stream__gift-item {
+  background: #232329;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.vista-stream__gift-item:hover {
+  border-color: #00bfff;
+  background: #2a2a2a;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 191, 255, 0.3);
+}
+
+.vista-stream__gift-item--custom {
+  border-color: rgba(0, 191, 255, 0.3);
+  background: linear-gradient(135deg, #232329 0%, #1e2a3a 100%);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.15);
+}
+
+.vista-stream__gift-item--custom:hover {
+  border-color: rgba(0, 191, 255, 0.6);
+  box-shadow: 0 5px 20px rgba(0, 191, 255, 0.4);
+}
+
+.vista-stream__gift-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #00bfff;
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.vista-stream__gift-icon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.vista-stream__gift-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+  font-family: system-ui, Arial, sans-serif;
+}
+
+.vista-stream__gift-price {
+  font-size: 0.8rem;
+  color: #00bfff;
+  font-weight: 700;
+  background: rgba(0, 191, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(0, 191, 255, 0.3);
+}
+
+/* Estilos para mensajes de regalo en el chat */
+.vista-stream__chat-message.gift-message {
+  background: linear-gradient(90deg, rgba(0, 191, 255, 0.1), rgba(0, 191, 255, 0.05));
+  border-left: 3px solid #00bfff;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 6px;
+  animation: giftGlow 2s ease-in-out;
+}
+
+.vista-stream__chat-gift-sparkle {
+  margin-left: 8px;
+  animation: sparkle 1.5s infinite;
+  color: #00bfff;
+}
+
+@keyframes giftGlow {
+  0% { 
+    background: linear-gradient(90deg, rgba(0, 191, 255, 0.3), rgba(0, 191, 255, 0.1));
+    transform: scale(1.02);
+  }
+  50% { 
+    background: linear-gradient(90deg, rgba(0, 191, 255, 0.2), rgba(0, 191, 255, 0.05));
+  }
+  100% { 
+    background: linear-gradient(90deg, rgba(0, 191, 255, 0.1), rgba(0, 191, 255, 0.05));
+    transform: scale(1);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+/* Estilos para mensajes de regalo en el chat */
+.vista-stream__chat-message.gift-message {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+  border-left: 3px solid #FFD700;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 0 8px 8px 0;
+  animation: giftGlow 2s ease-in-out;
+}
+
+.vista-stream__chat-gift-sparkle {
+  margin-left: 8px;
+  animation: sparkle 1.5s infinite;
+}
+
+@keyframes giftGlow {
+  0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+/* Banner del canal propio */
+.vista-stream__channel-banner {
+  width: 100%;
+  height: 180px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2c5f8d 50%, #1e3a5f 100%);
+  border-bottom: 1px solid rgba(0, 191, 255, 0.1);
+}
+
+.vista-stream__channel-banner-bg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40px;
+}
+
+.vista-stream__channel-banner-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 191, 255, 0.05) 0%, transparent 70%);
+  opacity: 0.6;
+}
+
+.vista-stream__channel-banner-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 600px;
+}
+
+.vista-stream__channel-offline-badge {
+  display: inline-block;
+  background: rgba(83, 83, 95, 0.8);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.vista-stream__channel-offline-title {
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Botones personalizados del canal propio */
+.vista-stream__action-btn.customize-channel {
+  background: #f7f7f8;
+  color: #0f0f0f;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.vista-stream__action-btn.customize-channel:hover {
+  background: #e5e5e5;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.vista-stream__action-btn.customize-channel svg {
+  flex-shrink: 0;
+}
+
+.vista-stream__action-btn.icon-only {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid #464649;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.vista-stream__action-btn.icon-only:hover {
+  background: #2c2c2e;
+  border-color: #5a5a5d;
+  transform: translateY(-1px);
+}
+
+/* Tabs de navegación */
+.vista-stream__tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #2c2c2e;
+  background-color: #18181b;
+  padding: 0 32px;
+}
+
+.vista-stream__tab {
+  background: transparent;
+  border: none;
+  color: #adadb8;
+  padding: 16px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.vista-stream__tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.vista-stream__tab.active {
+  color: #00bfff;
+}
+
+.vista-stream__tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #00bfff, transparent);
+  animation: tabGlow 2s ease-in-out infinite;
+}
+
+@keyframes tabGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Contenido del canal */
+.vista-stream__content {
+  flex: 1;
+  background-color: #0f0f0f;
+  padding: 60px 32px;
+  overflow: hidden;
+}
+
+/* Estado vacío */
+.vista-stream__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  background: radial-gradient(circle at center, rgba(0, 191, 255, 0.02) 0%, transparent 70%);
+  border-radius: 12px;
+  padding: 40px;
+}
+
+.vista-stream__empty-title {
+  color: #adadb8;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 20px 0 10px 0;
+}
+
+.vista-stream__empty-subtitle {
+  color: #6c6c6c;
+  font-size: 0.95rem;
+  margin: 0;
+  opacity: 0.8;
+}
