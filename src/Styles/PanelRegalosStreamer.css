@@ -536,3 +536,100 @@
     width: 100%;
   }
 }
+
+/* ------- Tipo de regalo (Imagen / Audio) ------- */
+
+.tipo-regalo-options {
+  display: flex;
+  gap: 16px;
+  padding: 8px 12px;
+  background: #1f1f23;
+  border-radius: 6px;
+  border: 1px solid #464649;
+}
+
+.tipo-regalo-options label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.tipo-regalo-options input[type="radio"] {
+  accent-color: #00bfff; /* color del radio button */
+}
+
+/* ------- Vista de regalo de audio en la tarjeta ------- */
+
+.regalo-audio-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 20%, #00bfff, #111827);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 0 0 12px rgba(0, 191, 255, 0.4);
+}
+
+.regalo-card--personalizado .regalo-audio-preview {
+  animation: audio-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes audio-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(0, 191, 255, 0.4);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 18px rgba(0, 191, 255, 0.7);
+  }
+}
+
+.tipo-regalo-options {
+  display: flex;
+  gap: 16px;
+  padding: 8px 12px;
+  background: #1f1f23;
+  border-radius: 6px;
+  border: 1px solid #464649;
+}
+
+.tipo-regalo-options label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.tipo-regalo-options input[type="radio"] {
+  accent-color: #00bfff;
+}
+
+.regalo-audio-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 20%, #00bfff, #111827);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-shadow: 0 0 12px rgba(0, 191, 255, 0.4);
+}
