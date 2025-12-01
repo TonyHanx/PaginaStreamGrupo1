@@ -1,4 +1,5 @@
 import { type Streamer, type Stream, type StreamWithStreamer, GAME_CATEGORIES } from '../types/streamers';
+import { getPublicImagePath } from '../utils/paths';
 
 // Base de datos de streamers populares
 export const STREAMERS: Streamer[] = [
@@ -162,7 +163,7 @@ export const ACTIVE_STREAMS: Stream[] = [
 		title: "🔥 REACCIONES A VIDEOS RANDOM + DONACIONES 🔥",
 		category: GAME_CATEGORIES.JUST_CHATTING,
 		game: GAME_CATEGORIES.JUST_CHATTING,
-		thumbnail: "/thumbnails/auronplay.png",
+		thumbnail: getPublicImagePath("/thumbnails/auronplay.png"),
 		viewers: 45230,
 		startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // Hace 2 horas
 		language: "Español",
@@ -176,7 +177,7 @@ export const ACTIVE_STREAMS: Stream[] = [
 		title: "MINECRAFT EXTREMO - CONSTRUYENDO LA BASE DEFINITIVA",
 		category: GAME_CATEGORIES.MINECRAFT,
 		game: GAME_CATEGORIES.MINECRAFT,
-		thumbnail: "/thumbnails/elrubius.png",
+		thumbnail: getPublicImagePath("/thumbnails/elrubius.png"),
 		viewers: 38750,
 		startedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // Hace 3 horas
 		language: "Español",
@@ -190,7 +191,7 @@ export const ACTIVE_STREAMS: Stream[] = [
 		title: "🎮 FORTNITE COMPETITIVO + VALORANT RANKED 🎮",
 		category: GAME_CATEGORIES.FORTNITE,
 		game: GAME_CATEGORIES.FORTNITE,
-		thumbnail: "/thumbnails/thegreft.png",
+		thumbnail: getPublicImagePath("/thumbnails/thegreft.png"),
 		viewers: 29840,
 		startedAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000), // Hace 1.5 horas
 		language: "Español",
@@ -204,7 +205,7 @@ export const ACTIVE_STREAMS: Stream[] = [
 		title: "CHARLANDO CON LA COMUNIDAD - PREGUNTAS Y RESPUESTAS",
 		category: GAME_CATEGORIES.JUST_CHATTING,
 		game: GAME_CATEGORIES.JUST_CHATTING,
-		thumbnail: "/thumbnails/ibai.png",
+		thumbnail: getPublicImagePath("/thumbnails/ibai.png"),
 		viewers: 52180,
 		startedAt: new Date(Date.now() - 45 * 60 * 1000), // Hace 45 minutos
 		language: "Español",
@@ -218,7 +219,7 @@ export const ACTIVE_STREAMS: Stream[] = [
 		title: "GTA V ROLEPLAY - AVENTURAS EN LOS SANTOS RP",
 		category: GAME_CATEGORIES.GTAV,
 		game: GAME_CATEGORIES.GTAV,
-		thumbnail: "/thumbnails/juanguarnizo.png",
+		thumbnail: getPublicImagePath("/thumbnails/juanguarnizo.png"),
 		viewers: 23670,
 		startedAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // Hace 4 horas
 		language: "Español",
@@ -232,7 +233,7 @@ export const ACTIVE_STREAMS: Stream[] = [
 		title: "MINECRAFT BUILD BATTLE + MINI JUEGOS DIVERTIDOS",
 		category: GAME_CATEGORIES.MINECRAFT,
 		game: GAME_CATEGORIES.MINECRAFT,
-		thumbnail: "/thumbnails/quackity.png",
+		thumbnail: getPublicImagePath("/thumbnails/quackity.png"),
 		viewers: 31420,
 		startedAt: new Date(Date.now() - 2.5 * 60 * 60 * 1000), // Hace 2.5 horas
 		language: "Español/English",
@@ -246,7 +247,7 @@ export const ACTIVE_STREAMS: Stream[] = [
 		title: "VALORANT RANKED - SUBIENDO A RADIANT 💎",
 		category: GAME_CATEGORIES.VALORANT,
 		game: GAME_CATEGORIES.VALORANT,
-		thumbnail: "/thumbnails/riversgg.png",
+		thumbnail: getPublicImagePath("/thumbnails/riversgg.png"),
 		viewers: 18950,
 		startedAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // Hace 1 hora
 		language: "Español",
@@ -260,7 +261,7 @@ export const ACTIVE_STREAMS: Stream[] = [
 		title: "LEAGUE OF LEGENDS SOLO QUEUE - ROAD TO CHALLENGER",
 		category: GAME_CATEGORIES.LOL,
 		game: GAME_CATEGORIES.LOL,
-		thumbnail: "/thumbnails/elded.png",
+		thumbnail: getPublicImagePath("/thumbnails/elded.png"),
 		viewers: 15680,
 		startedAt: new Date(Date.now() - 3.5 * 60 * 60 * 1000), // Hace 3.5 horas
 		language: "Español",
