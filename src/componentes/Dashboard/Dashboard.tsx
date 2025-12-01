@@ -57,6 +57,8 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     const [messageInput, setMessageInput] = useState('');
     const [tiempoTransmision, setTiempoTransmision] = useState({ horas: 0, minutos: 0, segundos: 0 });
     const [isStreaming, setIsStreaming] = useState(false);
+    const videoRef = useRef<HTMLVideoElement | null>(null); //Para prender camara
+    const [stream, setStream] = useState<MediaStream | null>(null); //Para prender camara
     const [showGiftPanel, setShowGiftPanel] = useState(false);
     const [espectadores, setEspectadores] = useState(0);
     const [followers, setFollowers] = useState(1);
@@ -351,71 +353,82 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
 
     };
 
-// Listen for incoming gifts (from viewers) and show overlay to streamer in dashboard
-useEffect(() => {
-    const handler = (e: any) => {
-        const d = e?.detail;
-        if (!d) return;
+    // Listen for incoming gifts (from viewers) and show overlay to streamer in dashboard
+    useEffect(() => {
+        const handler = (e: any) => {
+            const d = e?.detail;
+            if (!d) return;
 
-        // Show overlay only if the event is targeted to this streamer
-        if (
-            String(d.streamerId) === String(username) ||
-            String(d.streamerId) === String(displayName) ||
-            String(d.streamerId) === String(currentUserId)
-        ) {
-            const giftInfo: GiftData = {
-                sender: String(d.sender ?? "Espectador"),
-                nombre: String(d.gift?.nombre ?? "Regalo"),
-                icono: String(d.gift?.icono ?? d.gift?.emoji ?? "🎁"),
-                color: d.gift?.color,
-                audioUrl: d.gift?.audioUrl ? String(d.gift.audioUrl) : undefined, // ✅ AQUÍ PASAMOS EL AUDIO
-            };
+            // Show overlay only if the event is targeted to this streamer
+            if (
+                String(d.streamerId) === String(username) ||
+                String(d.streamerId) === String(displayName) ||
+                String(d.streamerId) === String(currentUserId)
+            ) {
+                const giftInfo: GiftData = {
+                    sender: String(d.sender ?? "Espectador"),
+                    nombre: String(d.gift?.nombre ?? "Regalo"),
+                    icono: String(d.gift?.icono ?? d.gift?.emoji ?? "🎁"),
+                    color: d.gift?.color,
+                    audioUrl: d.gift?.audioUrl ? String(d.gift.audioUrl) : undefined, // ✅ AQUÍ PASAMOS EL AUDIO
+                };
 
-            console.log("🎁 Gift recibido en overlay:", giftInfo);
-            setActiveGift(giftInfo);
-        }
-    };
+                console.log("🎁 Gift recibido en overlay:", giftInfo);
+                setActiveGift(giftInfo);
+            }
+        };
 
-    window.addEventListener("regaloEnviado", handler as EventListener);
-    return () =>
-        window.removeEventListener("regaloEnviado", handler as EventListener);
-}, [username, displayName, currentUserId]);
+        window.addEventListener("regaloEnviado", handler as EventListener);
+        return () =>
+            window.removeEventListener("regaloEnviado", handler as EventListener);
+    }, [username, displayName, currentUserId]);
 
     // Toggle de streaming
-    const toggleStreaming = () => {
-        if (isStreaming) {
-            // Detener stream - guardar horas transmitidas
-            const segundosTotales = tiempoTransmision.horas * 3600 + tiempoTransmision.minutos * 60 + tiempoTransmision.segundos;
-            const horasSesion = segundosTotales / 3600;
-
-            const streamerData = obtenerDatosStreamer();
-            if (streamerData) {
-                streamerData.horasTransmision = totalHorasTransmitidas + horasSesion;
-                guardarDatosStreamer(streamerData);
-                setTotalHorasTransmitidas(streamerData.horasTransmision);
-            }
-
-            // Resetear contador de sesión
-            setTiempoTransmision({ horas: 0, minutos: 0, segundos: 0 });
-
-            const nuevaNotificacion: Notification = {
-                mensaje: `⏹️ Transmisión finalizada - ${formatTime(tiempoTransmision.horas)}:${formatTime(tiempoTransmision.minutos)}:${formatTime(tiempoTransmision.segundos)}`,
-                tiempo: new Date().toLocaleTimeString(),
-                tipo: 'general'
-            };
-            setNotifications((prev) => [nuevaNotificacion, ...prev]);
-        } else {
-            // Iniciar stream
-            const nuevaNotificacion: Notification = {
-                mensaje: '🔴 Transmisión iniciada',
-                tiempo: new Date().toLocaleTimeString(),
-                tipo: 'general'
-            };
-            setNotifications((prev) => [nuevaNotificacion, ...prev]);
+const toggleStreaming = async () => {
+    if (isStreaming) {
+        if (stream) {
+            stream.getTracks().forEach(t => t.stop());
+            setStream(null);
         }
 
-        setIsStreaming(!isStreaming);
-    };
+        setIsStreaming(false);
+
+        const nuevaNotificacion: Notification = {
+            mensaje: `⏹️ Transmisión finalizada - ${formatTime(tiempoTransmision.horas)}:${formatTime(tiempoTransmision.minutos)}:${formatTime(tiempoTransmision.segundos)}`,
+            tiempo: new Date().toLocaleTimeString(),
+            tipo: "general"
+        };
+        setNotifications(prev => [nuevaNotificacion, ...prev]);
+
+        return;
+    }
+
+    try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        });
+
+        setStream(mediaStream);
+
+        if (videoRef.current) {
+            videoRef.current.srcObject = mediaStream;
+        }
+
+        const nuevaNotificacion: Notification = {
+            mensaje: '🔴 Transmisión iniciada',
+            tiempo: new Date().toLocaleTimeString(),
+            tipo: 'general'
+        };
+
+        setNotifications(prev => [nuevaNotificacion, ...prev]);
+        setIsStreaming(true);
+
+    } catch (err) {
+        console.error("No se pudo acceder a la cámara:", err);
+        alert("Error: no se pudo acceder a la cámara. Revisa permisos.");
+    }
+};
 
     const formatTime = (num: number) => num.toString().padStart(2, '0');
 
@@ -443,12 +456,29 @@ useEffect(() => {
                             </svg>
                             <h2>Vista previa del stream</h2>
                         </div>
-                        <div className="dashboard-creator__stream-preview">
-                            <div className="dashboard-creator__offline-overlay">
-                                <div className="dashboard-creator__offline-badge">SIN CONEXIÓN</div>
-                                <h3 className="dashboard-creator__offline-title">{displayName} está fuera de línea</h3>
-                            </div>
-                        </div>
+ <div className="dashboard-creator__stream-preview">
+
+    <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        className="dashboard-creator__stream-video"
+        style={{ display: isStreaming ? "block" : "none" }}
+    />
+
+    {!isStreaming && (
+        <div className="dashboard-creator__offline-overlay">
+            <div className="dashboard-creator__offline-badge">SIN CONEXIÓN</div>
+            <h3 className="dashboard-creator__offline-title">
+                {displayName} está fuera de línea
+            </h3>
+        </div>
+    )}
+
+</div>
+
+
                     </div>
 
                     {/* Feed de actividades */}
