@@ -9,12 +9,15 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 // App con las rutas
 import App from "./App";
+import { BrowserRouter } from "react-router-dom";
 
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    <BrowserRouter basename="/PaginaStreamGrupo1"> 
     <AuthProvider>
       <App/>  
     </AuthProvider>
+    </BrowserRouter>
   </StrictMode>
 )
