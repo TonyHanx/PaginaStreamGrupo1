@@ -69,6 +69,7 @@ const startServer = async () => {
       console.log(`   - Auth: http://localhost:${PORT}/api/auth`);
       console.log(`   - Streams: http://localhost:${PORT}/api/streams`);
       console.log(`   - Gifts: http://localhost:${PORT}/api/gifts`);
+      console.log(`✨ Tablas creadas con prisma db push`);
     });
   } catch (error) {
     console.error('❌ Error al iniciar el servidor:', error);
