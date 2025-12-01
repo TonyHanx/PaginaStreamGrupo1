@@ -354,7 +354,7 @@ const Encabezado = forwardRef<EncabezadoHandle, EncabezadoProps>(({ mostrarAuthB
                 showTerminos: () => setModal('terminos'),
                 showPoliticas: () => setModal('politicas')
               }}>
-                <Register onShowLogin={() => setModal('login')} />
+                <Register onShowLogin={() => setModal('login')} onClose={() => setModal(null)} />
               </ModalProvider>
             ) : modal === 'terminos' ? (
               <div className="encabezado__modal-content">
