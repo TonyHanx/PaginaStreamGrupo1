@@ -7,10 +7,10 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd PaginaStreamGrupo1BackEnd && npm run dev",
     "dev:frontend": "cd PaginaStreamGrupo1FrontEnd && npm run dev",
-    "build": "cd PaginaStreamGrupo1BackEnd && npm install && npm run build",
+    "build": "cd PaginaStreamGrupo1BackEnd && npm install && npx prisma generate && npx prisma migrate deploy",
     "build:frontend": "cd PaginaStreamGrupo1FrontEnd && npm run build",
     "start": "cd PaginaStreamGrupo1BackEnd && npm start",
-    "postinstall": "cd PaginaStreamGrupo1BackEnd && npm install"
+    "postinstall": "cd PaginaStreamGrupo1BackEnd && npm install && npx prisma generate"
   },
   "dependencies": {
     "bootstrap": "^5.3.0",
