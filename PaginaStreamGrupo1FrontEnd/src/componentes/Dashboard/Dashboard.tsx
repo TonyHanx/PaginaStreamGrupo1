@@ -58,19 +58,46 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     const [messageInput, setMessageInput] = useState('');
     const [tiempoTransmision, setTiempoTransmision] = useState({ horas: 0, minutos: 0, segundos: 0 });
     const [isStreaming, setIsStreaming] = useState(false);
-    const videoRef = useRef<HTMLVideoElement | null>(null); //Para prender camara
-    const [stream, setStream] = useState<MediaStream | null>(null); //Para prender camara
     const [showGiftPanel, setShowGiftPanel] = useState(false);
     const [espectadores, setEspectadores] = useState(0);
     const [followers, setFollowers] = useState(1);
     const [saldo, setSaldo] = useState(0);
     const [totalHorasTransmitidas, setTotalHorasTransmitidas] = useState(0);
+    const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
     const chatMessagesRef = useRef<HTMLDivElement>(null);
     const intervalRef = useRef<number | null>(null);
     const inicioStreamRef = useRef<Date | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     // Regalos disponibles (predeterminados + personalizados del streamer)
     const [regalos, setRegalos] = useState<Regalo[]>([]);
+
+    // Recuperar el stream activo al montar el componente
+    useEffect(() => {
+        const globalStream = (window as any).activeMediaStream;
+        const streamStartTime = localStorage.getItem('streamStartTime');
+        
+        if (globalStream && globalStream.active) {
+            setMediaStream(globalStream);
+            setIsStreaming(true);
+            if (videoRef.current) {
+                videoRef.current.srcObject = globalStream;
+            }
+            
+            // Recuperar el tiempo transcurrido
+            if (streamStartTime) {
+                const inicio = new Date(streamStartTime);
+                const ahora = new Date();
+                const segundosTranscurridos = Math.floor((ahora.getTime() - inicio.getTime()) / 1000);
+                
+                const horas = Math.floor(segundosTranscurridos / 3600);
+                const minutos = Math.floor((segundosTranscurridos % 3600) / 60);
+                const segundos = segundosTranscurridos % 60;
+                
+                setTiempoTransmision({ horas, minutos, segundos });
+            }
+        }
+    }, []);
 
     // Obtener datos del usuario
     const usuarioStr = sessionStorage.getItem('USUARIO');
@@ -169,20 +196,19 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     // Control del tiempo de transmisión en tiempo real
     useEffect(() => {
         if (isStreaming) {
-            inicioStreamRef.current = new Date();
             intervalRef.current = setInterval(() => {
-                setTiempoTransmision(prev => {
-                    const newSegundos = prev.segundos + 1;
-                    if (newSegundos >= 60) {
-                        const newMinutos = prev.minutos + 1;
-                        if (newMinutos >= 60) {
-                            const newHoras = prev.horas + 1;
-                            return { horas: newHoras, minutos: 0, segundos: 0 };
-                        }
-                        return { ...prev, minutos: newMinutos, segundos: 0 };
-                    }
-                    return { ...prev, segundos: newSegundos };
-                });
+                const streamStartTime = localStorage.getItem('streamStartTime');
+                if (streamStartTime) {
+                    const inicio = new Date(streamStartTime);
+                    const ahora = new Date();
+                    const segundosTranscurridos = Math.floor((ahora.getTime() - inicio.getTime()) / 1000);
+                    
+                    const horas = Math.floor(segundosTranscurridos / 3600);
+                    const minutos = Math.floor((segundosTranscurridos % 3600) / 60);
+                    const segundos = segundosTranscurridos % 60;
+                    
+                    setTiempoTransmision({ horas, minutos, segundos });
+                }
             }, 1000);
         } else {
             if (intervalRef.current) {
@@ -412,51 +438,93 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     }, [username, displayName, currentUserId]);
 
     // Toggle de streaming
-const toggleStreaming = async () => {
-    if (isStreaming) {
-        if (stream) {
-            stream.getTracks().forEach(t => t.stop());
-            setStream(null);
+    const toggleStreaming = async () => {
+        if (isStreaming) {
+            // Detener stream - guardar horas transmitidas
+            const segundosTotales = tiempoTransmision.horas * 3600 + tiempoTransmision.minutos * 60 + tiempoTransmision.segundos;
+            const horasSesion = segundosTotales / 3600;
+
+            const streamerData = obtenerDatosStreamer();
+            if (streamerData) {
+                streamerData.horasTransmision = totalHorasTransmitidas + horasSesion;
+                guardarDatosStreamer(streamerData);
+                setTotalHorasTransmitidas(streamerData.horasTransmision);
+            }
+
+            // Detener el stream de medios
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                setMediaStream(null);
+                // Remover de la variable global
+                delete (window as any).activeMediaStream;
+                localStorage.removeItem('streamStartTime');
+            }
+
+            // Resetear contador de sesión
+            setTiempoTransmision({ horas: 0, minutos: 0, segundos: 0 });
+
+            const nuevaNotificacion: Notification = {
+                mensaje: `⏹️ Transmisión finalizada - ${formatTime(tiempoTransmision.horas)}:${formatTime(tiempoTransmision.minutos)}:${formatTime(tiempoTransmision.segundos)}`,
+                tiempo: new Date().toLocaleTimeString(),
+                tipo: 'general'
+            };
+            setNotifications((prev) => [nuevaNotificacion, ...prev]);
+        } else {
+            // Iniciar stream - Solicitar permisos de cámara y micrófono
+            try {
+                console.log('🎥 Solicitando permisos de cámara y micrófono...');
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                
+                console.log('✅ Permisos concedidos:', stream);
+                
+                // Guardar el stream globalmente para que persista entre navegaciones
+                (window as any).activeMediaStream = stream;
+                
+                // Guardar el tiempo de inicio
+                const ahora = new Date();
+                localStorage.setItem('streamStartTime', ahora.toISOString());
+                
+                // Guardar el stream y conectarlo al video
+                setMediaStream(stream);
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+                
+                // Mostrar notificación de éxito
+                const nuevaNotificacion: Notification = {
+                    mensaje: '🔴 Transmisión iniciada - Cámara y micrófono activados',
+                    tiempo: new Date().toLocaleTimeString(),
+                    tipo: 'general'
+                };
+                setNotifications((prev) => [nuevaNotificacion, ...prev]);
+                
+            } catch (error: any) {
+                console.error('❌ Error al solicitar permisos:', error);
+                
+                let mensajeError = '❌ No se pudo acceder a la cámara/micrófono';
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                    mensajeError = '❌ Permisos denegados. Permite el acceso a cámara y micrófono en la configuración del navegador.';
+                } else if (error.name === 'NotFoundError') {
+                    mensajeError = '❌ No se encontró cámara o micrófono conectado.';
+                }
+                
+                const nuevaNotificacion: Notification = {
+                    mensaje: mensajeError,
+                    tiempo: new Date().toLocaleTimeString(),
+                    tipo: 'general'
+                };
+                setNotifications((prev) => [nuevaNotificacion, ...prev]);
+                
+                // No iniciar el streaming si no hay permisos
+                return;
+            }
         }
 
-        setIsStreaming(false);
-
-        const nuevaNotificacion: Notification = {
-            mensaje: `⏹️ Transmisión finalizada - ${formatTime(tiempoTransmision.horas)}:${formatTime(tiempoTransmision.minutos)}:${formatTime(tiempoTransmision.segundos)}`,
-            tiempo: new Date().toLocaleTimeString(),
-            tipo: "general"
-        };
-        setNotifications(prev => [nuevaNotificacion, ...prev]);
-
-        return;
-    }
-
-    try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: true
-        });
-
-        setStream(mediaStream);
-
-        if (videoRef.current) {
-            videoRef.current.srcObject = mediaStream;
-        }
-
-        const nuevaNotificacion: Notification = {
-            mensaje: '🔴 Transmisión iniciada',
-            tiempo: new Date().toLocaleTimeString(),
-            tipo: 'general'
-        };
-
-        setNotifications(prev => [nuevaNotificacion, ...prev]);
-        setIsStreaming(true);
-
-    } catch (err) {
-        console.error("No se pudo acceder a la cámara:", err);
-        alert("Error: no se pudo acceder a la cámara. Revisa permisos.");
-    }
-};
+        setIsStreaming(!isStreaming);
+    };
 
     const formatTime = (num: number) => num.toString().padStart(2, '0');
 
@@ -484,29 +552,33 @@ const toggleStreaming = async () => {
                             </svg>
                             <h2>Vista previa del stream</h2>
                         </div>
- <div className="dashboard-creator__stream-preview">
-
-    <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        className="dashboard-creator__stream-video"
-        style={{ display: isStreaming ? "block" : "none" }}
-    />
-
-    {!isStreaming && (
-        <div className="dashboard-creator__offline-overlay">
-            <div className="dashboard-creator__offline-badge">SIN CONEXIÓN</div>
-            <h3 className="dashboard-creator__offline-title">
-                {displayName} está fuera de línea
-            </h3>
-        </div>
-    )}
-
-</div>
-
-
+                        <div className="dashboard-creator__stream-preview">
+                            {/* Video de la cámara */}
+                            <video 
+                                ref={videoRef}
+                                autoPlay 
+                                playsInline 
+                                muted
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    display: isStreaming ? 'block' : 'none',
+                                    zIndex: 1
+                                }}
+                            />
+                            
+                            {/* Overlay cuando está offline */}
+                            {!isStreaming && (
+                                <div className="dashboard-creator__offline-overlay">
+                                    <div className="dashboard-creator__offline-badge">SIN CONEXIÓN</div>
+                                    <h3 className="dashboard-creator__offline-title">{displayName} está fuera de línea</h3>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Feed de actividades */}
