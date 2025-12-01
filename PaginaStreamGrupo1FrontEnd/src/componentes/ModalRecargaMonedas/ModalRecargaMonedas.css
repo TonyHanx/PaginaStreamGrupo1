@@ -352,25 +352,47 @@
 .pago-metodos {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .pago-metodo {
-  background: #23252d;
-  border-radius: 10px;
-  padding: 10px 12px;
-  border: 1px solid #323640;
-  color: #e0e3ea;
+  display: block;
+  width: 100%;
   text-align: left;
+  padding: 12px 16px;
+  background: #111217; /* fondo oscuro similar al modal */
+  color: #e6edf3;
+  border: 1px solid transparent;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 120ms, border-color 120ms, box-shadow 120ms;
+  font-weight: 500;
 }
 
-.pago-metodo:hover {
-  background: #2b2f3a;
-  border-color: #00b7ff;
+/* hover / focus */
+.pago-metodo:hover,
+.pago-metodo:focus {
+  background: #15181d;
+  outline: none;
+  border-color: rgba(255,255,255,0.06);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset;
+}
+
+/* método seleccionado */
+.pago-metodo.selected,
+.pago-metodo[aria-pressed="true"] {
+  background: linear-gradient(90deg, #0ea5a4 0%, #06b6d4 100%); /* color llamativo */
+  color: #0b1220;
+  border-color: rgba(14,165,164,0.8);
+  box-shadow: 0 6px 20px rgba(6,182,212,0.18);
+}
+
+/* estado deshabilitado durante procesamiento */
+.btn-confirmar[disabled],
+.pago-metodo[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .pago-acciones {
@@ -407,5 +429,114 @@
 
 .btn-confirmar:hover {
   filter: brightness(1.05);
+}
+
+/* ----------- MODAL DE MÉTODO DE PAGO (NUEVO, PANTALLA APARTE) ---------------- */
+
+.modal-metodo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200000; /* más alto que el modal de la pasarela */
+  animation: fadeIn 0.25s ease;
+}
+
+/* contenido del modal */
+.modal-metodo {
+  width: 420px;
+  background: radial-gradient(circle at top left, #2c313a, #1a1d22);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
+  animation: slideUp 0.25s ease;
+  color: #e9ecf2;
+  position: relative;
+}
+
+/* titulo */
+.modal-metodo h3 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* botón cerrar */
+.modal-metodo-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  color: #c7c9ce;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.modal-metodo-close:hover {
+  color: #fff;
+}
+
+/* inputs */
+.modal-metodo input {
+  width: 100%;
+  background: #121418;
+  border: 1px solid #343947;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 8px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.modal-metodo input:focus {
+  border-color: #00b7ff;
+}
+
+/* botones inferiores */
+.modal-metodo-footer {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-metodo-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.modal-metodo-btn.cancelar {
+  background: #2b2e36;
+  color: #ccc;
+}
+
+.modal-metodo-btn.cancelar:hover {
+  background: #3a3d45;
+}
+
+.modal-metodo-btn.guardar {
+  background: linear-gradient(90deg, #22ddaa, #00b7ff);
+  color: #0b1116;
+}
+
+.modal-metodo-btn.guardar:hover {
+  filter: brightness(1.05);
+}
+
+/* error mensaje */
+.modal-metodo-error {
+  color: #ff7b7b;
+  margin-top: 8px;
+  font-size: 13px;
+  text-align: center;
 }
 

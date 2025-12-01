@@ -16,6 +16,7 @@ export const useModalContext = () => {
     };
   }
   return context;
+
 };
 
 export const ModalProvider: React.FC<{ value: ModalContextType; children: React.ReactNode }> = ({ value, children }) => {
