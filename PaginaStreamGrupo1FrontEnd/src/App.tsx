@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./paginas/Login";
 import Register from "./paginas/Register";
 import Inicio from "./paginas/Inicio/Inicio";
@@ -29,7 +29,7 @@ export default function App() {
   ]);
 
   return (
-    <BrowserRouter>
+    <>
       <ModalRecargaMonedas />
       <Routes>
         {/* Página principal con layout completo */}
@@ -67,7 +67,7 @@ export default function App() {
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </>
   );
 }
 
