@@ -22,7 +22,7 @@ exports.getStreamerCustomGifts = async (req, res) => {
 
     const gifts = await prisma.gift.findMany({
       where: { 
-        streamerId: parseInt(streamerId),
+        streamerId: streamerId, // streamerId es un UUID, no un número
         esPredeterminado: false 
       },
       orderBy: { precio: 'asc' }
@@ -38,42 +38,97 @@ exports.getStreamerCustomGifts = async (req, res) => {
 // Crear regalo personalizado (solo streamers)
 exports.createCustomGift = async (req, res) => {
   try {
-    const { nombre, precio, imagenUrl, puntos, color } = req.body;
+    const { nombre, precio, imagenUrl, audioUrl, puntos, color } = req.body;
+    
+    console.log('📝 [createCustomGift] Datos recibidos:', { nombre, precio, imagenUrl, audioUrl, puntos, color });
 
     // Verificar si el usuario es streamer
     const user = await prisma.user.findUnique({
-      where: { id: req.userId }
+      where: { id: req.userId },
+      include: { streamer: true }
     });
+    
+    console.log('👤 [createCustomGift] Usuario encontrado:', user?.username, 'isStreamer:', user?.isStreamer);
+    
     if (!user || !user.isStreamer) {
       return res.status(403).json({ error: 'No tienes permisos de streamer' });
     }
 
-    const streamer = await prisma.streamer.findFirst({
-      where: { userId: req.userId }
-    });
+    // Si no tiene perfil de streamer, crearlo automáticamente
+    let streamer = user.streamer;
     if (!streamer) {
-      return res.status(404).json({ error: 'Perfil de streamer no encontrado' });
+      console.log('⚠️ Usuario sin perfil de streamer, creando automáticamente...');
+      streamer = await prisma.streamer.create({
+        data: {
+          userId: req.userId,
+          displayName: user.username,
+          description: `Canal de ${user.username}`
+        }
+      });
+      console.log('✅ Perfil de streamer creado:', streamer.id);
+      
+      // Actualizar isStreamer si no está marcado
+      if (!user.isStreamer) {
+        await prisma.user.update({
+          where: { id: req.userId },
+          data: { isStreamer: true }
+        });
+      }
     }
+    
+    console.log('🎁 [createCustomGift] StreamerId:', streamer.id);
+
+    const giftData = {
+      nombre,
+      precio: parseInt(precio),
+      imagenUrl: imagenUrl || null,
+      audioUrl: audioUrl || null,
+      puntos: parseInt(puntos),
+      color: color || '#ffffff',
+      esPredeterminado: false,
+      streamerId: streamer.id
+    };
+    
+    console.log('💾 [createCustomGift] Datos a guardar:', giftData);
 
     const gift = await prisma.gift.create({
-      data: {
-        nombre,
-        precio,
-        imagenUrl,
-        puntos,
-        color,
-        esPredeterminado: false,
-        streamerId: streamer.id
-      }
+      data: giftData
+    });
+    
+    console.log('✅ [createCustomGift] Regalo creado exitosamente:', gift.id);
+
+    // Dar XP por crear regalo personalizado (50 XP)
+    const xpGanado = 50;
+    const nuevoXP = user.xp + xpGanado;
+    const xpPorNivel = 100;
+    const nuevoNivel = Math.floor(nuevoXP / xpPorNivel) + 1;
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { xp: nuevoXP, nivel: nuevoNivel }
+    });
+
+    // Sincronizar con perfil de streamer
+    await prisma.streamer.update({
+      where: { id: streamer.id },
+      data: { xp: nuevoXP, nivel: nuevoNivel }
     });
 
     res.status(201).json({
       message: 'Regalo creado',
-      gift
+      gift,
+      xpGanado,
+      nivel: nuevoNivel,
+      subiDeNivel: nuevoNivel > user.nivel
     });
   } catch (error) {
-    console.error('Error en createCustomGift:', error);
-    res.status(500).json({ error: 'Error al crear regalo personalizado' });
+    console.error('❌ [createCustomGift] Error completo:', error);
+    console.error('❌ [createCustomGift] Error message:', error.message);
+    console.error('❌ [createCustomGift] Error stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Error al crear regalo personalizado',
+      details: error.message 
+    });
   }
 };
 
@@ -104,14 +159,32 @@ exports.sendGift = async (req, res) => {
 
     // Realizar transacción usando Prisma transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Actualizar monedas y puntos del usuario
+      // Calcular XP ganado basado en los puntos del regalo
+      // Los puntos del regalo se convierten directamente en XP
+      const xpGanado = gift.puntos;
+      const nuevoXP = user.xp + xpGanado;
+      const xpPorNivel = 100;
+      const nuevoNivel = Math.floor(nuevoXP / xpPorNivel) + 1;
+
+      // Actualizar monedas, puntos, XP y nivel del usuario
       const updatedUser = await tx.user.update({
         where: { id: user.id },
         data: {
           monedas: user.monedas - gift.precio,
-          puntos: user.puntos + gift.puntos
+          puntos: user.puntos + gift.puntos,
+          xp: nuevoXP,
+          nivel: nuevoNivel
         }
       });
+
+      // Si el usuario es streamer, sincronizar XP y nivel
+      const userStreamer = await tx.streamer.findUnique({ where: { userId: user.id } });
+      if (userStreamer) {
+        await tx.streamer.update({
+          where: { id: userStreamer.id },
+          data: { xp: nuevoXP, nivel: nuevoNivel }
+        });
+      }
 
       // Crear registro de transacción
       await tx.transaction.create({
@@ -125,13 +198,17 @@ exports.sendGift = async (req, res) => {
         }
       });
 
-      return updatedUser;
+      return { user: updatedUser, xpGanado, subiDeNivel: nuevoNivel > user.nivel };
     });
 
     res.json({
       message: `¡${gift.nombre} enviado!`,
-      monedas: result.monedas,
-      puntos: result.puntos
+      monedas: result.user.monedas,
+      puntos: result.user.puntos,
+      xp: result.user.xp,
+      nivel: result.user.nivel,
+      xpGanado: result.xpGanado,
+      subiDeNivel: result.subiDeNivel
     });
   } catch (error) {
     console.error('Error en sendGift:', error);
@@ -157,13 +234,30 @@ exports.buyCoins = async (req, res) => {
 
     // Realizar transacción usando Prisma transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Actualizar monedas del usuario
+      // Calcular XP ganado (5 XP por cada 100 monedas)
+      const xpGanado = Math.floor(cantidad / 100) * 5;
+      const nuevoXP = user.xp + xpGanado;
+      const xpPorNivel = 100;
+      const nuevoNivel = Math.floor(nuevoXP / xpPorNivel) + 1;
+
+      // Actualizar monedas, XP y nivel del usuario
       const updatedUser = await tx.user.update({
         where: { id: user.id },
         data: {
-          monedas: user.monedas + cantidad
+          monedas: user.monedas + cantidad,
+          xp: nuevoXP,
+          nivel: nuevoNivel
         }
       });
+
+      // Si el usuario es streamer, sincronizar XP y nivel
+      const userStreamer = await tx.streamer.findUnique({ where: { userId: user.id } });
+      if (userStreamer) {
+        await tx.streamer.update({
+          where: { id: userStreamer.id },
+          data: { xp: nuevoXP, nivel: nuevoNivel }
+        });
+      }
 
       // Crear registro de transacción
       await tx.transaction.create({
@@ -175,12 +269,16 @@ exports.buyCoins = async (req, res) => {
         }
       });
 
-      return updatedUser;
+      return { user: updatedUser, xpGanado, subiDeNivel: nuevoNivel > user.nivel };
     });
 
     res.json({
       message: `+${cantidad} monedas agregadas`,
-      monedas: result.monedas
+      monedas: result.user.monedas,
+      xp: result.user.xp,
+      nivel: result.user.nivel,
+      xpGanado: result.xpGanado,
+      subiDeNivel: result.subiDeNivel
     });
   } catch (error) {
     console.error('Error en buyCoins:', error);

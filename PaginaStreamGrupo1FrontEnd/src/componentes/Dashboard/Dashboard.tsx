@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import NotificacionNivel from '../../componentes/NotificacionNivel/NotificacionNivel';
@@ -9,12 +9,13 @@ import type { Regalo } from '../../types/regalos';
 import { obtenerTodosLosRegalos } from '../../utils/regalos';
 import { obtenerMonedasUsuario, gastarMonedas } from '../../utils/monedas';
 import { AccionesPuntos } from '../../utils/puntos';
-import { 
-    obtenerDatosStreamer, 
-    guardarDatosStreamer, 
-    calcularNivelStreamer, 
+import { addTransactionToLocalStorage, syncTransactions } from '../../services/transactionService';
+import {
+    obtenerDatosStreamer,
+    guardarDatosStreamer,
+    calcularNivelStreamer,
     actualizarHorasTransmision,
-    obtenerRangoStreamer 
+    obtenerRangoStreamer
 } from '../../utils/streamer';
 
 interface Notification {
@@ -49,7 +50,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     const [horasParaSiguienteNivel, setHorasParaSiguienteNivel] = useState(10);
     const [rangoStreamer, setRangoStreamer] = useState({ nombre: 'Novato', icono: '🌱', color: '#2ECC71' });
     const [mostrarNotificacionNivel, setMostrarNotificacionNivel] = useState(false);
-    
+
     // Estados del chat y transmisión
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     // overlay for incoming gifts (visible only in the creator control panel)
@@ -96,12 +97,12 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     // Cargar datos del streamer al montar el componente
     useEffect(() => {
         let streamerData = obtenerDatosStreamer();
-        
+
         // Si no existen datos del streamer, inicializarlos
         if (!streamerData || streamerData.horasTransmision === undefined) {
             const usuarioStr = sessionStorage.getItem('USUARIO');
             const usuario = usuarioStr ? JSON.parse(usuarioStr) : {};
-            
+
             streamerData = {
                 username: usuario.username || 'grupo1',
                 horasTransmision: 0,
@@ -111,7 +112,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
             };
             guardarDatosStreamer(streamerData);
         }
-        
+
         if (streamerData) {
             setTotalHorasTransmitidas(streamerData.horasTransmision);
             const progreso = calcularNivelStreamer(streamerData.horasTransmision);
@@ -139,15 +140,21 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
 
     // Cargar regalos (predeterminados + personalizados del streamer actual)
     useEffect(() => {
-        console.log('🎁 Cargando regalos para streamer:', username);
-        const todosLosRegalos = obtenerTodosLosRegalos(username);
-        console.log('🎁 Regalos obtenidos:', todosLosRegalos);
-        const regalosConColor = [
-            ...todosLosRegalos.predeterminados.map(r => ({ ...r, color: '#00bfff' })),
-            ...todosLosRegalos.personalizados.map(r => ({ ...r, color: '#764ba2' }))
-        ];
-        console.log('🎁 Total regalos con color:', regalosConColor.length);
-        setRegalos(regalosConColor);
+        const cargarRegalos = async () => {
+            // Obtener el streamerId UUID del usuario actual
+            const usuario = parsedUsuario;
+            const streamerId = usuario?.streamerId || usuario?.id || username;
+            console.log('🎁 Cargando regalos para streamer:', streamerId);
+            const todosLosRegalos = await obtenerTodosLosRegalos(streamerId);
+            console.log('🎁 Regalos obtenidos:', todosLosRegalos);
+            const regalosConColor = [
+                ...todosLosRegalos.predeterminados.map(r => ({ ...r, color: '#00bfff' })),
+                ...todosLosRegalos.personalizados.map(r => ({ ...r, color: '#764ba2' }))
+            ];
+            console.log('🎁 Total regalos con color:', regalosConColor.length);
+            setRegalos(regalosConColor);
+        };
+        cargarRegalos();
     }, [username]);
 
     // Auto-scroll del chat
@@ -260,7 +267,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
     };
 
     // Enviar regalo
-    const handleSendGift = (regalo: any) => {
+    const handleSendGift = async (regalo: any) => {
         // Importar gastarMonedas y obtenerMonedasUsuario
         const datosUsuario = obtenerMonedasUsuario();
         if (!datosUsuario) return;
@@ -284,6 +291,27 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
             return;
         }
 
+        // Obtener datos del streamer actual
+        const streamerData = obtenerDatosStreamer();
+
+        // Registrar transacción localmente
+        addTransactionToLocalStorage({
+            userId: '',
+            streamerId: streamerData?.username || username,
+            giftId: regalo.id,
+            tipo: 'regalo',
+            monto: regalo.precio,
+            descripcion: `Regalo ${regalo.nombre} enviado`,
+            gift: {
+                nombre: regalo.nombre,
+                emoji: regalo.emoji,
+                imagenUrl: regalo.imagenUrl
+            }
+        });
+
+        // Sincronizar transacciones con el backend
+        syncTransactions();
+
         // Agregar puntos
         const usuarioStr = sessionStorage.getItem('USUARIO');
         if (usuarioStr) {
@@ -292,7 +320,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
             const nuevosPuntos = puntosActuales + (AccionesPuntos.DONAR || 50);
             usuario.puntos = nuevosPuntos;
             sessionStorage.setItem('USUARIO', JSON.stringify(usuario));
-            
+
             // Sincronizar localStorage
             const registradoStr = localStorage.getItem('USUARIO_REGISTRADO');
             if (registradoStr) {
@@ -331,36 +359,55 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
 
         // Also notify the control panel overlay (simulate a global event that viewers would dispatch)
         try {
-            window.dispatchEvent(new CustomEvent('regaloEnviado', { detail: { streamerId: username, sender: username, gift: { nombre: regalo.nombre, icono: regalo.emoji || regalo.imagenUrl, color: regalo.color } } }));
+            window.dispatchEvent(
+                new CustomEvent('regaloEnviado', {
+                    detail: {
+                        streamerId: username,
+                        sender: username,
+                        gift: {
+                            nombre: regalo.nombre,
+                            icono: regalo.imagenUrl || regalo.emoji || '🎁',
+                            color: regalo.color,
+                            audioUrl: regalo.audioUrl || undefined, // AQUÍ VA EL AUDIO QUE SE DESEE REPRODUCIR
+                        },
+                    },
+                })
+            );
         } catch {
             // ignore
         }
+
     };
 
-    // Listen for incoming gifts (from viewers) and show overlay to streamer in dashboard
-    useEffect(() => {
-        const handler = (e: any) => {
-            const d = e?.detail;
-            if (!d) return;
-            // Show overlay only if the event is targeted to this streamer
-            if (
-                String(d.streamerId) === String(username)
-                || String(d.streamerId) === String(displayName)
-                || String(d.streamerId) === String(currentUserId)
-            ) {
-                const giftInfo: GiftData = {
-                    sender: String(d.sender ?? 'Espectador'),
-                    nombre: String(d.gift?.nombre ?? 'Regalo'),
-                    icono: String(d.gift?.icono ?? d.gift?.emoji ?? '🎁'),
-                    color: d.gift?.color
-                };
-                setActiveGift(giftInfo);
-            }
-        };
+// Listen for incoming gifts (from viewers) and show overlay to streamer in dashboard
+useEffect(() => {
+    const handler = (e: any) => {
+        const d = e?.detail;
+        if (!d) return;
 
-        window.addEventListener('regaloEnviado', handler as EventListener);
-        return () => window.removeEventListener('regaloEnviado', handler as EventListener);
-    }, [username, displayName]);
+        // Show overlay only if the event is targeted to this streamer
+        if (
+            String(d.streamerId) === String(username) ||
+            String(d.streamerId) === String(displayName) ||
+            String(d.streamerId) === String(currentUserId)
+        ) {
+            const giftInfo: GiftData = {
+                sender: String(d.sender ?? "Espectador"),
+                nombre: String(d.gift?.nombre ?? "Regalo"),
+                icono: String(d.gift?.icono ?? d.gift?.emoji ?? "🎁"),
+                color: d.gift?.color,
+                audioUrl: d.gift?.audioUrl ? String(d.gift.audioUrl) : undefined, // ✅ AQUÍ PASAMOS EL AUDIO
+            };
+
+            console.log("🎁 Gift recibido en overlay:", giftInfo);
+            setActiveGift(giftInfo);
+        }
+    };
+
+    window.addEventListener("regaloEnviado", handler as EventListener);
+    return () =>
+        window.removeEventListener("regaloEnviado", handler as EventListener);
+}, [username, displayName, currentUserId]);
 
     // Toggle de streaming
     const toggleStreaming = () => {
@@ -368,7 +415,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
             // Detener stream - guardar horas transmitidas
             const segundosTotales = tiempoTransmision.horas * 3600 + tiempoTransmision.minutos * 60 + tiempoTransmision.segundos;
             const horasSesion = segundosTotales / 3600;
-            
+
             const streamerData = obtenerDatosStreamer();
             if (streamerData) {
                 streamerData.horasTransmision = totalHorasTransmitidas + horasSesion;
@@ -378,7 +425,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
 
             // Resetear contador de sesión
             setTiempoTransmision({ horas: 0, minutos: 0, segundos: 0 });
-            
+
             const nuevaNotificacion: Notification = {
                 mensaje: `⏹️ Transmisión finalizada - ${formatTime(tiempoTransmision.horas)}:${formatTime(tiempoTransmision.minutos)}:${formatTime(tiempoTransmision.segundos)}`,
                 tiempo: new Date().toLocaleTimeString(),
@@ -394,7 +441,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
             };
             setNotifications((prev) => [nuevaNotificacion, ...prev]);
         }
-        
+
         setIsStreaming(!isStreaming);
     };
 
@@ -405,7 +452,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
             <div className="dashboard-creator__header">
                 <button className="dashboard-creator__back-btn" onClick={() => navigate("/")}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     Volver
                 </button>
@@ -420,7 +467,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                     <div className="dashboard-creator__section">
                         <div className="dashboard-creator__section-header">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                             </svg>
                             <h2>Vista previa del stream</h2>
                         </div>
@@ -436,7 +483,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                     <div className="dashboard-creator__section">
                         <div className="dashboard-creator__section-header">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M13 7.5h5v2h-5zm0 7h5v2h-5zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM11 6H6v5h5V6zm-1 4H7V7h3v3zm1 3H6v5h5v-5zm-1 4H7v-3h3v3z"/>
+                                <path d="M13 7.5h5v2h-5zm0 7h5v2h-5zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM11 6H6v5h5V6zm-1 4H7V7h3v3zm1 3H6v5h5v-5zm-1 4H7v-3h3v3z" />
                             </svg>
                             <h2>Feed de actividades</h2>
                             <button className="dashboard-creator__filter-btn">Filtro</button>
@@ -463,7 +510,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                     <div className="dashboard-creator__section" style={{ position: 'relative', overflow: 'visible' }}>
                         <div className="dashboard-creator__section-header">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
                             </svg>
                             <h2>Chat</h2>
                             <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -472,7 +519,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                             </div>
                             <button className="dashboard-creator__settings-btn">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                                 </svg>
                             </button>
                         </div>
@@ -491,8 +538,8 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                                     <span className="dashboard-creator__chat-time">{msg.timestamp}</span>
                                                     <div className="dashboard-creator__gift-message-content">
                                                         {msg.giftIcon?.startsWith('http') ? (
-                                                            <img 
-                                                                src={msg.giftIcon} 
+                                                            <img
+                                                                src={msg.giftIcon}
                                                                 alt="gift"
                                                                 style={{ width: '32px', height: '32px', objectFit: 'contain' }}
                                                                 onError={(e) => {
@@ -526,8 +573,8 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                             )}
                         </div>
                         <form className="dashboard-creator__chat-input" onSubmit={handleSendMessage}>
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="dashboard-creator__gift-btn"
                                 style={{
                                     backgroundColor: showGiftPanel ? '#00bfff' : '#2c2c2e'
@@ -543,9 +590,9 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                 }}
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <rect x="3" y="8" width="18" height="4" stroke="currentColor" strokeWidth="2" fill="none"/>
-                                    <rect x="5" y="12" width="14" height="9" stroke="currentColor" strokeWidth="2" fill="none"/>
-                                    <path d="M12 8V21 M12 8C12 5 14 5 14 5C14 5 16 5 16 8 M12 8C12 5 10 5 10 5C10 5 8 5 8 8" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                    <rect x="3" y="8" width="18" height="4" stroke="currentColor" strokeWidth="2" fill="none" />
+                                    <rect x="5" y="12" width="14" height="9" stroke="currentColor" strokeWidth="2" fill="none" />
+                                    <path d="M12 8V21 M12 8C12 5 14 5 14 5C14 5 16 5 16 8 M12 8C12 5 10 5 10 5C10 5 8 5 8 8" stroke="currentColor" strokeWidth="2" fill="none" />
                                 </svg>
                             </button>
                             <input
@@ -557,11 +604,11 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                             />
                             <button type="submit" className="dashboard-creator__send-btn">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                                 </svg>
                             </button>
                         </form>
-                        
+
                         {/* Panel de regalos */}
                         {showGiftPanel && (
                             <div className="dashboard-creator__gift-panel" style={{
@@ -573,7 +620,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                     <h3>Enviar regalo ({regalos.length} disponibles)</h3>
                                     <button onClick={() => setShowGiftPanel(false)}>×</button>
                                 </div>
-                                
+
                                 {/* Regalos Predeterminados */}
                                 {regalos.filter(r => r.esPredeterminado).length > 0 && (
                                     <div className="dashboard-creator__gift-section">
@@ -610,8 +657,8 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                                     style={{ borderColor: regalo.color || '#764ba2' }}
                                                 >
                                                     {regalo.imagenUrl ? (
-                                                        <img 
-                                                            src={regalo.imagenUrl} 
+                                                        <img
+                                                            src={regalo.imagenUrl}
                                                             alt={regalo.nombre}
                                                             className="dashboard-creator__gift-image"
                                                             onError={(e) => {
@@ -632,7 +679,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                 )}
 
                                 {regalos.length === 0 && (
-                                    <p style={{color: 'white', padding: '20px', textAlign: 'center'}}>No hay regalos disponibles</p>
+                                    <p style={{ color: 'white', padding: '20px', textAlign: 'center' }}>No hay regalos disponibles</p>
                                 )}
                             </div>
                         )}
@@ -644,12 +691,12 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                     <div className="dashboard-creator__section">
                         <div className="dashboard-creator__section-header">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
                             </svg>
                             <h2>Información del stream</h2>
                             <button className="dashboard-creator__edit-btn">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                                 </svg>
                             </button>
                         </div>
@@ -672,12 +719,12 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                     <div className="dashboard-creator__section">
                         <div className="dashboard-creator__section-header">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                             </svg>
                             <h2>Acciones de canal</h2>
                             <button className="dashboard-creator__more-btn">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                                 </svg>
                             </button>
                         </div>
@@ -685,13 +732,13 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                             <button className="dashboard-creator__action-item">
                                 <span>Modo lento</span>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="m10 17 5-5-5-5v10z"/>
+                                    <path d="m10 17 5-5-5-5v10z" />
                                 </svg>
                             </button>
                             <button className="dashboard-creator__action-item">
                                 <span>Chat de solo-seguidores</span>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="m10 17 5-5-5-5v10z"/>
+                                    <path d="m10 17 5-5-5-5v10z" />
                                 </svg>
                             </button>
                             <div className="dashboard-creator__action-item toggle">
@@ -711,19 +758,19 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                             <button className="dashboard-creator__action-item">
                                 <span>Moderación del chat con IA</span>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                                 </svg>
                             </button>
                             <button className="dashboard-creator__action-item">
                                 <span>Restricción de edad</span>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                                 </svg>
                             </button>
                             <button className="dashboard-creator__action-item">
                                 <span>Palabras baneadas</span>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                                 </svg>
                             </button>
                         </div>
@@ -733,7 +780,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                     <div className="dashboard-creator__section">
                         <div className="dashboard-creator__section-header">
                             <h2>Estadísticas</h2>
-                            <button 
+                            <button
                                 className={`dashboard-creator__stream-toggle ${isStreaming ? 'active' : ''}`}
                                 onClick={toggleStreaming}
                             >
@@ -764,7 +811,7 @@ const Dashboard: React.FC<DashboardProps> = ({ horasTransmision, notifications, 
                                     {rangoStreamer.icono} {rangoStreamer.nombre} - Nivel {nivelStreamer}
                                 </span>
                                 <div className="dashboard-creator__progress-bar">
-                                    <div className="dashboard-creator__progress-fill" style={{ 
+                                    <div className="dashboard-creator__progress-fill" style={{
                                         width: `${progresoStreamer}%`,
                                         background: `linear-gradient(90deg, ${rangoStreamer.color}, ${rangoStreamer.color}99)`
                                     }}></div>

@@ -185,6 +185,55 @@ El token se obtiene al hacer login o register.
 
 ---
 
+## 💸 Transacciones
+
+### GET `/api/gifts/transactions`
+Obtener historial de transacciones del usuario autenticado (requiere token).
+
+**Response:**
+```json
+{
+  "transactions": [
+    {
+      "id": "uuid",
+      "userId": "uuid",
+      "streamerId": "uuid",
+      "giftId": "uuid",
+      "tipo": "regalo",
+      "monto": 100,
+      "descripcion": "Regalo Corazón enviado a StreamerPro",
+      "createdAt": "2025-11-30T10:30:00Z",
+      "streamer": {
+        "displayName": "StreamerPro"
+      },
+      "gift": {
+        "nombre": "Corazón",
+        "emoji": "❤️",
+        "imagenUrl": "..."
+      }
+    },
+    {
+      "id": "uuid",
+      "userId": "uuid",
+      "tipo": "compra_monedas",
+      "monto": 500,
+      "descripcion": "Compra de 500 monedas",
+      "createdAt": "2025-11-30T09:15:00Z"
+    }
+  ]
+}
+```
+
+### Notas sobre Transacciones
+- Todas las transacciones se registran automáticamente al:
+  - Enviar regalos (`POST /api/gifts/send`)
+  - Comprar monedas (`POST /api/gifts/buy-coins`)
+- Las transacciones son de solo lectura para el usuario
+- El sistema mantiene un historial completo de todas las operaciones
+- Las transacciones se sincronizan con el localStorage del frontend
+
+---
+
 ## 🚀 Respuestas de Ejemplo
 
 ### Registro exitoso:

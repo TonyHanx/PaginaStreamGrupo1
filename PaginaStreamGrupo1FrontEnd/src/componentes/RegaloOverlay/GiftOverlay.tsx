@@ -7,6 +7,7 @@ export interface GiftData {
   icono: string;
   color?: string;
   precio?: number;
+  audioUrl?: string;
 }
 
 interface GiftOverlayProps {
@@ -25,28 +26,44 @@ const GiftOverlay: React.FC<GiftOverlayProps> = ({ gift = null, visible, duratio
     // auto-dismiss
     const t = setTimeout(() => onClose?.(), duration);
 
-    // small celebratory sound using WebAudio (no external files)
+    // Reproducir audio personalizado o sonido predeterminado
     let audioCtx: any = null;
+    let audioElement: HTMLAudioElement | null = null;
+    
     try {
-      if (playSound !== false && typeof window !== 'undefined' && (window as any).AudioContext) {
-        try {
-          audioCtx = new (window as any).AudioContext();
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-          gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.02);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          // little arpeggio
-          osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.12);
-          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
-          setTimeout(() => {
-            try { osc.stop(); audioCtx.close(); } catch { /* ignore */ }
-          }, 450);
-        } catch { /* ignore noisy browsers */ }
+      if (playSound !== false) {
+        // Si hay un audio personalizado, reproducirlo
+        if (gift?.audioUrl) {
+          try {
+            audioElement = new Audio(gift.audioUrl);
+            audioElement.volume = 0.5;
+            audioElement.play().catch((err) => {
+              console.warn('Error al reproducir audio personalizado:', err);
+            });
+          } catch (err) {
+            console.warn('Error al crear Audio element:', err);
+          }
+        } else if (typeof window !== 'undefined' && (window as any).AudioContext) {
+          // Sonido predeterminado con WebAudio
+          try {
+            audioCtx = new (window as any).AudioContext();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gain.gain.setValueAtValue(0.0001, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.02);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            // little arpeggio
+            osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.12);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+            setTimeout(() => {
+              try { osc.stop(); audioCtx.close(); } catch { /* ignore */ }
+            }, 450);
+          } catch { /* ignore noisy browsers */ }
+        }
       }
     } catch {
       // fail silently on older browsers
@@ -54,9 +71,15 @@ const GiftOverlay: React.FC<GiftOverlayProps> = ({ gift = null, visible, duratio
 
     return () => {
       clearTimeout(t);
-      try { if (audioCtx) audioCtx.close?.(); } catch {}
+      try { 
+        if (audioCtx) audioCtx.close?.(); 
+        if (audioElement) {
+          audioElement.pause();
+          audioElement.currentTime = 0;
+        }
+      } catch {}
     };
-  }, [visible, duration, onClose, playSound]);
+  }, [visible, duration, onClose, playSound, gift?.audioUrl]);
 
   if (!visible || !gift) return null;
 

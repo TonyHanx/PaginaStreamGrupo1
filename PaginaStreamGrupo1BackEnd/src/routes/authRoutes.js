@@ -10,5 +10,7 @@ router.post('/login', authController.login);
 // Rutas protegidas
 router.get('/profile', authMiddleware, authController.getProfile);
 router.put('/points', authMiddleware, authController.updatePoints);
+router.put('/xp', authMiddleware, authController.updateXP);
+router.post('/become-streamer', authMiddleware, authController.becomeStreamer);
 
 module.exports = router;

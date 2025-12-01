@@ -19,6 +19,8 @@ export interface AuthResponse {
     email: string;
     puntos: number;
     monedas: number;
+    nivel: number;
+    xp: number;
     isStreamer: boolean;
   };
 }
@@ -91,7 +93,14 @@ export const authService = {
       username: user.username,
       puntos: user.puntos,
       monedas: user.monedas,
+      nivel: user.nivel,
+      xp: user.xp,
       userId: user.id,
+      id: user.id,
+      isStreamer: user.isStreamer,
+      streamerId: (user as any).streamerId || null,
+      nivelStreamer: (user as any).streamerNivel || user.nivel,
+      xpStreamer: (user as any).streamerXp || user.xp
     }));
   },
 

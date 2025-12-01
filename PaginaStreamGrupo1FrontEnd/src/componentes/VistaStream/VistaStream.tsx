@@ -5,6 +5,7 @@ import { obtenerMonedasUsuario, gastarMonedas } from '../../utils/monedas';
 import NotificacionPuntos from '../NotificacionPuntos/NotificacionPuntos';
 import { obtenerTodosLosRegalos } from '../../utils/regalos';
 import type { Regalo as RegaloType } from '../../types/regalos';
+import { addTransactionToLocalStorage, syncTransactions } from '../../services/transactionService';
 
 import BunnySVG from '../Icons/BunnySVG';
 import GiftOverlay from '../RegaloOverlay/GiftOverlay';
@@ -96,7 +97,7 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
   };
 
   // Función para enviar regalo
-  const enviarRegalo = (regalo: RegaloType) => {
+  const enviarRegalo = async (regalo: RegaloType) => {
     const datosUsuario = obtenerMonedasUsuario();
     if (!datosUsuario) {
       onShowLogin?.();
@@ -114,17 +115,91 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
       return;
     }
 
-    // Gastar monedas usando la función centralizada
-    console.log('💸 [VistaStream] Gastando monedas:', regalo.precio);
+    try {
+      // Intentar enviar al backend primero
+      const token = localStorage.getItem('token');
+      if (token) {
+        console.log('🌐 [VistaStream] Enviando regalo al backend');
+        const response = await fetch('http://localhost:3000/api/gifts/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            giftId: regalo.id,
+            streamerId: streamerId
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ [VistaStream] Regalo enviado al backend:', data);
+          
+          // Actualizar saldo desde la respuesta del backend
+          const usuarioStr = sessionStorage.getItem('USUARIO');
+          if (usuarioStr) {
+            const usuario = JSON.parse(usuarioStr);
+            usuario.monedas = data.monedas;
+            usuario.puntos = data.puntos;
+            usuario.xp = data.xp || usuario.xp;
+            usuario.nivel = data.nivel || usuario.nivel;
+            sessionStorage.setItem('USUARIO', JSON.stringify(usuario));
+            
+            // Actualizar localStorage también
+            localStorage.setItem('user', JSON.stringify(usuario));
+          }
+
+          // Disparar evento para actualizar el saldo globalmente
+          window.dispatchEvent(new Event('saldo-actualizado'));
+          actualizarSaldo();
+
+          // Mostrar notificación si subió de nivel
+          if (data.subiDeNivel) {
+            mostrarNotificacionSimple(`¡Subiste al nivel ${data.nivel}! +${data.xpGanado} XP`);
+          }
+
+          console.log('✅ [VistaStream] Regalo enviado exitosamente');
+          return;
+        }
+      }
+
+      // Fallback: Si no hay token o falla el backend, usar lógica local
+      console.log('⚠️ [VistaStream] Usando fallback local');
+    } catch (error) {
+      console.error('❌ [VistaStream] Error al enviar regalo:', error);
+      // Continuar con fallback local
+    }
+
+    // Fallback local (solo si no hay backend)
+    console.log('💸 [VistaStream] Gastando monedas (local):', regalo.precio);
     const gastadoExitoso = gastarMonedas(regalo.precio);
     if (!gastadoExitoso) {
       mostrarNotificacionSimple('Error al procesar el regalo');
       return;
     }
 
+    // Registrar transacción localmente
+    addTransactionToLocalStorage({
+      userId: '',
+      streamerId: streamerId,
+      giftId: regalo.id,
+      tipo: 'regalo',
+      monto: regalo.precio,
+      descripcion: `Regalo ${regalo.nombre} enviado`,
+      gift: {
+        nombre: regalo.nombre,
+        emoji: regalo.emoji,
+        imagenUrl: regalo.imagenUrl
+      }
+    });
+
     // Actualizar el estado local (el evento ya actualizará el resto)
-    console.log('✅ [VistaStream] Regalo enviado exitosamente');
+    console.log('✅ [VistaStream] Regalo enviado exitosamente (local)');
     actualizarSaldo();
+
+    // Sincronizar transacciones con el backend
+    syncTransactions();
 
     // Agregar puntos de experiencia equivalentes al precio del regalo
     const puntosGanados = agregarPuntos(regalo.precio);
@@ -164,9 +239,13 @@ const VistaStream: React.FC<VistaStreamProps> = ({ streamerId = "1", onShowLogin
   // Detectar si el usuario está logueado y actualizar saldo
   useEffect(() => {
     // Cargar regalos del streamer
-    const todosLosRegalos = obtenerTodosLosRegalos(streamerId);
-    const regalos = [...todosLosRegalos.predeterminados, ...todosLosRegalos.personalizados];
-    setRegalosDisponibles(regalos);
+    const cargarRegalos = async () => {
+      const todosLosRegalos = await obtenerTodosLosRegalos(streamerId);
+      const regalos = [...todosLosRegalos.predeterminados, ...todosLosRegalos.personalizados];
+      setRegalosDisponibles(regalos);
+    };
+    
+    cargarRegalos();
     
     const checkLogin = () => {
       const usuario = typeof window !== 'undefined' ? sessionStorage.getItem('USUARIO') : null;

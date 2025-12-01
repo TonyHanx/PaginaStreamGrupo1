@@ -4,6 +4,7 @@ export interface Regalo {
   precio: number;
   emoji?: string; // Emoji para regalos predeterminados
   imagenUrl?: string; // URL de imagen para regalos personalizados
+  audioUrl?: string; // URL de audio personalizado (opcional)
   puntos: number; // Puntos que otorga al streamer
   esPredeterminado: boolean;
   streamerId?: string; // ID del streamer que creó el regalo (si es personalizado)

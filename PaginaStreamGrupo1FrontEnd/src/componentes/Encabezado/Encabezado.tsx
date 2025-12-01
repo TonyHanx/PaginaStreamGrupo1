@@ -5,6 +5,7 @@ import Login from "../../paginas/Login";
 import Register from "../../paginas/Register";
 import TerminosyCondiciones from "../../paginas/TerminosyCondiciones";
 import PoliticasPrivacidad from "../../paginas/PoliticasPrivacidad";
+import HistorialTransacciones from "../HistorialTransacciones/HistorialTransacciones";
 import { ModalProvider } from "../../context/ModalContext";
 import { useNavigate } from "react-router-dom";
 import { obtenerMonedasUsuario } from "../../utils/monedas";
@@ -27,6 +28,7 @@ export interface EncabezadoProps {
 
 function UserMenu({ username }: { username: string }) {
 	const [open, setOpen] = useState(false);
+	const [showHistorial, setShowHistorial] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
 	
@@ -143,6 +145,13 @@ function UserMenu({ username }: { username: string }) {
 							navigate("/streamer/panel");
 						}} />
 						<MenuItem icon={
+							// Icono de historial de transacciones
+							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="#fff" strokeWidth="1.5"/><path d="M7 7h6M7 10h4M7 13h6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/></svg>
+						} label="Historial de Transacciones" onClick={() => {
+							setOpen(false);
+							setShowHistorial(true);
+						}} />
+						<MenuItem icon={
 							// Icono estrella para suscripciones
 							<svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M10 2L12.5 7.5L18 8.5L14 12.5L15 18L10 15L5 18L6 12.5L2 8.5L7.5 7.5L10 2Z" stroke="#fff" strokeWidth="1.5"/></svg>
 						} label="Suscripciones" />
@@ -166,6 +175,7 @@ function UserMenu({ username }: { username: string }) {
 					</div>
 				</div>
 			)}
+			{showHistorial && <HistorialTransacciones onClose={() => setShowHistorial(false)} />}
 		</div>
 	);
 }

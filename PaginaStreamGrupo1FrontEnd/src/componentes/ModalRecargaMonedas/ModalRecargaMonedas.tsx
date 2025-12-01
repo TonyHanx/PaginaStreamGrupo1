@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { obtenerMonedasUsuario, agregarMonedas } from '../../utils/monedas';
+import { syncTransactions } from '../../services/transactionService';
 import BunnySVG from '../Icons/BunnySVG';
 import './ModalRecargaMonedas.css';
 
@@ -58,12 +59,19 @@ const ModalRecargaMonedas: React.FC = () => {
     setMostrarPasarela(true);
   };
 
-  const handleConfirmarPago = () => {
+  const handleConfirmarPago = async () => {
     if (!compraSeleccionada) return;
-    agregarMonedas(compraSeleccionada.monedas);
-    setSaldo((prev) => prev + compraSeleccionada.monedas);
-    setMostrarPasarela(false);
-    setMostrarModal(false);
+    const exito = await agregarMonedas(compraSeleccionada.monedas);
+    if (exito) {
+      // Sincronizar transacciones con el backend
+      await syncTransactions();
+      
+      setSaldo((prev) => prev + compraSeleccionada.monedas);
+      setMostrarPasarela(false);
+      setMostrarModal(false);
+    } else {
+      alert('Error al procesar la compra. Intenta nuevamente.');
+    }
   };
 
   const handleCancelarPasarela = () => {

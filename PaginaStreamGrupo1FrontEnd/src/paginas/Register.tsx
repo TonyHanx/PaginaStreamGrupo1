@@ -61,17 +61,8 @@ export default function Register({ onShowLogin }: { onShowLogin?: () => void }) 
       }, 2000);
 
     } catch (err: any) {
+      console.error('❌ Error en registro:', err);
       setError(err.message || "Error al registrar usuario");
-      
-      // Fallback a localStorage para demo
-      const userId = Date.now().toString();
-      const userData = { username, email, password, puntos: 0, monedas: 500, userId };
-      localStorage.setItem("USUARIO_REGISTRADO", JSON.stringify(userData));
-      setSuccess(true);
-      setUsername("");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
     } finally {
       setIsLoading(false);
     }

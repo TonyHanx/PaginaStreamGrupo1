@@ -1,4 +1,0 @@
-:root { --bg:#1139da; }
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; }
-body { margin: 0; background: var(--bg); font-family: system-ui, Arial; }

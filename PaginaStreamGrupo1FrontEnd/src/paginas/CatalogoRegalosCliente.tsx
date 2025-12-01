@@ -42,9 +42,9 @@ const CatalogoRegalosCliente: React.FC = () => {
   };
 
   // Cargar regalos
-  const cargarRegalos = () => {
+  const cargarRegalos = async () => {
     const streamerId = obtenerStreamerId();
-    const todosLosRegalos = obtenerTodosLosRegalos(streamerId);
+    const todosLosRegalos = await obtenerTodosLosRegalos(streamerId);
     setRegalos(todosLosRegalos);
   };
 
